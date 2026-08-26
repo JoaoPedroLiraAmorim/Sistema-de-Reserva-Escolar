@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Login CSS - Sistema de Reserva Escolar
+   Estrutura de Layout e Responsividade da Tela de Autenticação
+   ========================================================================== */
+
+/* Container Principal Split-Screen */
+.container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Lado Esquerdo - Imagem Institucional / Hero */
+.left-side {
+    width: 50vw; /* Exatamente metade da tela */
+    height: 100vh;
+}
+
+.left-side img.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Preenche todo o espaço sem distorcer */
+    object-position: left center; /* Alinha a imagem no lado esquerdo */
+    display: block;
+}
+
+/* Lado Direito - Caixa do Formulário Centralizada */
+.right-side {
+    width: 50vw; /* Exatamente a outra metade da tela */
+    height: 100vh;
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    background-color: var(--color-bg-white);
+}
+
+.login-box {
+    width: 100%;
+    max-width: 420px; /* Limite de largura para manter ergonomia */
+    padding: 20px;
+}
+
+/* Cabeçalho do Login */
+.login-header h2 {
+    color: var(--color-text-primary);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    margin-bottom: 40px;
+    line-height: 1.5;
+}
+
+/* ---------------------------------------------------------
+   Responsividade (Telas menores / Mobile)
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .left-side {
+        display: none;
+    }
+
+    .right-side {
+        width: 100vw;
+    }
+}

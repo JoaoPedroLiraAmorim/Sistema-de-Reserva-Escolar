@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Components CSS - Sistema de Reserva Escolar
+   Componentes Reutilizáveis (Formulários, Botões, Divisores, Links)
+   ========================================================================== */
+
+/* ---------------------------------------------------------
+   1. Formulários e Inputs
+   --------------------------------------------------------- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input-wrapper input:focus {
+    border-color: var(--color-primary-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-ring);
+}
+
+.input-wrapper svg.icon-left {
+    position: absolute;
+    left: 14px;
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-placeholder);
+}
+
+.input-wrapper svg.icon-right {
+    position: absolute;
+    right: 14px;
+    width: 20px;
+    height: 20px;
+    color: var(--color-text-placeholder);
+    cursor: pointer;
+}
+
+/* ---------------------------------------------------------
+   2. Links e Ações Secundárias
+   --------------------------------------------------------- */
+.forgot-password {
+    display: block;
+    text-align: right;
+    font-size: 13px;
+    color: var(--color-primary-focus);
+    text-decoration: none;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* ---------------------------------------------------------
+   3. Botões
+   --------------------------------------------------------- */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-primary);
+    color: var(--color-bg-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.btn-google {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-bg-white);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color var(--transition-fast);
+}
+
+.btn-google:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+/* ---------------------------------------------------------
+   4. Divisores
+   --------------------------------------------------------- */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 24px 0;
+    color: var(--color-text-placeholder);
+    font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.divider:not(:empty)::before {
+    margin-right: 15px;
+}
+
+.divider:not(:empty)::after {
+    margin-left: 15px;
+}
+
+/* ---------------------------------------------------------
+   5. Rodapé / Textos de Apoio
+   --------------------------------------------------------- */
+.footer-text {
+    margin-top: 40px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.footer-text a {
+    color: var(--color-primary-focus);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer-text a:hover {
+    text-decoration: underline;
+}
