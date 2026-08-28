@@ -1,0 +1,480 @@
+/* ==========================================================================
+   PROATEC CSS - Painel Administrativo / Dashboard
+   Layout e estilos específicos da tela PROATEC
+   ========================================================================== */
+
+/* 1. Layout Principal */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* 2. Barra Lateral (Sidebar) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background-color: var(--color-sidebar-bg);
+    color: var(--color-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    z-index: 100;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform var(--transition-normal);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--color-primary), #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.sidebar-brand-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.sidebar-brand-text p {
+    font-size: 11px;
+    color: var(--color-sidebar-text-muted);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    color: var(--color-sidebar-text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #ffffff;
+}
+
+.nav-link:hover {
+    background-color: var(--color-sidebar-hover);
+}
+
+.nav-link.active {
+    background-color: var(--color-primary-container);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary-focus);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.user-role {
+    font-size: 11px;
+    color: var(--color-sidebar-text-muted);
+}
+
+.nav-link.logout:hover {
+    color: #fca5a5;
+    background-color: rgba(220, 38, 38, 0.15);
+}
+
+/* 3. Área Principal */
+.main-wrapper {
+    margin-left: 260px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-page);
+}
+
+.dashboard-content {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.header-top-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.date-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.dashboard-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.dashboard-header p,
+.action-card p,
+.card-header-titles p,
+.agenda-room,
+.pickup-room {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+/* 4. Ações Rápidas */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.action-card {
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border);
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.action-icon.primary { background: var(--color-primary-light); color: var(--color-primary); }
+.action-icon.secondary { background: #f1f5f9; color: var(--color-text-secondary); }
+.action-icon.tertiary { background: #f8fafc; color: #475569; border: 1px solid var(--color-border-light); }
+
+.action-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+/* 5. Grid Principal (Reservas & Retirada) */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.card-header-icon {
+    background-color: var(--color-surface-low);
+}
+
+.card-header-icon .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--color-primary);
+}
+
+.card-header-titles h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.agenda-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border-light);
+    gap: 16px;
+    transition: background-color var(--transition-fast);
+}
+
+.agenda-item:last-child {
+    border-bottom: none;
+}
+
+.agenda-item:hover {
+    background-color: var(--color-bg-subtle);
+}
+
+.agenda-time {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    width: 55px;
+    flex-shrink: 0;
+}
+
+.agenda-details {
+    flex: 1;
+    border-left: 3px solid var(--color-border);
+    padding-left: 14px;
+}
+
+.agenda-item.highlight .agenda-details {
+    border-left-color: var(--color-primary);
+}
+
+.agenda-teacher {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.card-action-footer {
+    padding: 12px 20px;
+    background: var(--color-surface-low);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.link-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: gap var(--transition-fast);
+}
+
+.link-action:hover {
+    text-decoration: underline;
+    gap: 8px;
+}
+
+/* Card de Retirada Imediata */
+.pickup-card {
+    border-color: var(--color-primary);
+    position: relative;
+    box-shadow: var(--shadow-lg);
+}
+
+.pickup-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--color-primary);
+}
+
+.pickup-details-box {
+    margin: 16px;
+    padding: 14px;
+    background: var(--color-surface-low);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-light);
+}
+
+.pickup-badge-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary);
+    background-color: var(--color-primary-light);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.pickup-teacher {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.pickup-actions {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-dismiss {
+    width: 100%;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.btn-dismiss:hover {
+    background: var(--color-surface-container);
+    color: var(--color-text-primary);
+}
+
+/* 6. Inventário por Marca */
+.inventory-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.inventory-header .material-symbols-outlined {
+    font-size: 22px;
+    color: var(--color-text-secondary);
+}
+
+.brand-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.brand-card {
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.brand-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.brand-count-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.brand-count {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.brand-total {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+/* 7. Responsividade */
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .brand-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main-wrapper { margin-left: 0; }
+    .menu-toggle { display: block; }
+    .dashboard-content { padding: 20px 16px; }
+    .quick-actions-grid, .brand-grid { grid-template-columns: 1fr; }
+}

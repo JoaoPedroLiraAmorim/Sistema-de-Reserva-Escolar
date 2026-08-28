@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROATEC - Gestão de Laboratório</title>
+
+    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/proatec.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra Lateral de Navegação (Sidebar) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">
+                    <span class="material-symbols-outlined">laptop_mac</span>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h1>PROATEC</h1>
+                    <p>Gestão de Laboratório</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="proatec.html" class="nav-link active">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Início</span>
+                </a>
+                <a href="agendaProatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span>Reservas</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">computer</span>
+                    <span>Equipamentos</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                    <span>Salas</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>Relatórios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">J</div>
+                    <div class="user-info">
+                        <p class="user-name">João Almeida</p>
+                        <p class="user-role">Coordenador PROATEC</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-subnav">
+                    <a href="#" class="nav-link">
+                        <span class="material-symbols-outlined">settings</span>
+                        <span>Configurações</span>
+                    </a>
+                    <a href="index.html" class="nav-link logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <div class="main-wrapper">
+            <!-- Conteúdo da Dashboard -->
+            <main class="dashboard-content">
+                <!-- Cabeçalho de Boas-Vindas -->
+                <section class="dashboard-header">
+                    <div class="header-greeting">
+                        <div class="header-top-row">
+                            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
+                                <span class="material-symbols-outlined">menu</span>
+                            </button>
+                            <p class="date-badge">Sábado, 15 De Agosto De 2026</p>
+                        </div>
+                        <h2>Olá, João</h2>
+                        <p>Aqui está o panorama do PROATEC para hoje.</p>
+                    </div>
+                </section>
+
+                <!-- Seção de Ações Rápidas -->
+                <section class="quick-actions-section">
+                    <h3 class="section-label">Ações Rápidas</h3>
+                    <div class="quick-actions-grid">
+                        <a href="agendaProatec.html" class="action-card">
+                            <div class="action-icon primary">
+                                <span class="material-symbols-outlined">event_note</span>
+                            </div>
+                            <h3>Nova reserva</h3>
+                            <p>Agendar notebooks para uma turma</p>
+                        </a>
+
+                        <a href="#" class="action-card">
+                            <div class="action-icon secondary">
+                                <span class="material-symbols-outlined">devices</span>
+                            </div>
+                            <h3>Cadastrar equipamento</h3>
+                            <p>Adicionar um novo notebook</p>
+                        </a>
+
+                        <a href="#" class="action-card">
+                            <div class="action-icon tertiary">
+                                <span class="material-symbols-outlined">meeting_room</span>
+                            </div>
+                            <h3>Gerenciar salas</h3>
+                            <p>Ver disponibilidade dos espaços</p>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Grid Principal: Reservas do Dia e Retirada Imediata -->
+                <section class="dashboard-grid">
+                    <!-- Coluna Esquerda: Próximas Reservas -->
+                    <div class="card reservations-card">
+                        <div class="card-header card-header-icon">
+                            <span class="material-symbols-outlined">calendar_clock</span>
+                            <div class="card-header-titles">
+                                <h3>Próximas reservas</h3>
+                                <p>Agenda de hoje em ordem cronológica.</p>
+                            </div>
+                        </div>
+
+                        <div class="reservations-list">
+                            <!-- Item 1 -->
+                            <div class="agenda-item highlight">
+                                <span class="agenda-time">13:00</span>
+                                <div class="agenda-details">
+                                    <h4 class="agenda-teacher">Prof. João</h4>
+                                    <p class="agenda-room">Sala 04 • 20 notebooks</p>
+                                </div>
+                                <span class="badge badge-primary">Em breve</span>
+                            </div>
+
+                            <!-- Item 2 -->
+                            <div class="agenda-item">
+                                <span class="agenda-time">14:50</span>
+                                <div class="agenda-details">
+                                    <h4 class="agenda-teacher">Prof. Maria</h4>
+                                    <p class="agenda-room">Sala 02 • 15 notebooks</p>
+                                </div>
+                                <span class="badge badge-neutral">Confirmada</span>
+                            </div>
+
+                            <!-- Item 3 -->
+                            <div class="agenda-item">
+                                <span class="agenda-time">16:40</span>
+                                <div class="agenda-details">
+                                    <h4 class="agenda-teacher">Prof. Carlos</h4>
+                                    <p class="agenda-room">Sala 01 • 10 notebooks</p>
+                                </div>
+                                <span class="badge badge-neutral">Confirmada</span>
+                            </div>
+                        </div>
+
+                        <div class="card-action-footer">
+                            <a href="agendaProatec.html" class="link-action">
+                                <span>Ver todas as reservas</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Coluna Direita: Card de Foco (Confirmar Retirada) -->
+                    <div class="card pickup-card">
+                        <div class="card-header card-header-icon">
+                            <span class="material-symbols-outlined">inventory</span>
+                            <div>
+                                <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">Confirmar retirada</h3>
+                                <p style="font-size: 12px; color: var(--color-text-secondary);">Aguardando confirmação.</p>
+                            </div>
+                        </div>
+
+                        <div class="pickup-details-box">
+                            <div class="pickup-badge-time">
+                                <span class="material-symbols-outlined">schedule</span>
+                                <span>13:00 - em breve</span>
+                            </div>
+                            <h4 class="pickup-teacher">Prof. João</h4>
+                            <p class="pickup-room">Sala 04 • 20 notebooks</p>
+                        </div>
+
+                        <div class="pickup-actions">
+                            <button type="button" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">check</span>
+                                <span>Confirmar retirada</span>
+                            </button>
+                            <button type="button" class="btn-dismiss">
+                                Marcar como não retirado
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Seção Inferior: Inventário por Marca -->
+                <section class="card inventory-card" style="padding: 20px;">
+                    <div class="inventory-header">
+                        <span class="material-symbols-outlined">laptop_windows</span>
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary);">Notebooks disponíveis por marca</h3>
+                            <p style="font-size: 13px; color: var(--color-text-secondary);">Unidades prontas para reserva no momento.</p>
+                        </div>
+                    </div>
+
+                    <div class="brand-grid">
+                        <!-- Dell -->
+                        <div class="brand-card">
+                            <span class="brand-name">Dell</span>
+                            <div class="brand-count-wrapper">
+                                <span class="brand-count">42</span>
+                                <span class="brand-total">/ 50</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill primary" style="width: 84%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Lenovo -->
+                        <div class="brand-card">
+                            <span class="brand-name">Lenovo</span>
+                            <div class="brand-count-wrapper">
+                                <span class="brand-count">28</span>
+                                <span class="brand-total">/ 30</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill primary" style="width: 93%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Acer -->
+                        <div class="brand-card">
+                            <span class="brand-name">Acer</span>
+                            <div class="brand-count-wrapper">
+                                <span class="brand-count">15</span>
+                                <span class="brand-total">/ 25</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill secondary" style="width: 60%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Positivo -->
+                        <div class="brand-card">
+                            <span class="brand-name">Positivo</span>
+                            <div class="brand-count-wrapper">
+                                <span class="brand-count">9</span>
+                                <span class="brand-total">/ 20</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill error" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Script leve para alternar a sidebar em telas móveis -->
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Fecha ao clicar fora em telas móveis
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(e.target) && 
+                    !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -3,11 +3,18 @@
    Estrutura de Layout e Responsividade da Tela de Autenticação
    ========================================================================== */
 
+/* Regras específicas para o layout de login */
+body {
+    background-color: var(--color-bg-white);
+    overflow: hidden;
+}
+
 /* Container Principal Split-Screen */
 .container {
     display: flex;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
 }
 
 /* Lado Esquerdo - Imagem Institucional / Hero */

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Reservas - PROATEC</title>
+
+    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Folhas de Estilo Modularizadas -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/agenda.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra Lateral de Navegação (Sidebar) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">
+                    <span class="material-symbols-outlined">laptop_mac</span>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h1>PROATEC</h1>
+                    <p>Gestão de Laboratório</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="proatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Início</span>
+                </a>
+                <a href="agendaProatec.html" class="nav-link active">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span>Reservas</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">computer</span>
+                    <span>Equipamentos</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                    <span>Salas</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>Relatórios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">J</div>
+                    <div class="user-info">
+                        <p class="user-name">João Almeida</p>
+                        <p class="user-role">Coordenador PROATEC</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-subnav">
+                    <a href="#" class="nav-link">
+                        <span class="material-symbols-outlined">settings</span>
+                        <span>Configurações</span>
+                    </a>
+                    <a href="index.html" class="nav-link logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <div class="main-wrapper">
+            <main class="dashboard-content">
+                <!-- Cabeçalho da Página -->
+                <header class="agenda-page-header">
+                    <div class="agenda-title-group">
+                        <div class="header-top-row">
+                            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
+                                <span class="material-symbols-outlined">menu</span>
+                            </button>
+                            <h2>Agenda Semanal das Reservas</h2>
+                        </div>
+                        <p>Planejamento e alocação de notebooks e espaços para a semana letiva.</p>
+                    </div>
+
+                    <button type="button" class="btn-new-res" id="btnOpenNewReservation">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                        <span>Nova reserva</span>
+                    </button>
+                </header>
+
+                <!-- Barra de Filtros e Navegação da Semana -->
+                <section class="filters-bar">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>Período</label>
+                            <div class="filter-pill">
+                                <span>Manhã</span>
+                            </div>
+                        </div>
+                        <div class="filter-item">
+                            <label>Data</label>
+                            <div class="filter-pill">
+                                <span class="material-symbols-outlined">calendar_today</span>
+                                <span>11 ago - 15 ago</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="week-navigation">
+                        <button type="button" class="btn-nav-arrow" title="Semana anterior">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <span class="current-week-label">Semana Atual</span>
+                        <button type="button" class="btn-nav-arrow" title="Próxima semana">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Grade Semanal de Horários e Salas -->
+                <section class="schedule-container">
+                    <div class="schedule-table-wrapper">
+                        <div class="schedule-grid">
+                            <!-- Cabeçalhos dos Dias -->
+                            <div class="schedule-header time-col">Horário</div>
+                            <div class="schedule-header">Seg - 11</div>
+                            <div class="schedule-header">Ter - 12</div>
+                            <div class="schedule-header">Qua - 13</div>
+                            <div class="schedule-header">Qui - 14</div>
+                            <div class="schedule-header">Sex - 15</div>
+
+                            <!-- Linha 1: 07:00 -->
+                            <div class="schedule-time">07:00</div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card primary" onclick="openUsageModal('Sala 12', 'Prof. Ricardo Silva', '20 notebooks')">
+                                    <h4>Sala 12 — 20 notebooks</h4>
+                                    <p>Prof. Ricardo Silva</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+
+                            <!-- Linha 2: 07:50 -->
+                            <div class="schedule-time">07:50</div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 12', 'Prof. Carlos', '20 notebooks')">
+                                    <h4>Sala 12 — 20 notebooks</h4>
+                                    <p>Prof. Carlos</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 04', 'Prof. Ana', '15 notebooks')">
+                                    <h4>Sala 04 — 15 notebooks</h4>
+                                    <p>Prof. Ana</p>
+                                </div>
+                                <div class="schedule-card primary" onclick="openUsageModal('Sala 08', 'Prof. Marcos', '20 notebooks')">
+                                    <h4>Sala 08 — 20 notebooks</h4>
+                                    <p>Prof. Marcos</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+
+                            <!-- Linha 3: 08:40 -->
+                            <div class="schedule-time">08:40</div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card error">
+                                    <h4>Bloqueio — Manutenção</h4>
+                                    <p>Coordenação PROATEC</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 04', 'Prof. Ana', '15 notebooks')">
+                                    <h4>Sala 04 — 15 notebooks</h4>
+                                    <p>Prof. Ana</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+
+                            <!-- Linha 4: 09:30 -->
+                            <div class="schedule-time">09:30</div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 12', 'Prof. João', '20 notebooks')">
+                                    <h4>Sala 12 — 20 notebooks</h4>
+                                    <p>Prof. João</p>
+                                </div>
+                            </div>
+
+                            <!-- Linha 5: 10:20 -->
+                            <div class="schedule-time">10:20</div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card neutral" onclick="openUsageModal('Lab. Informática', 'Prof. Maria', 'Gabinete móvel')">
+                                    <h4>Lab. Informática</h4>
+                                    <p>Prof. Maria</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card neutral" onclick="openUsageModal('Lab. Informática', 'Prof. Carlos', 'Gabinete móvel')">
+                                    <h4>Lab. Informática</h4>
+                                    <p>Prof. Carlos</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+
+                            <!-- Linha 6: 11:10 -->
+                            <div class="schedule-time">11:10</div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell">
+                                <div class="schedule-card primary" onclick="openUsageModal('Sala 04', 'Prof. Ricardo Silva', '15 notebooks')">
+                                    <h4>Sala 04 — 15 notebooks</h4>
+                                    <p>Prof. Ricardo Silva</p>
+                                </div>
+                            </div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                            <div class="schedule-cell"></div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal 1: Criar Nova Reserva -->
+    <div class="modal-backdrop hidden" id="new-reservation-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Criar nova reserva</h3>
+                <button type="button" class="btn-close" onclick="closeModal('new-reservation-modal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form action="#" onsubmit="event.preventDefault(); closeModal('new-reservation-modal');">
+                <div class="modal-body">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="res-brand">Marca dos notebooks</label>
+                        <div class="select-wrapper">
+                            <select id="res-brand" required>
+                                <option value="">Selecione a marca</option>
+                                <option value="dell">Dell</option>
+                                <option value="lenovo">Lenovo</option>
+                                <option value="acer">Acer</option>
+                                <option value="positivo">Positivo</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="res-quantity">Quantidade de notebooks</label>
+                        <div class="select-wrapper">
+                            <select id="res-quantity" required>
+                                <option value="">Selecione a quantidade</option>
+                                <option value="10">10 notebooks</option>
+                                <option value="15">15 notebooks</option>
+                                <option value="20">20 notebooks</option>
+                                <option value="30">30 notebooks</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-col form-group" style="margin-bottom: 0;">
+                            <label for="res-start">Horário de início</label>
+                            <div class="select-wrapper">
+                                <select id="res-start" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:00">07:00</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:10">11:10</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+
+                        <div class="form-col form-group" style="margin-bottom: 0;">
+                            <label for="res-end">Horário de fim</label>
+                            <div class="select-wrapper">
+                                <select id="res-end" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:10">11:10</option>
+                                    <option value="12:00">12:00</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="res-room">Reservar sala</label>
+                        <div class="select-wrapper">
+                            <select id="res-room" required>
+                                <option value="">Selecione a sala</option>
+                                <option value="sala12">Sala 12</option>
+                                <option value="sala08">Sala 08</option>
+                                <option value="sala04">Sala 04</option>
+                                <option value="sala02">Sala 02</option>
+                                <option value="lab">Laboratório de Informática</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('new-reservation-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px;">Confirmar reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Registrar Uso dos Notebooks por Aluno -->
+    <div class="modal-backdrop hidden" id="register-usage-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalUsageTitle">Registrar uso da aula</h3>
+                    <p id="modalUsageSubtitle">Vincule cada notebook ao aluno responsável</p>
+                </div>
+                <button type="button" class="btn-close" onclick="closeModal('register-usage-modal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form action="#" onsubmit="event.preventDefault(); closeModal('register-usage-modal');">
+                <div class="modal-body" id="usageRowsContainer">
+                    <!-- Linhas de Notebook / Aluno -->
+                    <div class="usage-row">
+                        <div class="notebook-label-badge">Notebook 01</div>
+                        <input type="text" class="student-input" placeholder="Digite o nome do aluno" required>
+                    </div>
+                    <div class="usage-row">
+                        <div class="notebook-label-badge">Notebook 02</div>
+                        <input type="text" class="student-input" placeholder="Digite o nome do aluno">
+                    </div>
+                    <div class="usage-row">
+                        <div class="notebook-label-badge">Notebook 03</div>
+                        <input type="text" class="student-input" placeholder="Digite o nome do aluno">
+                    </div>
+                </div>
+
+                <div style="padding: 0 24px 12px;">
+                    <button type="button" class="btn-add-notebook" id="btnAddNotebookRow">
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Adicionar notebook</span>
+                    </button>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('register-usage-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px;">Confirmar registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script de Controle dos Modais e Sidebar Mobile -->
+    <script>
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        // Abre modal de uso com dados dinâmicos da aula clicada
+        function openUsageModal(room, teacher, count) {
+            const title = document.getElementById('modalUsageTitle');
+            const sub = document.getElementById('modalUsageSubtitle');
+            if (title) title.innerText = `${room} — ${teacher}`;
+            if (sub) sub.innerText = `Alocação de ${count} aos alunos`;
+            openModal('register-usage-modal');
+        }
+
+        document.getElementById('btnOpenNewReservation')?.addEventListener('click', () => {
+            openModal('new-reservation-modal');
+        });
+
+        // Fechar modais ao clicar no fundo escuro
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => {
+                if (e.target === backdrop) backdrop.classList.add('hidden');
+            });
+        });
+
+        // Adicionar dinamicamente mais uma linha de notebook
+        let notebookCount = 3;
+        document.getElementById('btnAddNotebookRow')?.addEventListener('click', () => {
+            notebookCount++;
+            const container = document.getElementById('usageRowsContainer');
+            const row = document.createElement('div');
+            row.className = 'usage-row';
+            row.innerHTML = `
+                <div class="notebook-label-badge">Notebook ${String(notebookCount).padStart(2, '0')}</div>
+                <input type="text" class="student-input" placeholder="Digite o nome do aluno">
+            `;
+            container.appendChild(row);
+        });
+
+        // Toggle do Menu Mobile
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
