@@ -56,6 +56,89 @@
     cursor: pointer;
 }
 
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+@media (max-width: 540px) {
+    .form-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+}
+
+.form-control,
+.form-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-white);
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus,
+.form-input:focus {
+    border-color: var(--color-primary-focus);
+    box-shadow: 0 0 0 3px var(--color-primary-ring);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* Toast Notification */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast-notification {
+    background-color: var(--color-text-primary);
+    color: #ffffff;
+    padding: 14px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: toastSlideIn 0.3s ease-out;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-notification.success {
+    background-color: #065f46;
+    border: 1px solid #059669;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 /* ---------------------------------------------------------
    2. Links e Ações Secundárias
    --------------------------------------------------------- */
@@ -546,6 +629,13 @@
     background-color: var(--color-bg-page);
 }
 
+.dashboard-content {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
 .header-top-row {
     display: flex;
     align-items: center;
@@ -567,6 +657,7 @@
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
     .main-wrapper { margin-left: 0; }
+    .dashboard-content { padding: 20px 16px; }
     .menu-toggle { display: block; }
 }
 

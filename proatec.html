@@ -105,7 +105,7 @@
                             <p>Agendar notebooks para uma turma</p>
                         </a>
 
-                        <a href="#" class="action-card">
+                        <a href="#" class="action-card" id="btnOpenEquipmentModal">
                             <div class="action-icon secondary">
                                 <span class="material-symbols-outlined">devices</span>
                             </div>
@@ -270,8 +270,154 @@
         </div>
     </div>
 
-    <!-- Script leve para alternar a sidebar em telas móveis -->
+    <!-- Modal: Cadastrar Novo Equipamento / Notebook -->
+    <div class="modal-backdrop hidden" id="equipment-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>Cadastrar Equipamento</h3>
+                    <p>Adicione novos notebooks ao inventário do PROATEC</p>
+                </div>
+                <button type="button" class="btn-close" onclick="closeModal('equipment-modal')" aria-label="Fechar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form id="equipmentForm" onsubmit="handleEquipmentSubmit(event)">
+                <div class="modal-body">
+                    <!-- Marca -->
+                    <div class="form-group">
+                        <label for="eq-brand">Marca do notebook</label>
+                        <div class="select-wrapper">
+                            <select id="eq-brand" required>
+                                <option value="">Selecione a marca</option>
+                                <option value="Dell">Dell</option>
+                                <option value="Lenovo">Lenovo</option>
+                                <option value="Acer">Acer</option>
+                                <option value="Positivo">Positivo</option>
+                                <option value="Outro">Outro fabricante</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <!-- Quantidade digitada pelo usuário -->
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="eq-quantity">Quantidade</label>
+                        <input type="number" class="form-control" id="eq-quantity" placeholder="Ex: 5" min="1" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('equipment-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                        <span>Salvar equipamento</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Container de Notificações Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts de Controle da Interface e Modais -->
     <script>
+        // Funções de Modal
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        // Notificação flutuante (Toast)
+        function showToast(message, isSuccess = true) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${isSuccess ? 'success' : ''}`;
+            toast.innerHTML = `
+                <span class="material-symbols-outlined">${isSuccess ? 'check_circle' : 'info'}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Atualização dinâmica dos cards de marcas
+        function updateBrandStats(brandName, quantity = 1) {
+            const brandCards = document.querySelectorAll('.brand-card');
+            brandCards.forEach(card => {
+                const nameEl = card.querySelector('.brand-name');
+                if (nameEl && nameEl.innerText.trim().toLowerCase() === brandName.toLowerCase()) {
+                    const countEl = card.querySelector('.brand-count');
+                    const totalEl = card.querySelector('.brand-total');
+                    const progressEl = card.querySelector('.progress-fill');
+                    if (countEl && totalEl) {
+                        let current = parseInt(countEl.innerText) || 0;
+                        let total = parseInt(totalEl.innerText.replace('/', '').trim()) || 0;
+                        current += quantity;
+                        total += quantity;
+                        countEl.innerText = current;
+                        totalEl.innerText = `/ ${total}`;
+                        if (progressEl && total > 0) {
+                            const pct = Math.min(100, Math.round((current / total) * 100));
+                            progressEl.style.width = `${pct}%`;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Submissão do formulário de cadastro de equipamento (Marca + Quantidade)
+        function handleEquipmentSubmit(e) {
+            e.preventDefault();
+            const brand = document.getElementById('eq-brand').value;
+            const qty = parseInt(document.getElementById('eq-quantity').value) || 1;
+
+            // Fechar modal e limpar campos
+            closeModal('equipment-modal');
+            document.getElementById('equipmentForm').reset();
+
+            // Atualiza estatísticas da marca na tela caso corresponda
+            updateBrandStats(brand, qty);
+
+            // Exibir notificação de sucesso
+            const unitWord = qty === 1 ? 'notebook' : 'notebooks';
+            showToast(`${qty} ${unitWord} (${brand}) cadastrado${qty > 1 ? 's' : ''} com sucesso!`);
+        }
+
+        // Event listener para o card de cadastrar equipamento
+        document.getElementById('btnOpenEquipmentModal')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal('equipment-modal');
+        });
+
+        // Fechar modais ao clicar no fundo escuro ou tecla ESC
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => {
+                if (e.target === backdrop) backdrop.classList.add('hidden');
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-backdrop').forEach(modal => modal.classList.add('hidden'));
+            }
+        });
+
+        // Script para alternar a sidebar em telas móveis
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
 
@@ -280,7 +426,6 @@
                 sidebar.classList.toggle('open');
             });
 
-            // Fecha ao clicar fora em telas móveis
             document.addEventListener('click', (e) => {
                 if (window.innerWidth <= 768 && 
                     !sidebar.contains(e.target) && 
