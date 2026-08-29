@@ -12,9 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/proatec.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/proatec.css">
 </head>
 <body>
     <div class="app-container">
@@ -47,7 +47,7 @@
                     <span class="material-symbols-outlined">meeting_room</span>
                     <span>Salas</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="relatorio.html" class="nav-link">
                     <span class="material-symbols-outlined">bar_chart</span>
                     <span>Relatórios</span>
                 </a>
@@ -67,7 +67,7 @@
                         <span class="material-symbols-outlined">settings</span>
                         <span>Configurações</span>
                     </a>
-                    <a href="index.html" class="nav-link logout">
+                    <a href="../index.html" class="nav-link logout">
                         <span class="material-symbols-outlined">logout</span>
                         <span>Sair</span>
                     </a>
@@ -403,37 +403,9 @@
             e.preventDefault();
             openModal('equipment-modal');
         });
-
-        // Fechar modais ao clicar no fundo escuro ou tecla ESC
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-            backdrop.addEventListener('click', (e) => {
-                if (e.target === backdrop) backdrop.classList.add('hidden');
-            });
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-backdrop').forEach(modal => modal.classList.add('hidden'));
-            }
-        });
-
-        // Script para alternar a sidebar em telas móveis
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-
-        if (menuToggle && sidebar) {
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('open');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768 && 
-                    !sidebar.contains(e.target) && 
-                    !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                }
-            });
-        }
     </script>
+
+    <!-- Script Global (Modais e Sidebar Mobile) -->
+    <script src="../js/main.js"></script>
 </body>
 </html>

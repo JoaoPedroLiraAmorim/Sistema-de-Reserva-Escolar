@@ -12,9 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/professor.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/professor.css">
 </head>
 <body>
     <div class="teacher-app">
@@ -55,7 +55,7 @@
                         <p class="teacher-user-role">Docente</p>
                     </div>
                 </div>
-                <a href="index.html" class="btn-header-logout" title="Sair do sistema">
+                <a href="../index.html" class="btn-header-logout" title="Sair do sistema">
                     <span class="material-symbols-outlined">logout</span>
                 </a>
             </div>
@@ -358,44 +358,8 @@
         </div>
     </div>
 
-    <!-- Scripts de Interação -->
-    <script>
-        // Funções para controle de modais
-        function openModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        }
-
-        document.getElementById('btnOpenNewReservation')?.addEventListener('click', () => {
-            openModal('new-reservation-modal');
-        });
-
-        // Fechar modais ao clicar no fundo escuro ou tecla Escape
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-            backdrop.addEventListener('click', (e) => {
-                if (e.target === backdrop) backdrop.classList.add('hidden');
-            });
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-backdrop').forEach(b => b.classList.add('hidden'));
-            }
-        });
-
-        // Alternar botões de turno (Manhã/Tarde/Noite)
-        const shiftButtons = document.querySelectorAll('.shift-btn');
-        shiftButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                shiftButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-    </script>
+    <!-- Scripts Modularizados -->
+    <script src="../js/main.js"></script>
+    <script src="../js/professor.js"></script>
 </body>
 </html>

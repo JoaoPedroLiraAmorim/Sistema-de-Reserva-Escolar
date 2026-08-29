@@ -12,9 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Folhas de Estilo Modularizadas -->
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/agenda.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/agenda.css">
 </head>
 <body>
     <div class="app-container">
@@ -47,7 +47,7 @@
                     <span class="material-symbols-outlined">meeting_room</span>
                     <span>Salas</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="relatorio.html" class="nav-link">
                     <span class="material-symbols-outlined">bar_chart</span>
                     <span>Relatórios</span>
                 </a>
@@ -67,7 +67,7 @@
                         <span class="material-symbols-outlined">settings</span>
                         <span>Configurações</span>
                     </a>
-                    <a href="index.html" class="nav-link logout">
+                    <a href="../index.html" class="nav-link logout">
                         <span class="material-symbols-outlined">logout</span>
                         <span>Sair</span>
                     </a>
@@ -381,63 +381,8 @@
         </div>
     </div>
 
-    <!-- Script de Controle dos Modais e Sidebar Mobile -->
-    <script>
-        function openModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        }
-
-        // Abre modal de uso com dados dinâmicos da aula clicada
-        function openUsageModal(room, teacher, count) {
-            const title = document.getElementById('modalUsageTitle');
-            const sub = document.getElementById('modalUsageSubtitle');
-            if (title) title.innerText = `${room} — ${teacher}`;
-            if (sub) sub.innerText = `Alocação de ${count} aos alunos`;
-            openModal('register-usage-modal');
-        }
-
-        document.getElementById('btnOpenNewReservation')?.addEventListener('click', () => {
-            openModal('new-reservation-modal');
-        });
-
-        // Fechar modais ao clicar no fundo escuro
-        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-            backdrop.addEventListener('click', (e) => {
-                if (e.target === backdrop) backdrop.classList.add('hidden');
-            });
-        });
-
-        // Adicionar dinamicamente mais uma linha de notebook
-        let notebookCount = 3;
-        document.getElementById('btnAddNotebookRow')?.addEventListener('click', () => {
-            notebookCount++;
-            const container = document.getElementById('usageRowsContainer');
-            const row = document.createElement('div');
-            row.className = 'usage-row';
-            row.innerHTML = `
-                <div class="notebook-label-badge">Notebook ${String(notebookCount).padStart(2, '0')}</div>
-                <input type="text" class="student-input" placeholder="Digite o nome do aluno">
-            `;
-            container.appendChild(row);
-        });
-
-        // Toggle do Menu Mobile
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        if (menuToggle && sidebar) {
-            menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                }
-            });
-        }
-    </script>
+    <!-- Scripts Modularizados -->
+    <script src="../js/main.js"></script>
+    <script src="../js/agenda.js"></script>
 </body>
 </html>
