@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - PROATEC</title>
+
+    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/relatorio.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra Lateral de Navegação (Sidebar) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">
+                    <span class="material-symbols-outlined">laptop_mac</span>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h1>PROATEC</h1>
+                    <p>Gestão de Laboratório</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="proatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Início</span>
+                </a>
+                <a href="agendaProatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span>Reservas</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">computer</span>
+                    <span>Equipamentos</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                    <span>Salas</span>
+                </a>
+                <a href="relatorio.html" class="nav-link active">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>Relatórios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">J</div>
+                    <div class="user-info">
+                        <p class="user-name">João Almeida</p>
+                        <p class="user-role">Coordenador PROATEC</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-subnav">
+                    <a href="#" class="nav-link">
+                        <span class="material-symbols-outlined">settings</span>
+                        <span>Configurações</span>
+                    </a>
+                    <a href="index.html" class="nav-link logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Principal de Conteúdo -->
+        <div class="main-wrapper">
+            <main class="dashboard-content" style="padding: 28px 32px;">
+                <!-- Cabeçalho da Página de Relatórios -->
+                <header class="reports-page-header">
+                    <div class="reports-title-group">
+                        <div class="header-top-row">
+                            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
+                                <span class="material-symbols-outlined">menu</span>
+                            </button>
+                            <h2>Relatórios Detalhados de Hoje</h2>
+                        </div>
+                        <p>Registro diário de uso de equipamentos por turma e aluno.</p>
+                    </div>
+
+                    <div class="reports-date-badge">
+                        <span class="material-symbols-outlined">calendar_month</span>
+                        <span>Hoje (15 Nov)</span>
+                    </div>
+                </header>
+
+                <!-- Lista de Cartões de Relatório -->
+                <section class="reports-list">
+                    <!-- Registro 1: Prof. Silva -->
+                    <article class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-lead">
+                                <div class="report-icon-box primary">
+                                    <span class="material-symbols-outlined">laptop_mac</span>
+                                </div>
+                                <div class="report-details">
+                                    <div class="report-title-row">
+                                        <h3 class="report-teacher-name">Prof. Silva</h3>
+                                        <span class="report-class-tag">• Turma 3A Info</span>
+                                    </div>
+                                    <div class="report-meta-row">
+                                        <span class="report-meta-item">
+                                            <span class="material-symbols-outlined">schedule</span>
+                                            08:00 - 09:40
+                                        </span>
+                                        <span class="report-meta-item">
+                                            <span class="material-symbols-outlined">meeting_room</span>
+                                            Sala 04
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-view-more">
+                                <span>Ver mais</span>
+                                <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+                            </button>
+                        </div>
+                        <div class="report-card-body">
+                            <span class="report-section-label">Uso de Notebooks</span>
+                            <div class="student-items-grid">
+                                <div class="student-item">
+                                    <span class="student-item-number">01</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Ana Clara</span>
+                                </div>
+                                <div class="student-item">
+                                    <span class="student-item-number">02</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Bruno Gomes</span>
+                                </div>
+                                <div class="student-item">
+                                    <span class="student-item-number">03</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Carlos Eduardo</span>
+                                </div>
+                                <div class="student-item">
+                                    <span class="student-item-number">04</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Daniela Souza</span>
+                                </div>
+                                <div class="student-item">
+                                    <span class="student-item-number">05</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Eduardo Lima</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Registro 2: Prof. Maria -->
+                    <article class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-lead">
+                                <div class="report-icon-box secondary">
+                                    <span class="material-symbols-outlined">laptop_chromebook</span>
+                                </div>
+                                <div class="report-details">
+                                    <div class="report-title-row">
+                                        <h3 class="report-teacher-name">Prof. Maria</h3>
+                                        <span class="report-class-tag">• Turma 2B Admin</span>
+                                    </div>
+                                    <div class="report-meta-row">
+                                        <span class="report-meta-item">
+                                            <span class="material-symbols-outlined">schedule</span>
+                                            10:00 - 11:40
+                                        </span>
+                                        <span class="report-meta-item">
+                                            <span class="material-symbols-outlined">meeting_room</span>
+                                            Sala 02
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-view-more">
+                                <span>Ver mais</span>
+                                <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+                            </button>
+                        </div>
+                        <div class="report-card-body">
+                            <span class="report-section-label">Uso de Notebooks</span>
+                            <div class="student-items-grid">
+                                <div class="student-item">
+                                    <span class="student-item-number secondary">11</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Felipe Santos</span>
+                                </div>
+                                <div class="student-item">
+                                    <span class="student-item-number secondary">12</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Gabriela Costa</span>
+                                </div>
+                                <div class="student-item">
+                                    <span class="student-item-number secondary">13</span>
+                                    <div class="student-item-divider"></div>
+                                    <span class="student-item-name">Henrique Alves</span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Registro 3: Prof. Carlos (Agendado / Em espera) -->
+                    <article class="report-card upcoming">
+                        <div class="report-card-header">
+                            <div class="report-lead">
+                                <div class="report-icon-box tertiary">
+                                    <span class="material-symbols-outlined">laptop_windows</span>
+                                </div>
+                                <div class="report-details">
+                                    <div class="report-title-row">
+                                        <h3 class="report-teacher-name">Prof. Carlos</h3>
+                                        <span class="report-class-tag">• Turma 1A Log</span>
+                                        <span class="badge badge-neutral" style="margin-left: 6px;">Agendado</span>
+                                    </div>
+                                    <div class="report-meta-row">
+                                        <span class="report-meta-item">
+                                            <span class="material-symbols-outlined">schedule</span>
+                                            13:30 - 15:10
+                                        </span>
+                                        <span class="report-meta-item">
+                                            <span class="material-symbols-outlined">meeting_room</span>
+                                            Sala 01
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-view-more">
+                                <span>Ver mais</span>
+                                <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+                            </button>
+                        </div>
+                    </article>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Script para alternar a sidebar em telas móveis -->
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Fecha ao clicar fora em telas móveis
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(e.target) && 
+                    !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

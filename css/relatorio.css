@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Relatório CSS - Sistema de Reserva Escolar
+   Estilos específicos para a tela de Relatórios Detalhados (PROATEC)
+   ========================================================================== */
+
+/* ---------------------------------------------------------
+   1. Cabeçalho da Página de Relatórios
+   --------------------------------------------------------- */
+.reports-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.reports-title-group h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.reports-title-group p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.reports-date-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.reports-date-badge .material-symbols-outlined {
+    font-size: 18px;
+    color: var(--color-primary);
+}
+
+/* ---------------------------------------------------------
+   2. Lista e Cartões de Relatórios
+   --------------------------------------------------------- */
+.reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 40px;
+}
+
+.report-card {
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.report-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.report-card.upcoming {
+    opacity: 0.85;
+}
+
+/* Topo do Cartão de Relatório */
+.report-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    background-color: var(--color-bg-white);
+}
+
+.report-lead {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.report-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.report-icon-box .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.report-icon-box.primary {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.report-icon-box.secondary {
+    background-color: var(--color-surface-container);
+    color: var(--color-text-secondary);
+}
+
+.report-icon-box.tertiary {
+    background-color: var(--color-tertiary-light);
+    color: var(--color-tertiary);
+}
+
+.report-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.report-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.report-teacher-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.report-class-tag {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.report-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.report-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.report-meta-item .material-symbols-outlined {
+    font-size: 16px;
+    color: var(--color-text-placeholder);
+}
+
+.btn-view-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background-color: transparent;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-view-more:hover {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary-focus);
+}
+
+/* Corpo do Cartão: Listagem Aluno/Equipamento */
+.report-card-body {
+    padding: 20px 24px;
+    background-color: #fafbfd;
+}
+
+.report-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--color-text-muted);
+    margin-bottom: 14px;
+    display: block;
+}
+
+.student-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.student-item:hover {
+    border-color: var(--color-primary-ring);
+    transform: translateY(-1px);
+}
+
+.student-item-number {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-primary);
+    min-width: 24px;
+    text-align: center;
+}
+
+.student-item-number.secondary {
+    color: var(--color-text-secondary);
+}
+
+.student-item-divider {
+    width: 1px;
+    height: 18px;
+    background-color: var(--color-border-light);
+}
+
+.student-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .reports-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .report-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-view-more {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .student-items-grid {
+        grid-template-columns: 1fr;
+    }
+}

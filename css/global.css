@@ -42,6 +42,13 @@
     --color-error: #dc2626;
     --color-error-bg: #fee2e2;
 
+    /* Cores Terciárias / Destaques Complementares */
+    --color-tertiary: #334457;
+    --color-tertiary-hover: #233140;
+    --color-tertiary-light: #d3e4fd;
+    --color-tertiary-container: #4b5b70;
+    --color-on-tertiary-fixed: #0b1d2f;
+
     /* Tipografia */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 

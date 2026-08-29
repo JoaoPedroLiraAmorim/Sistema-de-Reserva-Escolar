@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduLab Reserve - Agenda do Professor</title>
+
+    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/professor.css">
+</head>
+<body>
+    <div class="teacher-app">
+        <!-- Barra de Navegação Superior (TopNavBar) -->
+        <header class="teacher-header">
+            <div class="teacher-brand-group">
+                <a href="professor.html" class="teacher-brand-logo">
+                    <div class="brand-icon">
+                        <span class="material-symbols-outlined">school</span>
+                    </div>
+                    <span>EduLab Reserve</span>
+                </a>
+                <span class="teacher-greeting">Olá, Prof. Marcelo</span>
+            </div>
+
+            <!-- Navegação Desktop -->
+            <nav class="teacher-top-nav-links">
+                <a href="professor.html" class="teacher-nav-link active">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span>Agenda</span>
+                </a>
+                <a href="#" class="teacher-nav-link">
+                    <span class="material-symbols-outlined">devices</span>
+                    <span>Equipamentos</span>
+                </a>
+                <a href="#" class="teacher-nav-link">
+                    <span class="material-symbols-outlined">history_edu</span>
+                    <span>Minhas Reservas</span>
+                </a>
+            </nav>
+
+            <!-- Ações e Perfil do Usuário -->
+            <div class="teacher-user-actions">
+                <div class="teacher-user-badge">
+                    <div class="teacher-avatar">M</div>
+                    <div>
+                        <p class="teacher-user-name">Prof. Marcelo</p>
+                        <p class="teacher-user-role">Docente</p>
+                    </div>
+                </div>
+                <a href="index.html" class="btn-header-logout" title="Sair do sistema">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="teacher-main-content">
+            <!-- Banner de Reserva Ativa -->
+            <section class="active-reservation-banner">
+                <div class="banner-lead">
+                    <div class="banner-icon-box">
+                        <span class="material-symbols-outlined">timer</span>
+                    </div>
+                    <div class="banner-text">
+                        <h2>Reserva em andamento</h2>
+                        <p>Você tem uma reserva ativa agora — Sala 12, 20 notebooks Dell</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-banner-action">
+                    <span>Registrar reserva atual</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">edit_document</span>
+                </button>
+            </section>
+
+            <!-- Cabeçalho da Agenda e Ações -->
+            <section class="agenda-action-header">
+                <div class="agenda-action-title">
+                    <h1>Agenda de Reservas</h1>
+                    <p>Visualize e gerencie os equipamentos disponíveis.</p>
+                </div>
+                <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                    <span>Nova reserva</span>
+                </button>
+            </section>
+
+            <!-- Barra de Controles e Filtros -->
+            <section class="calendar-controls-bar">
+                <div class="week-selector">
+                    <button type="button" class="btn-week-nav" aria-label="Semana anterior">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <h3>14 - 18 Outubro</h3>
+                    <button type="button" class="btn-week-nav" aria-label="Próxima semana">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+
+                <div class="shift-segmented-control" id="shiftControl">
+                    <button type="button" class="shift-btn active" data-shift="manha">Manhã</button>
+                    <button type="button" class="shift-btn" data-shift="tarde">Tarde</button>
+                    <button type="button" class="shift-btn" data-shift="noite">Noite</button>
+                </div>
+            </section>
+
+            <!-- Grade Semanal de Horários -->
+            <section class="calendar-wrapper-card">
+                <div class="calendar-scroll-area">
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th class="time-col-header">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>
+                                </th>
+                                <th>
+                                    <div class="day-header-tag">Segunda</div>
+                                    <div class="day-header-number">14</div>
+                                </th>
+                                <th>
+                                    <div class="day-header-tag">Terça</div>
+                                    <div class="day-header-number">15</div>
+                                </th>
+                                <th class="today-col">
+                                    <div class="day-header-tag">Quarta</div>
+                                    <div class="day-header-number">16</div>
+                                </th>
+                                <th>
+                                    <div class="day-header-tag">Quinta</div>
+                                    <div class="day-header-number">17</div>
+                                </th>
+                                <th>
+                                    <div class="day-header-tag">Sexta</div>
+                                    <div class="day-header-number">18</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 07:00 -->
+                            <tr>
+                                <td class="time-col-cell">07:00</td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell"></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <!-- 07:50 -->
+                            <tr>
+                                <td class="time-col-cell">07:50</td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell"></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <!-- 08:40 -->
+                            <tr>
+                                <td class="time-col-cell">08:40</td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell">
+                                    <div class="calendar-events-container">
+                                        <div class="calendar-event-card primary">
+                                            <span class="event-teacher">Prof. Ana</span>
+                                            <span class="event-desc">30 Notebooks, Proj.</span>
+                                            <span class="event-room">
+                                                <span class="material-symbols-outlined">location_on</span>
+                                                Sala 04
+                                            </span>
+                                        </div>
+                                        <div class="calendar-event-card tertiary">
+                                            <span class="event-teacher">Prof. Marcos</span>
+                                            <span class="event-desc">Kit Robótica</span>
+                                            <span class="event-room">
+                                                <span class="material-symbols-outlined">science</span>
+                                                Lab 2
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <!-- Intervalo (09:30) -->
+                            <tr class="interval-row">
+                                <td class="time-col-cell">09:30</td>
+                                <td colspan="5">
+                                    <div class="interval-label">
+                                        <span class="material-symbols-outlined">coffee</span>
+                                        <span>Intervalo</span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- 09:50 -->
+                            <tr>
+                                <td class="time-col-cell">09:50</td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell"></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <!-- 10:40 -->
+                            <tr>
+                                <td class="time-col-cell">10:40</td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell"></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <!-- 11:30 -->
+                            <tr>
+                                <td class="time-col-cell">11:30</td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell"></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <!-- Navegação Inferior para Dispositivos Móveis -->
+        <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
+            <a href="professor.html" class="mobile-bottom-item active">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span>Agenda</span>
+            </a>
+            <a href="#" class="mobile-bottom-item">
+                <span class="material-symbols-outlined">devices</span>
+                <span>Equipamentos</span>
+            </a>
+            <a href="#" class="mobile-bottom-item">
+                <span class="material-symbols-outlined">history_edu</span>
+                <span>Reservas</span>
+            </a>
+            <a href="#" class="mobile-bottom-item">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Ajustes</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modal: Criar Nova Reserva -->
+    <div class="modal-backdrop hidden" id="new-reservation-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>Criar nova reserva</h3>
+                    <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 2px;">Selecione os equipamentos e o horário desejado.</p>
+                </div>
+                <button type="button" class="btn-close" onclick="closeModal('new-reservation-modal')" aria-label="Fechar modal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form action="#" onsubmit="event.preventDefault(); closeModal('new-reservation-modal');">
+                <div class="modal-body">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="res-brand">Marca dos notebooks</label>
+                        <div class="select-wrapper">
+                            <select id="res-brand" required>
+                                <option value="">Selecione a marca</option>
+                                <option value="dell">Dell</option>
+                                <option value="lenovo">Lenovo</option>
+                                <option value="acer">Acer</option>
+                                <option value="positivo">Positivo</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="res-quantity">Quantidade de notebooks</label>
+                        <div class="select-wrapper">
+                            <select id="res-quantity" required>
+                                <option value="">Selecione a quantidade</option>
+                                <option value="10">10 notebooks</option>
+                                <option value="15">15 notebooks</option>
+                                <option value="20">20 notebooks</option>
+                                <option value="30">30 notebooks</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-col form-group" style="margin-bottom: 0;">
+                            <label for="res-start">Horário de início</label>
+                            <div class="select-wrapper">
+                                <select id="res-start" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:00">07:00</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:50">09:50</option>
+                                    <option value="10:40">10:40</option>
+                                    <option value="11:30">11:30</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+
+                        <div class="form-col form-group" style="margin-bottom: 0;">
+                            <label for="res-end">Horário de fim</label>
+                            <div class="select-wrapper">
+                                <select id="res-end" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:40">10:40</option>
+                                    <option value="11:30">11:30</option>
+                                    <option value="12:20">12:20</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="res-room">Reservar sala <span style="font-size: 12px; font-weight: normal; color: var(--color-text-muted);">(opcional)</span></label>
+                        <div class="select-wrapper">
+                            <select id="res-room">
+                                <option value="">Selecione a sala (opcional)</option>
+                                <option value="aquario">Aquário</option>
+                                <option value="sala-leitura">Sala de Leitura</option>
+                                <option value="sala-video">Sala de Vídeo</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('new-reservation-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px;">Confirmar reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts de Interação -->
+    <script>
+        // Funções para controle de modais
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        document.getElementById('btnOpenNewReservation')?.addEventListener('click', () => {
+            openModal('new-reservation-modal');
+        });
+
+        // Fechar modais ao clicar no fundo escuro ou tecla Escape
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => {
+                if (e.target === backdrop) backdrop.classList.add('hidden');
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.classList.add('hidden'));
+            }
+        });
+
+        // Alternar botões de turno (Manhã/Tarde/Noite)
+        const shiftButtons = document.querySelectorAll('.shift-btn');
+        shiftButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                shiftButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

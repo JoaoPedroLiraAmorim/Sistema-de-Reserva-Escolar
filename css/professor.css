@@ -1,0 +1,700 @@
+/* ==========================================================================
+   Professor CSS - Sistema de Reserva Escolar
+   Estilos específicos para o Portal e Agenda do Professor
+   ========================================================================== */
+
+/* ---------------------------------------------------------
+   1. Layout Geral & Barra Superior (Top Navigation)
+   --------------------------------------------------------- */
+.teacher-app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-page);
+}
+
+.teacher-header {
+    background-color: var(--color-bg-white);
+    border-bottom: 1px solid var(--color-border-light);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.teacher-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.teacher-brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 17px;
+}
+
+.teacher-brand-logo .brand-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--color-primary), #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.teacher-brand-logo .brand-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.teacher-greeting {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    border-left: 1px solid var(--color-border-light);
+    padding-left: 16px;
+}
+
+.teacher-top-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.teacher-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.teacher-nav-link:hover {
+    background-color: var(--color-surface-low);
+    color: var(--color-primary);
+}
+
+.teacher-nav-link.active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.teacher-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.teacher-user-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.teacher-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(17, 66, 188, 0.2);
+}
+
+.teacher-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.teacher-user-role {
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+.btn-header-logout {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.btn-header-logout:hover {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+/* ---------------------------------------------------------
+   2. Conteúdo Principal
+   --------------------------------------------------------- */
+.teacher-main-content {
+    flex: 1;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 32px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ---------------------------------------------------------
+   3. Banner de Reserva em Andamento
+   --------------------------------------------------------- */
+.active-reservation-banner {
+    background-color: #f0f4f9;
+    border-left: 4px solid var(--color-tertiary);
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.banner-lead {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.banner-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--color-tertiary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.banner-icon-box .material-symbols-outlined {
+    font-size: 22px;
+}
+
+.banner-text h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.banner-text p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.btn-banner-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: var(--color-tertiary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-banner-action:hover {
+    background-color: var(--color-tertiary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-banner-action:active {
+    transform: scale(0.98);
+}
+
+/* ---------------------------------------------------------
+   4. Cabeçalho de Ações da Agenda
+   --------------------------------------------------------- */
+.agenda-action-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.agenda-action-title h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.agenda-action-title p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.btn-teacher-new-res {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-teacher-new-res:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-teacher-new-res:active {
+    transform: scale(0.98);
+}
+
+/* ---------------------------------------------------------
+   5. Barra de Filtros e Controles de Semana
+   --------------------------------------------------------- */
+.calendar-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 14px 20px;
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.week-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.week-selector h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    min-width: 140px;
+    text-align: center;
+}
+
+.btn-week-nav {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    padding: 6px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.btn-week-nav:hover {
+    background-color: var(--color-surface-container);
+    color: var(--color-text-primary);
+}
+
+/* Segmented Control para Turnos */
+.shift-segmented-control {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-surface-low);
+    padding: 4px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
+}
+
+.shift-btn {
+    padding: 6px 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.shift-btn.active {
+    background-color: var(--color-bg-white);
+    color: var(--color-primary);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.shift-btn:not(.active):hover {
+    color: var(--color-text-primary);
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* ---------------------------------------------------------
+   6. Grade Semanal de Horários
+   --------------------------------------------------------- */
+.calendar-wrapper-card {
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-scroll-area {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.calendar-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+}
+
+/* Cabeçalho dos Dias */
+.calendar-table th {
+    background-color: #fcfdfe;
+    border-bottom: 1px solid var(--color-border-light);
+    border-right: 1px solid var(--color-border-light);
+    padding: 14px 10px;
+    text-align: center;
+    font-weight: 600;
+    position: relative;
+}
+
+.calendar-table th:last-child {
+    border-right: none;
+}
+
+.calendar-table th.time-col-header {
+    width: 80px;
+    background-color: var(--color-surface-low);
+    color: var(--color-text-muted);
+}
+
+.day-header-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+}
+
+.day-header-number {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-top: 2px;
+}
+
+/* Destaque para o dia de hoje */
+.calendar-table th.today-col {
+    background-color: #f0f5ff;
+}
+
+.calendar-table th.today-col::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--color-primary);
+}
+
+.calendar-table th.today-col .day-header-tag,
+.calendar-table th.today-col .day-header-number {
+    color: var(--color-primary);
+}
+
+/* Células de Horário */
+.calendar-table td {
+    border-bottom: 1px solid var(--color-border-light);
+    border-right: 1px solid var(--color-border-light);
+    vertical-align: top;
+    height: 84px;
+    padding: 6px;
+    background-color: var(--color-bg-white);
+    transition: background-color var(--transition-fast);
+}
+
+.calendar-table td:last-child {
+    border-right: none;
+}
+
+.calendar-table td.time-col-cell {
+    width: 80px;
+    background-color: #fafbfd;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    padding-top: 12px;
+}
+
+.calendar-table td.today-cell {
+    background-color: #fcfdff;
+}
+
+.calendar-table td:not(.time-col-cell):hover {
+    background-color: #f8fafc;
+}
+
+/* Linha de Intervalo */
+.interval-row td {
+    height: 44px;
+    background-color: #f1f4fa !important;
+    padding: 0 16px;
+    vertical-align: middle;
+}
+
+.interval-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.interval-label .material-symbols-outlined {
+    font-size: 16px;
+}
+
+/* Cartões de Agendamento dentro das Células */
+.calendar-events-container {
+    display: flex;
+    gap: 6px;
+    height: 100%;
+}
+
+.calendar-event-card {
+    flex: 1;
+    border-radius: var(--radius-md);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid transparent;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    overflow: hidden;
+}
+
+.calendar-event-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.calendar-event-card.primary {
+    background-color: var(--color-primary-light);
+    border-left-color: var(--color-primary);
+}
+
+.calendar-event-card.primary .event-teacher {
+    color: #1e3a8a;
+}
+
+.calendar-event-card.primary .event-desc,
+.calendar-event-card.primary .event-room {
+    color: var(--color-primary);
+}
+
+.calendar-event-card.tertiary {
+    background-color: #e5edf7;
+    border-left-color: var(--color-tertiary);
+}
+
+.calendar-event-card.tertiary .event-teacher {
+    color: #1f2d3d;
+}
+
+.calendar-event-card.tertiary .event-desc,
+.calendar-event-card.tertiary .event-room {
+    color: var(--color-tertiary);
+}
+
+.event-teacher {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-desc {
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.9;
+}
+
+.event-room {
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.event-room .material-symbols-outlined {
+    font-size: 12px;
+}
+
+/* ---------------------------------------------------------
+   7. Navegação Inferior (Mobile Bottom Navigation)
+   --------------------------------------------------------- */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background-color: var(--color-bg-white);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 12px;
+}
+
+.mobile-bottom-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.mobile-bottom-item .material-symbols-outlined {
+    font-size: 22px;
+}
+
+.mobile-bottom-item.active {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.mobile-bottom-item:active {
+    transform: scale(0.92);
+}
+
+/* ---------------------------------------------------------
+   8. Responsividade
+   --------------------------------------------------------- */
+@media (max-width: 768px) {
+    .teacher-header {
+        padding: 0 16px;
+    }
+
+    .teacher-greeting,
+    .teacher-top-nav-links,
+    .teacher-user-role {
+        display: none;
+    }
+
+    .teacher-main-content {
+        padding: 16px 16px 84px;
+        gap: 18px;
+    }
+
+    .active-reservation-banner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-banner-action {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .agenda-action-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-teacher-new-res {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .calendar-controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .shift-segmented-control {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .shift-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .mobile-bottom-nav {
+        display: flex;
+    }
+}
