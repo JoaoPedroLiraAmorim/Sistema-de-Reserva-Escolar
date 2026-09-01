@@ -15,12 +15,12 @@
 </head>
 <body>
     <div class="container">
-        <!-- Lado Esquerdo (Imagem grudada na esquerda) -->
+        <!-- Lado Esquerdo (60% Imagem) -->
         <div class="left-side">
-            <img src="imagens/tela_login_completa_alta_resolucao.png" alt="Sistema de Agendamento" class="hero-image" />
+            <img src="imagens/ChatGPT Image 31 de ago. de 2026, 21_40_12.png" alt="Sistema de Agendamento" class="hero-image" />
         </div>
 
-        <!-- Lado Direito (Login grudado na direita) -->
+        <!-- Lado Direito (40% Formulário de Login) -->
         <div class="right-side">
             <div class="login-box">
                 <div class="login-header">
@@ -28,7 +28,7 @@
                     <p>Informe seu e-mail institucional e senha para continuar.</p>
                 </div>
 
-                <form action="#">
+                <form action="pages/professor.html">
                     <!-- E-mail Input -->
                     <div class="form-group">
                         <label for="email">E-mail</label>
@@ -48,7 +48,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                             <input type="password" id="password" placeholder="Digite sua senha" required>
-                            <svg class="icon-right" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="icon-right" id="togglePassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" title="Mostrar/Ocultar senha">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
@@ -78,5 +78,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Alternância de visibilidade da senha
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.style.color = type === 'text' ? 'var(--color-primary)' : '';
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,12 +1,13 @@
 /* ==========================================================================
    Login CSS - Sistema de Reserva Escolar
-   Estrutura de Layout e Responsividade da Tela de Autenticação
+   Estrutura de Layout Fiel ao Mockup (Split-Screen com Fundo Branco)
    ========================================================================== */
 
 /* Regras específicas para o layout de login */
 body {
-    background-color: var(--color-bg-white);
-    overflow: hidden;
+    background-color: #ffffff;
+    overflow-x: hidden;
+    min-height: 100vh;
 }
 
 /* Container Principal Split-Screen */
@@ -14,67 +15,147 @@ body {
     display: flex;
     width: 100vw;
     height: 100vh;
+    min-height: 100vh;
     overflow: hidden;
+    background-color: #ffffff;
 }
 
-/* Lado Esquerdo - Imagem Institucional / Hero */
+/* ---------------------------------------------------------
+   1. Lado Esquerdo (60% da tela) - Painel Visual / Imagem
+   --------------------------------------------------------- */
 .left-side {
-    width: 50vw; /* Exatamente metade da tela */
+    flex: 0 0 60%;
+    width: 60%;
     height: 100vh;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
 }
 
 .left-side img.hero-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Preenche todo o espaço sem distorcer */
-    object-position: left center; /* Alinha a imagem no lado esquerdo */
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center center;
     display: block;
 }
 
-/* Lado Direito - Caixa do Formulário Centralizada */
+/* ---------------------------------------------------------
+   2. Lado Direito (40% da tela) - Formulário de Login
+   --------------------------------------------------------- */
 .right-side {
-    width: 50vw; /* Exatamente a outra metade da tela */
+    flex: 0 0 40%;
+    width: 40%;
     height: 100vh;
     display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
-    background-color: var(--color-bg-white);
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 40px 60px;
+    overflow-y: auto;
+    border-left: 1px solid #e8ecf2;
 }
 
 .login-box {
     width: 100%;
-    max-width: 420px; /* Limite de largura para manter ergonomia */
-    padding: 20px;
+    max-width: 410px;
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Cabeçalho do Login */
 .login-header h2 {
-    color: var(--color-text-primary);
-    font-size: 24px;
+    color: #0f172a;
+    font-size: 26px;
     font-weight: 700;
+    letter-spacing: -0.5px;
     margin-bottom: 8px;
 }
 
 .login-header p {
-    color: var(--color-text-secondary);
+    color: #475569;
     font-size: 14px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     line-height: 1.5;
 }
 
+/* Ícone de alternar visualização de senha */
+.input-wrapper .icon-right {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.input-wrapper .icon-right:hover {
+    color: var(--color-primary);
+}
+
 /* ---------------------------------------------------------
-   Responsividade (Telas menores / Mobile)
+   3. Responsividade
    --------------------------------------------------------- */
-@media (max-width: 900px) {
+/* Telas médias / Notebooks compactos (992px - 1200px) */
+@media (max-width: 1200px) {
+    .left-side {
+        flex: 0 0 55%;
+        width: 55%;
+        padding: 0;
+    }
+    
+    .right-side {
+        flex: 0 0 45%;
+        width: 45%;
+        padding: 32px 36px;
+    }
+}
+
+/* Tablets (768px - 991px) */
+@media (max-width: 991px) {
+    .left-side {
+        flex: 0 0 50%;
+        width: 50%;
+        padding: 0;
+    }
+    
+    .right-side {
+        flex: 0 0 50%;
+        width: 50%;
+        padding: 28px 24px;
+    }
+}
+
+/* Celulares / Telas Pequenas (até 768px) */
+@media (max-width: 768px) {
     .container {
         flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
     }
 
     .left-side {
-        display: none;
+        flex: none;
+        width: 100vw;
+        height: 240px;
+        padding: 0;
     }
 
     .right-side {
+        flex: 1;
         width: 100vw;
+        height: auto;
+        min-height: calc(100vh - 240px);
+        padding: 32px 24px 48px;
+        border-left: none;
+        border-top: 1px solid #e8ecf2;
+    }
+
+    .login-box {
+        max-width: 400px;
     }
 }
+
