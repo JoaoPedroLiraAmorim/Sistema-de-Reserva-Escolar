@@ -30,21 +30,6 @@
                 <span class="teacher-greeting">Olá, Prof. Marcelo</span>
             </div>
 
-            <!-- Navegação Desktop -->
-            <nav class="teacher-top-nav-links">
-                <a href="professor.html" class="teacher-nav-link active">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    <span>Agenda</span>
-                </a>
-                <a href="#" class="teacher-nav-link">
-                    <span class="material-symbols-outlined">devices</span>
-                    <span>Equipamentos</span>
-                </a>
-                <a href="#" class="teacher-nav-link">
-                    <span class="material-symbols-outlined">history_edu</span>
-                    <span>Minhas Reservas</span>
-                </a>
-            </nav>
 
             <!-- Ações e Perfil do Usuário -->
             <div class="teacher-user-actions">
@@ -63,33 +48,31 @@
 
         <!-- Conteúdo Principal -->
         <main class="teacher-main-content">
-            <!-- Banner de Reserva Ativa -->
-            <section class="active-reservation-banner">
-                <div class="banner-lead">
-                    <div class="banner-icon-box">
-                        <span class="material-symbols-outlined">timer</span>
-                    </div>
-                    <div class="banner-text">
-                        <h2>Reserva em andamento</h2>
-                        <p>Você tem uma reserva ativa agora — Sala 12, 20 notebooks Dell</p>
-                    </div>
-                </div>
-                <button type="button" class="btn-banner-action">
-                    <span>Registrar reserva atual</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">edit_document</span>
-                </button>
-            </section>
-
             <!-- Cabeçalho da Agenda e Ações -->
             <section class="agenda-action-header">
                 <div class="agenda-action-title">
                     <h1>Agenda de Reservas</h1>
                     <p>Visualize e gerencie os equipamentos disponíveis.</p>
                 </div>
-                <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
-                    <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
-                    <span>Nova reserva</span>
-                </button>
+                <div class="agenda-header-right">
+                    <!-- Alerta sutil de reserva em andamento -->
+                    <div class="active-res-chip">
+                        <span class="chip-dot"></span>
+                        <span class="material-symbols-outlined chip-icon">timer</span>
+                        <div class="chip-body">
+                            <span class="chip-label">Reserva em andamento</span>
+                            <span class="chip-text">Sala 12 &mdash; 20 notebooks Dell</span>
+                        </div>
+                        <button type="button" class="chip-action-btn" id="btnOpenRegisterModal" onclick="openModal('register-usage-modal')" title="Registrar uso dos equipamentos da reserva atual">
+                            <span class="material-symbols-outlined">edit_document</span>
+                            <span>Registrar aula</span>
+                        </button>
+                    </div>
+                    <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                        <span>Nova reserva</span>
+                    </button>
+                </div>
             </section>
 
             <!-- Barra de Controles e Filtros -->
@@ -143,9 +126,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- 07:00 -->
+                            <!-- 07:00 – 07:50 -->
                             <tr>
-                                <td class="time-col-cell">07:00</td>
+                                <td class="time-col-cell">
+                                    <span class="time-start">07:00</span>
+                                    <span class="time-end">07:50</span>
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td class="today-cell"></td>
@@ -153,9 +139,12 @@
                                 <td></td>
                             </tr>
 
-                            <!-- 07:50 -->
+                            <!-- 07:50 – 08:40 -->
                             <tr>
-                                <td class="time-col-cell">07:50</td>
+                                <td class="time-col-cell">
+                                    <span class="time-start">07:50</span>
+                                    <span class="time-end">08:40</span>
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td class="today-cell"></td>
@@ -163,9 +152,12 @@
                                 <td></td>
                             </tr>
 
-                            <!-- 08:40 -->
+                            <!-- 08:40 – 09:30 -->
                             <tr>
-                                <td class="time-col-cell">08:40</td>
+                                <td class="time-col-cell">
+                                    <span class="time-start">08:40</span>
+                                    <span class="time-end">09:30</span>
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td class="today-cell">
@@ -192,9 +184,25 @@
                                 <td></td>
                             </tr>
 
-                            <!-- Intervalo (09:30) -->
+                            <!-- 09:30 – 10:20 -->
+                            <tr>
+                                <td class="time-col-cell">
+                                    <span class="time-start">09:30</span>
+                                    <span class="time-end">10:20</span>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td class="today-cell"></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <!-- Intervalo (10:20 – 10:35) -->
                             <tr class="interval-row">
-                                <td class="time-col-cell">09:30</td>
+                                <td class="time-col-cell">
+                                    <span class="time-start">10:20</span>
+                                    <span class="time-end">10:35</span>
+                                </td>
                                 <td colspan="5">
                                     <div class="interval-label">
                                         <span class="material-symbols-outlined">coffee</span>
@@ -203,9 +211,12 @@
                                 </td>
                             </tr>
 
-                            <!-- 09:50 -->
+                            <!-- 10:35 – 11:25 -->
                             <tr>
-                                <td class="time-col-cell">09:50</td>
+                                <td class="time-col-cell">
+                                    <span class="time-start">10:35</span>
+                                    <span class="time-end">11:25</span>
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td class="today-cell"></td>
@@ -213,19 +224,12 @@
                                 <td></td>
                             </tr>
 
-                            <!-- 10:40 -->
+                            <!-- 11:25 – 12:15 -->
                             <tr>
-                                <td class="time-col-cell">10:40</td>
-                                <td></td>
-                                <td></td>
-                                <td class="today-cell"></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-
-                            <!-- 11:30 -->
-                            <tr>
-                                <td class="time-col-cell">11:30</td>
+                                <td class="time-col-cell">
+                                    <span class="time-start">11:25</span>
+                                    <span class="time-end">12:15</span>
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td class="today-cell"></td>
@@ -290,16 +294,14 @@
 
                     <div class="form-group" style="margin-bottom: 0;">
                         <label for="res-quantity">Quantidade de notebooks</label>
-                        <div class="select-wrapper">
-                            <select id="res-quantity" required>
-                                <option value="">Selecione a quantidade</option>
-                                <option value="10">10 notebooks</option>
-                                <option value="15">15 notebooks</option>
-                                <option value="20">20 notebooks</option>
-                                <option value="30">30 notebooks</option>
-                            </select>
-                            <span class="material-symbols-outlined select-icon">expand_more</span>
-                        </div>
+                        <input 
+                            type="number" 
+                            id="res-quantity" 
+                            class="form-control" 
+                            placeholder="Digite a quantidade (ex: 24)" 
+                            min="1" 
+                            required
+                        >
                     </div>
 
                     <div class="form-row">
@@ -307,13 +309,13 @@
                             <label for="res-start">Horário de início</label>
                             <div class="select-wrapper">
                                 <select id="res-start" required>
-                                    <option value="">Selecione</option>
+                                    <option value="">Selecione o horário</option>
                                     <option value="07:00">07:00</option>
                                     <option value="07:50">07:50</option>
                                     <option value="08:40">08:40</option>
-                                    <option value="09:50">09:50</option>
-                                    <option value="10:40">10:40</option>
-                                    <option value="11:30">11:30</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:35">10:35</option>
+                                    <option value="11:25">11:25</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
@@ -323,13 +325,13 @@
                             <label for="res-end">Horário de fim</label>
                             <div class="select-wrapper">
                                 <select id="res-end" required>
-                                    <option value="">Selecione</option>
+                                    <option value="">Selecione o horário</option>
                                     <option value="07:50">07:50</option>
                                     <option value="08:40">08:40</option>
                                     <option value="09:30">09:30</option>
-                                    <option value="10:40">10:40</option>
-                                    <option value="11:30">11:30</option>
-                                    <option value="12:20">12:20</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:25">11:25</option>
+                                    <option value="12:15">12:15</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
@@ -357,6 +359,78 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal: Registrar Uso de Equipamentos -->
+    <div class="modal-backdrop hidden" id="register-usage-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div class="reg-modal-title">
+                    <div class="reg-modal-icon">
+                        <span class="material-symbols-outlined">edit_document</span>
+                    </div>
+                    <div>
+                        <h3>Registrar uso dos equipamentos</h3>
+                        <p>Informe a etiqueta e o aluno para cada notebook retirado.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" onclick="closeModal('register-usage-modal')" aria-label="Fechar modal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Resumo da Reserva -->
+            <div class="reg-reservation-summary">
+                <div class="reg-summary-item">
+                    <span class="material-symbols-outlined">laptop</span>
+                    <span id="reg-summary-notebooks">20 notebooks Dell</span>
+                </div>
+                <div class="reg-summary-divider"></div>
+                <div class="reg-summary-item">
+                    <span class="material-symbols-outlined">location_on</span>
+                    <span>Sala 12</span>
+                </div>
+                <div class="reg-summary-divider"></div>
+                <div class="reg-summary-item">
+                    <span class="material-symbols-outlined">schedule</span>
+                    <span>08:40 – 09:30</span>
+                </div>
+                <div class="reg-counter-badge">
+                    <span id="reg-count">0</span>/<span id="reg-total">20</span> registrados
+                </div>
+            </div>
+
+            <form id="register-usage-form" onsubmit="submitUsageRegistration(event)">
+                <div class="modal-body reg-modal-body" id="reg-rows-container">
+                    <!-- Cabeçalho das colunas -->
+                    <div class="reg-row-header">
+                        <span class="reg-col-tag">Nº da Etiqueta</span>
+                        <span class="reg-col-student">Nome do Aluno</span>
+                        <span class="reg-col-remove"></span>
+                    </div>
+
+                    <!-- Linhas geradas dinamicamente pelo JS -->
+                    <div id="reg-rows-list"></div>
+
+                    <!-- Botão adicionar linha -->
+                    <button type="button" class="btn-add-reg-row" id="btnAddRegRow" onclick="addRegistrationRow()">
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Adicionar notebook</span>
+                    </button>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('register-usage-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary btn-register-submit" id="btnSubmitUsage">
+                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                        <span>Confirmar registro</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <!-- Scripts Modularizados -->
     <script src="../js/main.js"></script>

@@ -21,11 +21,11 @@
     --color-border: #cbd5e1;
     --color-border-light: #e2e8f0;
     --color-border-subtle: #f1f5f9;
-    --color-bg-white: #ffffff;
-    --color-bg-subtle: #f8fafc;
-    --color-bg-page: #f7f9ff;
-    --color-surface-low: #f1f4fa;
-    --color-surface-container: #ebeef4;
+    --color-bg-white: #fafbfd;
+    --color-bg-subtle: #f4f6fb;
+    --color-bg-page: #eef1f8;
+    --color-surface-low: #edf0f7;
+    --color-surface-container: #e5e9f2;
     --color-surface-variant: #dfe3e8;
 
     /* Sidebar / Navegação */
