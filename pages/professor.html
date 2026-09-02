@@ -131,7 +131,7 @@
             <div class="modal-header">
                 <div>
                     <h3>Criar nova reserva</h3>
-                    <p>Selecione os equipamentos e o horário desejado.</p>
+                    <p>Selecione a data, equipamentos, marca e o horário desejado.</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar modal">
                     <span class="material-symbols-outlined">close</span>
@@ -140,37 +140,19 @@
 
             <form id="new-reservation-form">
                 <div class="modal-body">
-                    <!-- Data -->
+                    <!-- Data com mini-calendário -->
                     <div class="form-group">
-                        <label for="res-date">Data</label>
-                        <input type="date" id="res-date" class="form-control" required>
+                        <label for="res-date">Data da reserva</label>
+                        <input type="date" id="res-date" class="form-control" required style="cursor: pointer;">
                     </div>
 
-                    <!-- Turma -->
-                    <div class="form-group">
-                        <label for="res-turma">Turma</label>
-                        <input type="text" id="res-turma" class="form-control" placeholder="Ex: 3A Info, 2B Admin" required>
-                    </div>
-
+                    <!-- Horários Dinâmicos por Turno -->
                     <div class="form-row">
                         <div class="form-col form-group">
                             <label for="res-start">Horário de início</label>
                             <div class="select-wrapper">
                                 <select id="res-start" required>
-                                    <option value="">Selecione o horário</option>
-                                    <option value="07:00">07:00</option>
-                                    <option value="07:50">07:50</option>
-                                    <option value="08:40">08:40</option>
-                                    <option value="09:30">09:30</option>
-                                    <option value="10:35">10:35</option>
-                                    <option value="11:25">11:25</option>
-                                    <option value="13:00">13:00</option>
-                                    <option value="13:50">13:50</option>
-                                    <option value="14:40">14:40</option>
-                                    <option value="15:30">15:30</option>
-                                    <option value="19:00">19:00</option>
-                                    <option value="19:50">19:50</option>
-                                    <option value="20:40">20:40</option>
+                                    <option value="">Selecione o início</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
@@ -179,20 +161,7 @@
                             <label for="res-end">Horário de fim</label>
                             <div class="select-wrapper">
                                 <select id="res-end" required>
-                                    <option value="">Selecione o horário</option>
-                                    <option value="07:50">07:50</option>
-                                    <option value="08:40">08:40</option>
-                                    <option value="09:30">09:30</option>
-                                    <option value="10:20">10:20</option>
-                                    <option value="11:25">11:25</option>
-                                    <option value="12:15">12:15</option>
-                                    <option value="13:50">13:50</option>
-                                    <option value="14:40">14:40</option>
-                                    <option value="15:30">15:30</option>
-                                    <option value="16:20">16:20</option>
-                                    <option value="19:50">19:50</option>
-                                    <option value="20:40">20:40</option>
-                                    <option value="21:30">21:30</option>
+                                    <option value="">Selecione o fim</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
@@ -201,7 +170,7 @@
 
                     <!-- Sala -->
                     <div class="form-group">
-                        <label for="res-room">Reservar sala</label>
+                        <label for="res-room">Reservar sala (opcional)</label>
                         <div class="select-wrapper">
                             <select id="res-room">
                                 <option value="">Sem sala (somente notebooks)</option>
@@ -210,12 +179,24 @@
                         </div>
                     </div>
 
-                    <!-- Notebooks -->
-                    <div class="form-group">
-                        <label for="res-quantity">Quantidade de notebooks</label>
-                        <input type="number" id="res-quantity" class="form-control" placeholder="0 = sem notebooks" min="0">
-                        <p class="avail-info" id="avail-info"></p>
+                    <!-- Marca e Quantidade de Notebooks -->
+                    <div class="form-row">
+                        <div class="form-col form-group">
+                            <label for="res-brand">Marca do notebook</label>
+                            <div class="select-wrapper">
+                                <select id="res-brand">
+                                    <option value="">Qualquer marca</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="form-col form-group">
+                            <label for="res-quantity">Quantidade</label>
+                            <input type="number" id="res-quantity" class="form-control" placeholder="0 = sem notebooks" min="0">
+                        </div>
                     </div>
+
+                    <p class="avail-info" id="avail-info"></p>
 
                     <!-- Mensagem de erro -->
                     <div id="res-error" class="login-error-msg"></div>

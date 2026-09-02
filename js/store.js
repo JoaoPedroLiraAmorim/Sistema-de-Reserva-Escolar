@@ -216,6 +216,22 @@
     // ─────────────────────────────────────────────────────────────
     function getNotebooks() { return load(KEYS.NOTEBOOKS) || []; }
 
+    
+    function getBrands() {
+        const nbs = getNotebooks();
+        const brands = [];
+        nbs.forEach(n => {
+            if (n.marca && !brands.includes(n.marca)) brands.push(n.marca);
+        });
+        return brands;
+    }
+
+    function getDisponivelByBrand(marca) {
+        if (!marca || marca === 'Qualquer marca' || marca === '') return getTotalDisponivel();
+        const nb = getNotebooks().find(n => n.marca.toLowerCase() === marca.toLowerCase());
+        return nb ? nb.funcionando : 0;
+    }
+
     function getTotalDisponivel() {
         return getNotebooks().reduce((acc, n) => acc + n.funcionando, 0);
     }
@@ -450,7 +466,7 @@
         // Salas
         getRooms, getActiveRooms, toggleRoom, addRoom,
         // Notebooks
-        getNotebooks, getTotalDisponivel, addNotebooks, updateNotebookStatus,
+        getNotebooks, getTotalDisponivel, getBrands, getDisponivelByBrand, addNotebooks, updateNotebookStatus,
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts,
