@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistema de Agendamento</title>
+    <title>Login - EduLab Reserve</title>
+    <meta name="description" content="Sistema de reserva de laboratórios e notebooks escolares. Faça login para acessar.">
     <!-- Fonte do Google Fonts (Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +29,7 @@
                     <p>Informe seu e-mail institucional e senha para continuar.</p>
                 </div>
 
-                <form action="pages/professor.html">
+                <form id="login-form" novalidate>
                     <!-- E-mail Input -->
                     <div class="form-group">
                         <label for="email">E-mail</label>
@@ -36,7 +37,7 @@
                             <svg class="icon-left" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <input type="email" id="email" placeholder="seu@email.com" required>
+                            <input type="email" id="email" placeholder="seu@email.com" autocomplete="username" required>
                         </div>
                     </div>
 
@@ -47,7 +48,7 @@
                             <svg class="icon-left" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            <input type="password" id="password" placeholder="Digite sua senha" required>
+                            <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required>
                             <svg class="icon-right" id="togglePassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" title="Mostrar/Ocultar senha">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -55,21 +56,26 @@
                         </div>
                     </div>
 
-                    <a href="#" class="forgot-password">Esqueceu sua senha?</a>
+                    <!-- Mensagem de Erro -->
+                    <div id="login-error" class="login-error-msg" style="display:none;"></div>
 
-                    <button type="submit" class="btn-primary">Entrar</button>
+                    <button type="submit" class="btn-primary" id="btn-login">Entrar</button>
 
-                    <div class="divider">ou</div>
-
-                    <button type="button" class="btn-google">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17.64 9.20455C17.64 8.56636 17.5827 7.95273 17.4764 7.36364H9V10.845H13.8436C13.635 11.97 13.0009 12.9232 12.0477 13.5614V15.8195H14.9564C16.6582 14.2527 17.64 11.9455 17.64 9.20455Z" fill="#4285F4"/>
-                            <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5614C11.2418 14.1014 10.2109 14.4205 9 14.4205C6.65591 14.4205 4.67182 12.8373 3.96409 10.71H0.957275V13.0418C2.43818 15.9832 5.48182 18 9 18Z" fill="#34A853"/>
-                            <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59318 3.68182 9C3.68182 8.40682 3.78409 7.83 3.96409 7.29H0.957275V9.62182C-0.319091 11.3836 -0.319091 6.61636 0.957275 9.62182L3.96409 10.71Z" fill="#FBBC05"/>
-                            <path d="M9 3.57955C10.3214 3.57955 11.5077 4.03364 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01682 0.957275 4.95818L3.96409 7.29C4.67182 5.16273 6.65591 3.57955 9 3.57955Z" fill="#EA4335"/>
-                        </svg>
-                        Entrar com Google
-                    </button>
+                    <!-- Credenciais de demonstração -->
+                    <div class="demo-credentials">
+                        <p class="demo-title">Credenciais de demonstração:</p>
+                        <div class="demo-pills">
+                            <button type="button" class="demo-pill" data-email="professor@demo.com" data-pass="123456">
+                                <span>👨‍🏫 Professor</span>
+                            </button>
+                            <button type="button" class="demo-pill" data-email="proatec@demo.com" data-pass="123456">
+                                <span>🖥️ PROATEC</span>
+                            </button>
+                            <button type="button" class="demo-pill" data-email="coordenacao@demo.com" data-pass="123456">
+                                <span>🏫 Coordenação</span>
+                            </button>
+                        </div>
+                    </div>
                 </form>
 
                 <div class="footer-text">
@@ -79,8 +85,19 @@
         </div>
     </div>
 
+    <!-- Store (dados e lógica) -->
+    <script src="js/store.js"></script>
     <script>
-        // Alternância de visibilidade da senha
+        // Se já está logado, redirecionar direto
+        (function () {
+            const session = ERS.getSession();
+            if (session) {
+                const map = { professor: 'pages/professor.html', proatec: 'pages/proatec.html', coordenacao: 'pages/proatec.html' };
+                window.location.href = map[session.role] || 'pages/professor.html';
+            }
+        })();
+
+        // Toggle de senha
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
         if (togglePassword && passwordInput) {
@@ -90,6 +107,45 @@
                 togglePassword.style.color = type === 'text' ? 'var(--color-primary)' : '';
             });
         }
+
+        // Preencher credenciais ao clicar nas pills de demonstração
+        document.querySelectorAll('.demo-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.getElementById('email').value = pill.dataset.email;
+                document.getElementById('password').value = pill.dataset.pass;
+                document.getElementById('login-error').style.display = 'none';
+            });
+        });
+
+        // Submit do formulário de login
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+            const btnLogin = document.getElementById('btn-login');
+
+            errorEl.style.display = 'none';
+            btnLogin.textContent = 'Entrando...';
+            btnLogin.disabled = true;
+
+            setTimeout(() => {
+                const result = ERS.login(email, password);
+                if (result.ok) {
+                    const map = {
+                        professor:   'pages/professor.html',
+                        proatec:     'pages/proatec.html',
+                        coordenacao: 'pages/proatec.html',
+                    };
+                    window.location.href = map[result.user.role] || 'pages/professor.html';
+                } else {
+                    errorEl.textContent = result.message;
+                    errorEl.style.display = 'block';
+                    btnLogin.textContent = 'Entrar';
+                    btnLogin.disabled = false;
+                }
+            }, 400); // Pequeno delay para feedback visual
+        });
     </script>
 </body>
 </html>

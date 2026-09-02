@@ -159,3 +159,68 @@ body {
     }
 }
 
+/* ---------------------------------------------------------
+   4. Mensagem de Erro de Login
+   --------------------------------------------------------- */
+.login-error-msg {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+/* ---------------------------------------------------------
+   5. Credenciais de Demonstração
+   --------------------------------------------------------- */
+.demo-credentials {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.demo-title {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.demo-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.demo-pill {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-weight: 500;
+}
+
+.demo-pill:hover {
+    background: #e2e8f0;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.demo-pill span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

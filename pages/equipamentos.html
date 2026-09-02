@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipamentos - PROATEC</title>
+    <meta name="description" content="Gestão de notebooks e equipamentos do laboratório PROATEC.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/proatec.css">
+    <style>
+        .eq-table-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; overflow: hidden; }
+        .eq-table { width: 100%; border-collapse: collapse; }
+        .eq-table th { background: var(--color-bg); padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--color-text-secondary); text-align: left; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--color-border); }
+        .eq-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--color-border); }
+        .eq-table tr:last-child td { border-bottom: none; }
+        .eq-table tr:hover td { background: var(--color-bg); }
+        .eq-brand-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+        .eq-brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+        .eq-stat { text-align: center; }
+        .eq-stat-num { font-size: 16px; font-weight: 700; color: var(--color-text-primary); }
+        .eq-stat-sub { font-size: 11px; color: var(--color-text-muted); }
+        .stat-green { color: #16a34a; }
+        .stat-orange { color: #d97706; }
+        .stat-red { color: #dc2626; }
+        .eq-actions { display: flex; gap: 6px; }
+        .btn-add-eq, .btn-rm-eq {
+            width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--color-border);
+            background: var(--color-bg); cursor: pointer; font-size: 16px; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .btn-add-eq:hover { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
+        .btn-rm-eq:hover { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
+        .eq-summary-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+        .eq-summary-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 16px 20px; flex: 1; min-width: 140px; }
+        .eq-summary-card h4 { font-size: 12px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .eq-summary-card .num { font-size: 28px; font-weight: 700; color: var(--color-text-primary); }
+        .eq-summary-card .num.green { color: #16a34a; }
+        .eq-summary-card .num.orange { color: #d97706; }
+        .eq-summary-card .num.red { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">
+                    <span class="material-symbols-outlined">laptop_mac</span>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h1>PROATEC</h1>
+                    <p>Gestão de Laboratório</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="proatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Início</span>
+                </a>
+                <a href="agendaProatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span>Reservas</span>
+                </a>
+                <a href="equipamentos.html" class="nav-link active">
+                    <span class="material-symbols-outlined">computer</span>
+                    <span>Equipamentos</span>
+                </a>
+                <a href="salas.html" class="nav-link">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                    <span>Salas</span>
+                </a>
+                <a href="relatorio.html" class="nav-link">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>Relatórios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">J</div>
+                    <div class="user-info">
+                        <p class="user-name">João Almeida</p>
+                        <p class="user-role">Coordenador PROATEC</p>
+                    </div>
+                </div>
+                <div class="sidebar-subnav">
+                    <a href="../index.html" class="nav-link logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Principal -->
+        <div class="main-wrapper">
+            <main class="dashboard-content">
+                <!-- Cabeçalho -->
+                <section class="dashboard-header">
+                    <div class="header-greeting">
+                        <div class="header-top-row">
+                            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
+                                <span class="material-symbols-outlined">menu</span>
+                            </button>
+                            <p class="date-badge">—</p>
+                        </div>
+                        <h2 style="font-size:22px;">Gestão de Equipamentos</h2>
+                        <p>Controle o inventário de notebooks por marca e situação.</p>
+                    </div>
+                    <button type="button" class="btn-primary" id="btnAddEquipment"
+                        style="height:fit-content; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; width:auto;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+                        Cadastrar notebooks
+                    </button>
+                </section>
+
+                <!-- Cards de resumo -->
+                <div class="eq-summary-row" id="eq-summary"></div>
+
+                <!-- Tabela de Notebooks -->
+                <div class="eq-table-card">
+                    <table class="eq-table" id="eq-table">
+                        <thead>
+                            <tr>
+                                <th>Marca</th>
+                                <th class="eq-stat">Total</th>
+                                <th class="eq-stat">Funcionando</th>
+                                <th class="eq-stat">Com defeito</th>
+                                <th class="eq-stat">Quebrados</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eq-tbody"></tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal: Cadastrar Notebook -->
+    <div class="modal-backdrop hidden" id="add-eq-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>Cadastrar Notebooks</h3>
+                    <p style="font-size:13px; color:var(--color-text-secondary);">Adicione unidades ao inventário.</p>
+                </div>
+                <button type="button" class="btn-close" onclick="closeModal('add-eq-modal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="add-eq-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="add-brand">Marca</label>
+                        <div class="select-wrapper">
+                            <select id="add-brand" required>
+                                <option value="">Selecione a marca</option>
+                                <option value="Dell">Dell</option>
+                                <option value="Lenovo">Lenovo</option>
+                                <option value="Acer">Acer</option>
+                                <option value="Positivo">Positivo</option>
+                                <option value="Outro">Outro fabricante</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="add-qty">Quantidade</label>
+                        <input type="number" id="add-qty" class="form-control" min="1" placeholder="Ex: 5" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('add-eq-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width:auto; padding:10px 22px;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../js/store.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+    let currentSession = null;
+    const BRAND_COLORS = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
+        if (!currentSession) return;
+
+        AUTH.renderUserInfo(currentSession);
+        AUTH.setupLogout();
+        AUTH.adaptSidebarByRole(currentSession);
+
+        document.getElementById('btnAddEquipment').addEventListener('click', () => openModal('add-eq-modal'));
+        document.getElementById('add-eq-form').addEventListener('submit', handleAddEquipment);
+
+        renderTable();
+    });
+
+    function renderTable() {
+        const notebooks = ERS.getNotebooks();
+
+        // Summary cards
+        const total = notebooks.reduce((a, n) => a + n.total, 0);
+        const func = notebooks.reduce((a, n) => a + n.funcionando, 0);
+        const def = notebooks.reduce((a, n) => a + n.defeito, 0);
+        const qbr = notebooks.reduce((a, n) => a + n.quebrado, 0);
+
+        document.getElementById('eq-summary').innerHTML = `
+            <div class="eq-summary-card"><h4>Total cadastrado</h4><div class="num">${total}</div></div>
+            <div class="eq-summary-card"><h4>Funcionando</h4><div class="num green">${func}</div></div>
+            <div class="eq-summary-card"><h4>Com defeito</h4><div class="num orange">${def}</div></div>
+            <div class="eq-summary-card"><h4>Quebrados</h4><div class="num red">${qbr}</div></div>
+        `;
+
+        // Table rows
+        const tbody = document.getElementById('eq-tbody');
+        tbody.innerHTML = notebooks.map((nb, i) => `
+            <tr>
+                <td>
+                    <div class="eq-brand-pill">
+                        <div class="eq-brand-dot" style="background:${BRAND_COLORS[i % BRAND_COLORS.length]}"></div>
+                        <strong>${nb.marca}</strong>
+                    </div>
+                </td>
+                <td class="eq-stat"><span class="eq-stat-num">${nb.total}</span></td>
+                <td class="eq-stat">
+                    <span class="eq-stat-num stat-green">${nb.funcionando}</span>
+                    <div class="eq-actions" style="justify-content:center; margin-top:4px;">
+                        <button class="btn-add-eq" onclick="adjustNb('${nb.id}','funcionando',1)" title="Adicionar">+</button>
+                        <button class="btn-rm-eq" onclick="adjustNb('${nb.id}','funcionando',-1)" title="Remover">−</button>
+                    </div>
+                </td>
+                <td class="eq-stat">
+                    <span class="eq-stat-num stat-orange">${nb.defeito}</span>
+                    <div class="eq-actions" style="justify-content:center; margin-top:4px;">
+                        <button class="btn-add-eq" onclick="adjustNb('${nb.id}','defeito',1)" title="Adicionar">+</button>
+                        <button class="btn-rm-eq" onclick="adjustNb('${nb.id}','defeito',-1)" title="Remover">−</button>
+                    </div>
+                </td>
+                <td class="eq-stat">
+                    <span class="eq-stat-num stat-red">${nb.quebrado}</span>
+                    <div class="eq-actions" style="justify-content:center; margin-top:4px;">
+                        <button class="btn-add-eq" onclick="adjustNb('${nb.id}','quebrado',1)" title="Adicionar">+</button>
+                        <button class="btn-rm-eq" onclick="adjustNb('${nb.id}','quebrado',-1)" title="Remover">−</button>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn-add-eq" onclick="document.getElementById('add-brand').value='${nb.marca}'; openModal('add-eq-modal');" title="Adicionar mais desta marca" style="width:auto; padding:4px 10px; font-size:12px;">+ Adicionar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function adjustNb(id, field, delta) {
+        const result = ERS.updateNotebookStatus(id, field, delta);
+        if (!result.ok) {
+            ERS.showToast(result.message, 'error');
+            return;
+        }
+        renderTable();
+    }
+
+    function handleAddEquipment(e) {
+        e.preventDefault();
+        const brand = document.getElementById('add-brand').value;
+        const qty = parseInt(document.getElementById('add-qty').value) || 0;
+        if (qty < 1) return;
+
+        ERS.addNotebooks(brand, qty);
+        closeModal('add-eq-modal');
+        document.getElementById('add-eq-form').reset();
+        renderTable();
+        ERS.showToast(`${qty} notebook(s) ${brand} cadastrado(s) com sucesso!`, 'success');
+    }
+    </script>
+</body>
+</html>

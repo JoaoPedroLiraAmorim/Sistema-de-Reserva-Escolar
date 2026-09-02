@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloqueios - Coordenação</title>
+    <meta name="description" content="Gestão de bloqueios de períodos pelo setor de Coordenação.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/proatec.css">
+    <style>
+        .block-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+        .block-item {
+            background: var(--color-surface); border: 1px solid #fecaca;
+            border-left: 4px solid #ef4444; border-radius: 12px; padding: 16px 20px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .block-icon { width: 40px; height: 40px; background: #fef2f2; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .block-icon span { color: #ef4444; font-size: 20px; }
+        .block-body { flex: 1; }
+        .block-title { font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; }
+        .block-meta { font-size: 13px; color: var(--color-text-secondary); display: flex; flex-wrap: wrap; gap: 10px; }
+        .block-meta-item { display: flex; align-items: center; gap: 4px; }
+        .block-meta-item span.material-symbols-outlined { font-size: 14px; color: var(--color-text-muted); }
+        .btn-delete-block {
+            background: none; border: 1px solid #fecaca; color: #dc2626;
+            border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit;
+            transition: all 0.15s; display: flex; align-items: center; gap: 4px; white-space: nowrap;
+        }
+        .btn-delete-block:hover { background: #fef2f2; }
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--color-text-muted); }
+        .empty-state .material-symbols-outlined { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.4; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar (Coordenação) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">
+                    <span class="material-symbols-outlined">laptop_mac</span>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h1>EduLab</h1>
+                    <p>Coordenação</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="proatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Início</span>
+                </a>
+                <a href="agendaProatec.html" class="nav-link">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span>Reservas</span>
+                </a>
+                <a href="equipamentos.html" class="nav-link">
+                    <span class="material-symbols-outlined">computer</span>
+                    <span>Equipamentos</span>
+                </a>
+                <a href="salas.html" class="nav-link">
+                    <span class="material-symbols-outlined">meeting_room</span>
+                    <span>Salas</span>
+                </a>
+                <a href="relatorio.html" class="nav-link">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>Relatórios</span>
+                </a>
+                <a href="bloqueios.html" class="nav-link active" id="nav-bloqueios">
+                    <span class="material-symbols-outlined">block</span>
+                    <span>Bloqueios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">S</div>
+                    <div class="user-info">
+                        <p class="user-name">Dra. Sandra Lima</p>
+                        <p class="user-role">Coordenação</p>
+                    </div>
+                </div>
+                <div class="sidebar-subnav">
+                    <a href="../index.html" class="nav-link logout">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Sair</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Área Principal -->
+        <div class="main-wrapper">
+            <main class="dashboard-content">
+                <!-- Cabeçalho -->
+                <section class="dashboard-header">
+                    <div class="header-greeting">
+                        <div class="header-top-row">
+                            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
+                                <span class="material-symbols-outlined">menu</span>
+                            </button>
+                            <p class="date-badge">—</p>
+                        </div>
+                        <h2 style="font-size:22px;">Bloqueios de Períodos</h2>
+                        <p>Crie bloqueios para impedir reservas em datas e horários específicos.</p>
+                    </div>
+                    <button type="button" class="btn-primary" id="btnOpenBlock"
+                        style="height:fit-content; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; width:auto; background:#dc2626; border-color:#dc2626;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">block</span>
+                        Criar bloqueio
+                    </button>
+                </section>
+
+                <div class="block-list" id="block-list"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal: Criar Bloqueio -->
+    <div class="modal-backdrop hidden" id="block-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>Criar Bloqueio</h3>
+                    <p style="font-size:13px; color:var(--color-text-secondary);">Impede novas reservas no período informado.</p>
+                </div>
+                <button type="button" class="btn-close" onclick="closeModal('block-modal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="block-form">
+                <div class="modal-body">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="blk-date">Data</label>
+                        <input type="date" id="blk-date" class="form-control" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col form-group" style="margin-bottom:0;">
+                            <label for="blk-start">Início</label>
+                            <div class="select-wrapper">
+                                <select id="blk-start" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:00">07:00</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:10">11:10</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="13:50">13:50</option>
+                                    <option value="14:40">14:40</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="19:00">19:00</option>
+                                    <option value="19:50">19:50</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="form-col form-group" style="margin-bottom:0;">
+                            <label for="blk-end">Fim</label>
+                            <div class="select-wrapper">
+                                <select id="blk-end" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:10">11:10</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:50">13:50</option>
+                                    <option value="14:40">14:40</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="16:20">16:20</option>
+                                    <option value="19:50">19:50</option>
+                                    <option value="20:40">20:40</option>
+                                    <option value="21:30">21:30</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="blk-motivo">Motivo</label>
+                        <input type="text" id="blk-motivo" class="form-control" placeholder="Ex: Manutenção preventiva dos equipamentos" required>
+                    </div>
+                    <div id="blk-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('block-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="background:#dc2626; border-color:#dc2626; width:auto; padding:10px 22px;">
+                        <span class="material-symbols-outlined" style="font-size:18px;">block</span>
+                        Criar bloqueio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="../js/store.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+    let currentSession = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentSession = AUTH.requireAuth(['coordenacao']);
+        if (!currentSession) return;
+
+        AUTH.renderUserInfo(currentSession);
+        AUTH.setupLogout();
+
+        document.getElementById('btnOpenBlock').addEventListener('click', () => {
+            document.getElementById('blk-date').value = ERS.today();
+            document.getElementById('blk-error').style.display = 'none';
+            openModal('block-modal');
+        });
+
+        document.getElementById('block-form').addEventListener('submit', handleCreateBlock);
+
+        renderBlocks();
+    });
+
+    function renderBlocks() {
+        const blocks = ERS.getBlocks().sort((a, b) => a.data.localeCompare(b.data) || a.inicio.localeCompare(b.inicio));
+        const list = document.getElementById('block-list');
+
+        if (blocks.length === 0) {
+            list.innerHTML = `
+                <div class="empty-state">
+                    <span class="material-symbols-outlined">event_available</span>
+                    <p>Nenhum bloqueio cadastrado.</p>
+                    <p style="font-size:12px; margin-top:4px;">Crie um bloqueio para impedir reservas em datas específicas.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = blocks.map(b => `
+            <div class="block-item">
+                <div class="block-icon">
+                    <span class="material-symbols-outlined">block</span>
+                </div>
+                <div class="block-body">
+                    <div class="block-title">${b.motivo}</div>
+                    <div class="block-meta">
+                        <span class="block-meta-item">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            ${ERS.formatDate(b.data)}
+                        </span>
+                        <span class="block-meta-item">
+                            <span class="material-symbols-outlined">schedule</span>
+                            ${b.inicio} – ${b.fim}
+                        </span>
+                        <span class="block-meta-item">
+                            <span class="material-symbols-outlined">person</span>
+                            ${b.criadoPor}
+                        </span>
+                    </div>
+                </div>
+                <button class="btn-delete-block" onclick="deleteBlock('${b.id}')">
+                    <span class="material-symbols-outlined" style="font-size:14px;">delete</span>
+                    Excluir
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function deleteBlock(id) {
+        if (!confirm('Remover este bloqueio? Reservas neste período voltarão a ser permitidas.')) return;
+        ERS.deleteBlock(id);
+        renderBlocks();
+        ERS.showToast('Bloqueio removido com sucesso.', 'success');
+    }
+
+    function handleCreateBlock(e) {
+        e.preventDefault();
+        const errEl = document.getElementById('blk-error');
+        errEl.style.display = 'none';
+
+        const data   = document.getElementById('blk-date').value;
+        const inicio = document.getElementById('blk-start').value;
+        const fim    = document.getElementById('blk-end').value;
+        const motivo = document.getElementById('blk-motivo').value.trim();
+
+        const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: currentSession.nome });
+        if (!result.ok) {
+            errEl.textContent = result.message;
+            errEl.style.display = 'block';
+            return;
+        }
+
+        closeModal('block-modal');
+        document.getElementById('block-form').reset();
+        renderBlocks();
+        ERS.showToast('Bloqueio criado. Novas reservas nesse período serão impedidas.', 'success');
+    }
+    </script>
+</body>
+</html>

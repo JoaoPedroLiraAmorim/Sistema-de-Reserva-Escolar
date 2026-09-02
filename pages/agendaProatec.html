@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda de Reservas - PROATEC</title>
+    <meta name="description" content="Grade semanal de reservas de laboratório para gestão pelo PROATEC e Coordenação.">
 
     <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +16,13 @@
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/agenda.css">
+    <style>
+        .schedule-card.block-card { background: #fef2f2; border-left: 3px solid #ef4444; cursor: default; }
+        .schedule-card.block-card h4 { color: #dc2626; }
+        .week-label { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+        .btn-block { display: none; }
+        .coordenacao-only { display: none; }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -39,11 +47,11 @@
                     <span class="material-symbols-outlined">calendar_today</span>
                     <span>Reservas</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="equipamentos.html" class="nav-link">
                     <span class="material-symbols-outlined">computer</span>
                     <span>Equipamentos</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="salas.html" class="nav-link">
                     <span class="material-symbols-outlined">meeting_room</span>
                     <span>Salas</span>
                 </a>
@@ -63,7 +71,7 @@
                 </div>
 
                 <div class="sidebar-subnav">
-                    <a href="#" class="nav-link">
+                    <a href="salas.html" class="nav-link">
                         <span class="material-symbols-outlined">settings</span>
                         <span>Configurações</span>
                     </a>
@@ -90,36 +98,37 @@
                         <p>Planejamento e alocação de notebooks e espaços para a semana letiva.</p>
                     </div>
 
-                    <button type="button" class="btn-new-res" id="btnOpenNewReservation">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
-                        <span>Nova reserva</span>
-                    </button>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <!-- Botão de bloqueio (apenas Coordenação) -->
+                        <button type="button" class="btn-new-res coordenacao-only" id="btnOpenBlock"
+                            style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">block</span>
+                            <span>Criar bloqueio</span>
+                        </button>
+                        <button type="button" class="btn-new-res" id="btnOpenNewReservation">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                            <span>Nova reserva</span>
+                        </button>
+                    </div>
                 </header>
 
                 <!-- Barra de Filtros e Navegação da Semana -->
                 <section class="filters-bar">
                     <div class="filter-group">
                         <div class="filter-item">
-                            <label>Período</label>
+                            <label>Semana</label>
                             <div class="filter-pill">
-                                <span>Manhã</span>
-                            </div>
-                        </div>
-                        <div class="filter-item">
-                            <label>Data</label>
-                            <div class="filter-pill">
-                                <span class="material-symbols-outlined">calendar_today</span>
-                                <span>11 ago - 15 ago</span>
+                                <span id="weekRangeLabel">—</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="week-navigation">
-                        <button type="button" class="btn-nav-arrow" title="Semana anterior">
+                        <button type="button" class="btn-nav-arrow" id="btnPrevWeek" title="Semana anterior">
                             <span class="material-symbols-outlined">chevron_left</span>
                         </button>
-                        <span class="current-week-label">Semana Atual</span>
-                        <button type="button" class="btn-nav-arrow" title="Próxima semana">
+                        <span class="current-week-label week-label" id="weekLabel">Semana Atual</span>
+                        <button type="button" class="btn-nav-arrow" id="btnNextWeek" title="Próxima semana">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>
@@ -128,111 +137,8 @@
                 <!-- Grade Semanal de Horários e Salas -->
                 <section class="schedule-container">
                     <div class="schedule-table-wrapper">
-                        <div class="schedule-grid">
-                            <!-- Cabeçalhos dos Dias -->
-                            <div class="schedule-header time-col">Horário</div>
-                            <div class="schedule-header">Seg - 11</div>
-                            <div class="schedule-header">Ter - 12</div>
-                            <div class="schedule-header">Qua - 13</div>
-                            <div class="schedule-header">Qui - 14</div>
-                            <div class="schedule-header">Sex - 15</div>
-
-                            <!-- Linha 1: 07:00 -->
-                            <div class="schedule-time">07:00</div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card primary" onclick="openUsageModal('Sala 12', 'Prof. Ricardo Silva', '20 notebooks')">
-                                    <h4>Sala 12 — 20 notebooks</h4>
-                                    <p>Prof. Ricardo Silva</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-
-                            <!-- Linha 2: 07:50 -->
-                            <div class="schedule-time">07:50</div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 12', 'Prof. Carlos', '20 notebooks')">
-                                    <h4>Sala 12 — 20 notebooks</h4>
-                                    <p>Prof. Carlos</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 04', 'Prof. Ana', '15 notebooks')">
-                                    <h4>Sala 04 — 15 notebooks</h4>
-                                    <p>Prof. Ana</p>
-                                </div>
-                                <div class="schedule-card primary" onclick="openUsageModal('Sala 08', 'Prof. Marcos', '20 notebooks')">
-                                    <h4>Sala 08 — 20 notebooks</h4>
-                                    <p>Prof. Marcos</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-
-                            <!-- Linha 3: 08:40 -->
-                            <div class="schedule-time">08:40</div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card error">
-                                    <h4>Bloqueio — Manutenção</h4>
-                                    <p>Coordenação PROATEC</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 04', 'Prof. Ana', '15 notebooks')">
-                                    <h4>Sala 04 — 15 notebooks</h4>
-                                    <p>Prof. Ana</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-
-                            <!-- Linha 4: 09:30 -->
-                            <div class="schedule-time">09:30</div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card neutral" onclick="openUsageModal('Sala 12', 'Prof. João', '20 notebooks')">
-                                    <h4>Sala 12 — 20 notebooks</h4>
-                                    <p>Prof. João</p>
-                                </div>
-                            </div>
-
-                            <!-- Linha 5: 10:20 -->
-                            <div class="schedule-time">10:20</div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card neutral" onclick="openUsageModal('Lab. Informática', 'Prof. Maria', 'Gabinete móvel')">
-                                    <h4>Lab. Informática</h4>
-                                    <p>Prof. Maria</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card neutral" onclick="openUsageModal('Lab. Informática', 'Prof. Carlos', 'Gabinete móvel')">
-                                    <h4>Lab. Informática</h4>
-                                    <p>Prof. Carlos</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-
-                            <!-- Linha 6: 11:10 -->
-                            <div class="schedule-time">11:10</div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell">
-                                <div class="schedule-card primary" onclick="openUsageModal('Sala 04', 'Prof. Ricardo Silva', '15 notebooks')">
-                                    <h4>Sala 04 — 15 notebooks</h4>
-                                    <p>Prof. Ricardo Silva</p>
-                                </div>
-                            </div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
-                            <div class="schedule-cell"></div>
+                        <div class="schedule-grid" id="scheduleGrid">
+                            <!-- Gerado dinamicamente -->
                         </div>
                     </div>
                 </section>
@@ -250,39 +156,29 @@
                 </button>
             </div>
 
-            <form action="#" onsubmit="event.preventDefault(); closeModal('new-reservation-modal');">
+            <form id="new-res-form">
                 <div class="modal-body">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="res-brand">Marca dos notebooks</label>
-                        <div class="select-wrapper">
-                            <select id="res-brand" required>
-                                <option value="">Selecione a marca</option>
-                                <option value="dell">Dell</option>
-                                <option value="lenovo">Lenovo</option>
-                                <option value="acer">Acer</option>
-                                <option value="positivo">Positivo</option>
-                            </select>
-                            <span class="material-symbols-outlined select-icon">expand_more</span>
-                        </div>
+                    <!-- Data -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="res-date">Data</label>
+                        <input type="date" id="res-date" class="form-control" required>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="res-quantity">Quantidade de notebooks</label>
-                        <div class="select-wrapper">
-                            <select id="res-quantity" required>
-                                <option value="">Selecione a quantidade</option>
-                                <option value="10">10 notebooks</option>
-                                <option value="15">15 notebooks</option>
-                                <option value="20">20 notebooks</option>
-                                <option value="30">30 notebooks</option>
-                            </select>
-                            <span class="material-symbols-outlined select-icon">expand_more</span>
-                        </div>
+                    <!-- Turma -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="res-turma">Turma</label>
+                        <input type="text" id="res-turma" class="form-control" placeholder="Ex: 3A Info" required>
+                    </div>
+
+                    <!-- Professor -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="res-professor">Professor</label>
+                        <input type="text" id="res-professor" class="form-control" placeholder="Nome do professor" required>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-col form-group" style="margin-bottom: 0;">
-                            <label for="res-start">Horário de início</label>
+                        <div class="form-col form-group" style="margin-bottom:0;">
+                            <label for="res-start">Início</label>
                             <div class="select-wrapper">
                                 <select id="res-start" required>
                                     <option value="">Selecione</option>
@@ -292,13 +188,18 @@
                                     <option value="09:30">09:30</option>
                                     <option value="10:20">10:20</option>
                                     <option value="11:10">11:10</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="13:50">13:50</option>
+                                    <option value="14:40">14:40</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="19:00">19:00</option>
+                                    <option value="19:50">19:50</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
                         </div>
-
-                        <div class="form-col form-group" style="margin-bottom: 0;">
-                            <label for="res-end">Horário de fim</label>
+                        <div class="form-col form-group" style="margin-bottom:0;">
+                            <label for="res-end">Fim</label>
                             <div class="select-wrapper">
                                 <select id="res-end" required>
                                     <option value="">Selecione</option>
@@ -308,24 +209,45 @@
                                     <option value="10:20">10:20</option>
                                     <option value="11:10">11:10</option>
                                     <option value="12:00">12:00</option>
+                                    <option value="13:50">13:50</option>
+                                    <option value="14:40">14:40</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="16:20">16:20</option>
+                                    <option value="19:50">19:50</option>
+                                    <option value="20:40">20:40</option>
+                                    <option value="21:30">21:30</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="res-room">Reservar sala <span style="font-size: 12px; font-weight: normal; color: var(--color-text-muted);">(opcional)</span></label>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="res-room">Sala <span style="font-size:12px; color:var(--color-text-muted);">(opcional)</span></label>
                         <div class="select-wrapper">
                             <select id="res-room">
-                                <option value="">Selecione a sala (opcional)</option>
-                                <option value="aquario">Aquário</option>
-                                <option value="sala-leitura">Sala de Leitura</option>
-                                <option value="sala-video">Sala de Vídeo</option>
+                                <option value="">Sem sala</option>
                             </select>
                             <span class="material-symbols-outlined select-icon">expand_more</span>
                         </div>
                     </div>
+
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="res-qty">Notebooks <span style="font-size:12px; color:var(--color-text-muted);">(opcional)</span></label>
+                        <div class="select-wrapper">
+                            <select id="res-qty">
+                                <option value="0">Sem notebooks</option>
+                                <option value="10">10 notebooks</option>
+                                <option value="15">15 notebooks</option>
+                                <option value="20">20 notebooks</option>
+                                <option value="25">25 notebooks</option>
+                                <option value="30">30 notebooks</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div id="res-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px; line-height:1.4;"></div>
                 </div>
 
                 <div class="modal-footer">
@@ -336,53 +258,337 @@
         </div>
     </div>
 
-    <!-- Modal 2: Registrar Uso dos Notebooks por Aluno -->
+    <!-- Modal 2: Ver detalhes / Cancelar reserva -->
     <div class="modal-backdrop hidden" id="register-usage-modal">
         <div class="modal">
             <div class="modal-header">
                 <div>
-                    <h3 id="modalUsageTitle">Registrar uso da aula</h3>
-                    <p id="modalUsageSubtitle">Vincule cada notebook ao aluno responsável</p>
+                    <h3 id="modalUsageTitle">Detalhes da reserva</h3>
+                    <p id="modalUsageSubtitle" style="font-size:13px; color:var(--color-text-secondary);"></p>
                 </div>
                 <button type="button" class="btn-close" onclick="closeModal('register-usage-modal')">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
+            <div class="modal-body" id="usageDetailBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal('register-usage-modal')">Fechar</button>
+                <button type="button" id="btn-cancel-detail" class="btn-primary"
+                    style="background:#dc2626; width:auto; padding:10px 22px; display:none;">
+                    Cancelar Reserva
+                </button>
+            </div>
+        </div>
+    </div>
 
-            <form action="#" onsubmit="event.preventDefault(); closeModal('register-usage-modal');">
-                <div class="modal-body" id="usageRowsContainer">
-                    <!-- Linhas de Notebook / Aluno -->
-                    <div class="usage-row">
-                        <div class="notebook-label-badge">Notebook 01</div>
-                        <input type="text" class="student-input" placeholder="Digite o nome do aluno" required>
-                    </div>
-                    <div class="usage-row">
-                        <div class="notebook-label-badge">Notebook 02</div>
-                        <input type="text" class="student-input" placeholder="Digite o nome do aluno">
-                    </div>
-                    <div class="usage-row">
-                        <div class="notebook-label-badge">Notebook 03</div>
-                        <input type="text" class="student-input" placeholder="Digite o nome do aluno">
-                    </div>
+    <!-- Modal 3: Criar Bloqueio (Coordenação) -->
+    <div class="modal-backdrop hidden" id="block-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>Criar Bloqueio</h3>
+                    <p style="font-size:13px; color:var(--color-text-secondary);">Impede novas reservas no período informado.</p>
                 </div>
-
-                <div style="padding: 0 24px 12px;">
-                    <button type="button" class="btn-add-notebook" id="btnAddNotebookRow">
-                        <span class="material-symbols-outlined">add</span>
-                        <span>Adicionar notebook</span>
-                    </button>
+                <button type="button" class="btn-close" onclick="closeModal('block-modal')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="block-form">
+                <div class="modal-body">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="blk-date">Data</label>
+                        <input type="date" id="blk-date" class="form-control" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col form-group" style="margin-bottom:0;">
+                            <label for="blk-start">Início</label>
+                            <div class="select-wrapper">
+                                <select id="blk-start" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:00">07:00</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:10">11:10</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="13:50">13:50</option>
+                                    <option value="14:40">14:40</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="19:00">19:00</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="form-col form-group" style="margin-bottom:0;">
+                            <label for="blk-end">Fim</label>
+                            <div class="select-wrapper">
+                                <select id="blk-end" required>
+                                    <option value="">Selecione</option>
+                                    <option value="07:50">07:50</option>
+                                    <option value="08:40">08:40</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:20">10:20</option>
+                                    <option value="11:10">11:10</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:50">13:50</option>
+                                    <option value="14:40">14:40</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="16:20">16:20</option>
+                                    <option value="19:50">19:50</option>
+                                    <option value="20:40">20:40</option>
+                                    <option value="21:30">21:30</option>
+                                </select>
+                                <span class="material-symbols-outlined select-icon">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="blk-motivo">Motivo</label>
+                        <input type="text" id="blk-motivo" class="form-control" placeholder="Ex: Manutenção preventiva" required>
+                    </div>
+                    <div id="blk-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px;"></div>
                 </div>
-
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('register-usage-modal')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px;">Confirmar registro</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('block-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="background:#dc2626; width:auto; padding:10px 22px;">Criar bloqueio</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Scripts Modularizados -->
+    <!-- Scripts -->
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="../js/store.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
-    <script src="../js/agenda.js"></script>
+    <script>
+    let currentSession = null;
+    let currentWeekMonday = ERS.getMonday(new Date());
+    let selectedResId = null;
+
+    // Todos os horários da grade
+    const ALL_SLOTS = [
+        '07:00','07:50','08:40','09:30','10:20','11:10','13:00','13:50','14:40','15:30','19:00','19:50','20:40'
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
+        if (!currentSession) return;
+
+        AUTH.renderUserInfo(currentSession);
+        AUTH.setupLogout();
+        AUTH.adaptSidebarByRole(currentSession);
+
+        // Mostrar botão de bloqueio para Coordenação
+        if (currentSession.role === 'coordenacao') {
+            document.querySelectorAll('.coordenacao-only').forEach(el => el.style.display = '');
+            document.getElementById('btnOpenBlock').style.display = '';
+        }
+
+        // Navegação de semana
+        document.getElementById('btnPrevWeek').addEventListener('click', () => {
+            currentWeekMonday.setDate(currentWeekMonday.getDate() - 7);
+            renderSchedule();
+        });
+        document.getElementById('btnNextWeek').addEventListener('click', () => {
+            currentWeekMonday.setDate(currentWeekMonday.getDate() + 7);
+            renderSchedule();
+        });
+
+        // Modais
+        document.getElementById('btnOpenNewReservation').addEventListener('click', () => {
+            populateRoomSelect('res-room');
+            document.getElementById('res-date').value = ERS.today();
+            document.getElementById('res-error').style.display = 'none';
+            openModal('new-reservation-modal');
+        });
+
+        document.getElementById('btnOpenBlock')?.addEventListener('click', () => {
+            document.getElementById('blk-date').value = ERS.today();
+            document.getElementById('blk-error').style.display = 'none';
+            openModal('block-modal');
+        });
+
+        // Forms
+        document.getElementById('new-res-form').addEventListener('submit', handleCreateReservation);
+        document.getElementById('block-form').addEventListener('submit', handleCreateBlock);
+
+        renderSchedule();
+    });
+
+    function populateRoomSelect(selId) {
+        const sel = document.getElementById(selId);
+        sel.innerHTML = '<option value="">Sem sala</option>';
+        ERS.getActiveRooms().forEach(r => {
+            sel.innerHTML += `<option value="${r.nome}">${r.nome}</option>`;
+        });
+    }
+
+    function renderSchedule() {
+        const weekDays = ERS.getWeekDays(currentWeekMonday);
+        const todayStr = ERS.today();
+
+        // Labels
+        const first = weekDays[0];
+        const last = weekDays[4];
+        document.getElementById('weekRangeLabel').textContent =
+            `${first.getDate()} ${ERS.MESES[first.getMonth()]} - ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
+        document.getElementById('weekLabel').textContent =
+            currentWeekMonday.getDate() === ERS.getMonday(new Date()).getDate() ? 'Semana Atual' : 'Semana Selecionada';
+
+        const grid = document.getElementById('scheduleGrid');
+        grid.innerHTML = '';
+
+        // Cabeçalhos
+        const timeHeader = document.createElement('div');
+        timeHeader.className = 'schedule-header time-col';
+        timeHeader.textContent = 'Horário';
+        grid.appendChild(timeHeader);
+
+        weekDays.forEach(d => {
+            const dk = ERS.dateKey(d);
+            const isToday = dk === todayStr;
+            const h = document.createElement('div');
+            h.className = 'schedule-header' + (isToday ? ' today-header' : '');
+            h.innerHTML = `${ERS.DIAS_SEMANA[d.getDay()]} - ${d.getDate()}`;
+            grid.appendChild(h);
+        });
+
+        // Linhas de horário
+        ALL_SLOTS.forEach((slotStart, idx) => {
+            const slotEnd = ALL_SLOTS[idx + 1] || (parseInt(slotStart.split(':')[0]) + 1).toString().padStart(2, '0') + ':00';
+
+            const timeCell = document.createElement('div');
+            timeCell.className = 'schedule-time';
+            timeCell.textContent = slotStart;
+            grid.appendChild(timeCell);
+
+            weekDays.forEach(d => {
+                const dk = ERS.dateKey(d);
+                const cell = document.createElement('div');
+                cell.className = 'schedule-cell';
+
+                // Bloqueios
+                const blocks = ERS.getBlocks().filter(b =>
+                    b.data === dk && ERS.timesOverlap(slotStart, slotEnd, b.inicio, b.fim)
+                );
+                blocks.forEach(b => {
+                    const card = document.createElement('div');
+                    card.className = 'schedule-card error block-card';
+                    card.innerHTML = `<h4>🔒 Bloqueado</h4><p>${b.motivo}</p>`;
+                    cell.appendChild(card);
+                });
+
+                // Reservas
+                const dayRes = ERS.getReservationsByDate(dk);
+                const slotRes = dayRes.filter(r => ERS.timesOverlap(slotStart, slotEnd, r.inicio, r.fim));
+                slotRes.forEach(r => {
+                    const card = document.createElement('div');
+                    card.className = 'schedule-card ' + (r.situacao === 'cancelada' ? 'error' : 'neutral');
+                    card.style.cursor = 'pointer';
+                    card.innerHTML = `<h4>${r.sala || 'Sem sala'} — ${r.notebooks || 0} notebooks</h4><p>${r.professorNome}</p>`;
+                    card.addEventListener('click', () => openDetailModal(r.id));
+                    cell.appendChild(card);
+                });
+
+                grid.appendChild(cell);
+            });
+        });
+    }
+
+    function openDetailModal(id) {
+        const reservations = ERS.getReservations();
+        const r = reservations.find(r => r.id === id);
+        if (!r) return;
+
+        document.getElementById('modalUsageTitle').textContent = `${r.sala || 'Sem sala'} — ${r.professorNome}`;
+        document.getElementById('modalUsageSubtitle').textContent = `${r.inicio}–${r.fim} • ${r.turma}`;
+        document.getElementById('usageDetailBody').innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
+                <div><strong>Horário:</strong> ${r.inicio} – ${r.fim}</div>
+                <div><strong>Turma:</strong> ${r.turma}</div>
+                ${r.sala ? `<div><strong>Sala:</strong> ${r.sala}</div>` : ''}
+                ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}</div>` : ''}
+                <div><strong>Professor:</strong> ${r.professorNome}</div>
+                <div><strong>Situação:</strong> <span style="font-weight:600; color:${r.situacao === 'confirmada' ? '#16a34a' : '#dc2626'}">${r.situacao}</span></div>
+            </div>
+        `;
+
+        const btnCancel = document.getElementById('btn-cancel-detail');
+        if (r.situacao === 'confirmada') {
+            btnCancel.style.display = '';
+            btnCancel.onclick = () => {
+                if (!confirm('Cancelar esta reserva?')) return;
+                ERS.cancelReservation(r.id);
+                closeModal('register-usage-modal');
+                ERS.showToast('Reserva cancelada com sucesso.', 'success');
+                renderSchedule();
+            };
+        } else {
+            btnCancel.style.display = 'none';
+        }
+
+        openModal('register-usage-modal');
+    }
+
+    function handleCreateReservation(e) {
+        e.preventDefault();
+        const errEl = document.getElementById('res-error');
+        errEl.style.display = 'none';
+
+        const data     = document.getElementById('res-date').value;
+        const inicio   = document.getElementById('res-start').value;
+        const fim      = document.getElementById('res-end').value;
+        const sala     = document.getElementById('res-room').value;
+        const qtd      = parseInt(document.getElementById('res-qty').value) || 0;
+        const turma    = document.getElementById('res-turma').value.trim();
+        const profNome = document.getElementById('res-professor').value.trim();
+
+        const result = ERS.createReservation({
+            professorId: currentSession.userId,
+            professorNome: profNome || currentSession.nome,
+            data, inicio, fim,
+            sala: sala || null,
+            notebooks: qtd,
+            turma,
+        });
+
+        if (!result.ok) {
+            errEl.textContent = result.message;
+            errEl.style.display = 'block';
+            return;
+        }
+
+        closeModal('new-reservation-modal');
+        document.getElementById('new-res-form').reset();
+        ERS.showToast('Reserva criada com sucesso!', 'success');
+        renderSchedule();
+    }
+
+    function handleCreateBlock(e) {
+        e.preventDefault();
+        const errEl = document.getElementById('blk-error');
+        errEl.style.display = 'none';
+
+        const data   = document.getElementById('blk-date').value;
+        const inicio = document.getElementById('blk-start').value;
+        const fim    = document.getElementById('blk-end').value;
+        const motivo = document.getElementById('blk-motivo').value.trim();
+
+        const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: currentSession.nome });
+        if (!result.ok) {
+            errEl.textContent = result.message;
+            errEl.style.display = 'block';
+            return;
+        }
+
+        closeModal('block-modal');
+        document.getElementById('block-form').reset();
+        ERS.showToast('Bloqueio criado. Novas reservas nesse período serão impedidas.', 'success');
+        renderSchedule();
+    }
+    </script>
 </body>
 </html>

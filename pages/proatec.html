@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PROATEC - Gestão de Laboratório</title>
+    <meta name="description" content="Dashboard do PROATEC para gestão de reservas, equipamentos e salas.">
 
     <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,11 +40,11 @@
                     <span class="material-symbols-outlined">calendar_today</span>
                     <span>Reservas</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="equipamentos.html" class="nav-link">
                     <span class="material-symbols-outlined">computer</span>
                     <span>Equipamentos</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="salas.html" class="nav-link">
                     <span class="material-symbols-outlined">meeting_room</span>
                     <span>Salas</span>
                 </a>
@@ -63,7 +64,7 @@
                 </div>
 
                 <div class="sidebar-subnav">
-                    <a href="#" class="nav-link">
+                    <a href="salas.html" class="nav-link">
                         <span class="material-symbols-outlined">settings</span>
                         <span>Configurações</span>
                     </a>
@@ -86,7 +87,7 @@
                             <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
                                 <span class="material-symbols-outlined">menu</span>
                             </button>
-                            <p class="date-badge">Sábado, 15 De Agosto De 2026</p>
+                            <p class="date-badge">—</p>
                         </div>
                         <h2>Olá, João</h2>
                         <p>Aqui está o panorama do PROATEC para hoje.</p>
@@ -105,15 +106,15 @@
                             <p>Agendar notebooks para uma turma</p>
                         </a>
 
-                        <a href="#" class="action-card" id="btnOpenEquipmentModal">
+                        <a href="equipamentos.html" class="action-card">
                             <div class="action-icon secondary">
                                 <span class="material-symbols-outlined">devices</span>
                             </div>
-                            <h3>Cadastrar equipamento</h3>
-                            <p>Adicionar um novo notebook</p>
+                            <h3>Gerenciar equipamentos</h3>
+                            <p>Adicionar ou editar notebooks</p>
                         </a>
 
-                        <a href="#" class="action-card">
+                        <a href="salas.html" class="action-card">
                             <div class="action-icon tertiary">
                                 <span class="material-symbols-outlined">meeting_room</span>
                             </div>
@@ -123,7 +124,7 @@
                     </div>
                 </section>
 
-                <!-- Grid Principal: Reservas do Dia e Retirada Imediata -->
+                <!-- Grid Principal: Reservas do Dia e Inventário -->
                 <section class="dashboard-grid">
                     <!-- Coluna Esquerda: Próximas Reservas -->
                     <div class="card reservations-card">
@@ -135,36 +136,8 @@
                             </div>
                         </div>
 
-                        <div class="reservations-list">
-                            <!-- Item 1 -->
-                            <div class="agenda-item highlight">
-                                <span class="agenda-time">13:00</span>
-                                <div class="agenda-details">
-                                    <h4 class="agenda-teacher">Prof. João</h4>
-                                    <p class="agenda-room">Sala 04 • 20 notebooks</p>
-                                </div>
-                                <span class="badge badge-primary">Em breve</span>
-                            </div>
-
-                            <!-- Item 2 -->
-                            <div class="agenda-item">
-                                <span class="agenda-time">14:50</span>
-                                <div class="agenda-details">
-                                    <h4 class="agenda-teacher">Prof. Maria</h4>
-                                    <p class="agenda-room">Sala 02 • 15 notebooks</p>
-                                </div>
-                                <span class="badge badge-neutral">Confirmada</span>
-                            </div>
-
-                            <!-- Item 3 -->
-                            <div class="agenda-item">
-                                <span class="agenda-time">16:40</span>
-                                <div class="agenda-details">
-                                    <h4 class="agenda-teacher">Prof. Carlos</h4>
-                                    <p class="agenda-room">Sala 01 • 10 notebooks</p>
-                                </div>
-                                <span class="badge badge-neutral">Confirmada</span>
-                            </div>
+                        <div class="reservations-list" id="today-reservations-list">
+                            <p style="font-size:13px; color:var(--color-text-muted); padding: 12px 0;">Carregando...</p>
                         </div>
 
                         <div class="card-action-footer">
@@ -175,33 +148,18 @@
                         </div>
                     </div>
 
-                    <!-- Coluna Direita: Card de Foco (Confirmar Retirada) -->
+                    <!-- Coluna Direita: Próxima reserva em destaque -->
                     <div class="card pickup-card">
                         <div class="card-header card-header-icon">
                             <span class="material-symbols-outlined">inventory</span>
                             <div>
-                                <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">Confirmar retirada</h3>
-                                <p style="font-size: 12px; color: var(--color-text-secondary);">Aguardando confirmação.</p>
+                                <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">Próxima reserva</h3>
+                                <p style="font-size: 12px; color: var(--color-text-secondary);">Prepare-se para a entrega.</p>
                             </div>
                         </div>
 
-                        <div class="pickup-details-box">
-                            <div class="pickup-badge-time">
-                                <span class="material-symbols-outlined">schedule</span>
-                                <span>13:00 - em breve</span>
-                            </div>
-                            <h4 class="pickup-teacher">Prof. João</h4>
-                            <p class="pickup-room">Sala 04 • 20 notebooks</p>
-                        </div>
-
-                        <div class="pickup-actions">
-                            <button type="button" class="btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">check</span>
-                                <span>Confirmar retirada</span>
-                            </button>
-                            <button type="button" class="btn-dismiss">
-                                Marcar como não retirado
-                            </button>
+                        <div class="pickup-details-box" id="next-pickup-box">
+                            <p style="font-size:13px; color:var(--color-text-muted);">Nenhuma reserva hoje.</p>
                         </div>
                     </div>
                 </section>
@@ -212,58 +170,12 @@
                         <span class="material-symbols-outlined">laptop_windows</span>
                         <div>
                             <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary);">Notebooks disponíveis por marca</h3>
-                            <p style="font-size: 13px; color: var(--color-text-secondary);">Unidades prontas para reserva no momento.</p>
+                            <p style="font-size: 13px; color: var(--color-text-secondary);">Unidades funcionando no momento.</p>
                         </div>
                     </div>
 
-                    <div class="brand-grid">
-                        <!-- Dell -->
-                        <div class="brand-card">
-                            <span class="brand-name">Dell</span>
-                            <div class="brand-count-wrapper">
-                                <span class="brand-count">42</span>
-                                <span class="brand-total">/ 50</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill primary" style="width: 84%;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Lenovo -->
-                        <div class="brand-card">
-                            <span class="brand-name">Lenovo</span>
-                            <div class="brand-count-wrapper">
-                                <span class="brand-count">28</span>
-                                <span class="brand-total">/ 30</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill primary" style="width: 93%;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Acer -->
-                        <div class="brand-card">
-                            <span class="brand-name">Acer</span>
-                            <div class="brand-count-wrapper">
-                                <span class="brand-count">15</span>
-                                <span class="brand-total">/ 25</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill secondary" style="width: 60%;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Positivo -->
-                        <div class="brand-card">
-                            <span class="brand-name">Positivo</span>
-                            <div class="brand-count-wrapper">
-                                <span class="brand-count">9</span>
-                                <span class="brand-total">/ 20</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill error" style="width: 45%;"></div>
-                            </div>
-                        </div>
+                    <div class="brand-grid" id="brand-grid">
+                        <!-- Gerado dinamicamente -->
                     </div>
                 </section>
             </main>
@@ -285,7 +197,6 @@
 
             <form id="equipmentForm" onsubmit="handleEquipmentSubmit(event)">
                 <div class="modal-body">
-                    <!-- Marca -->
                     <div class="form-group">
                         <label for="eq-brand">Marca do notebook</label>
                         <div class="select-wrapper">
@@ -301,7 +212,6 @@
                         </div>
                     </div>
 
-                    <!-- Quantidade digitada pelo usuário -->
                     <div class="form-group" style="margin-bottom: 0;">
                         <label for="eq-quantity">Quantidade</label>
                         <input type="number" class="form-control" id="eq-quantity" placeholder="Ex: 5" min="1" required>
@@ -322,90 +232,94 @@
     <!-- Container de Notificações Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts de Controle da Interface e Modais -->
-    <script>
-        // Funções de Modal
-        function openModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        }
-
-        // Notificação flutuante (Toast)
-        function showToast(message, isSuccess = true) {
-            const container = document.getElementById('toastContainer');
-            if (!container) return;
-
-            const toast = document.createElement('div');
-            toast.className = `toast-notification ${isSuccess ? 'success' : ''}`;
-            toast.innerHTML = `
-                <span class="material-symbols-outlined">${isSuccess ? 'check_circle' : 'info'}</span>
-                <span>${message}</span>
-            `;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
-        }
-
-        // Atualização dinâmica dos cards de marcas
-        function updateBrandStats(brandName, quantity = 1) {
-            const brandCards = document.querySelectorAll('.brand-card');
-            brandCards.forEach(card => {
-                const nameEl = card.querySelector('.brand-name');
-                if (nameEl && nameEl.innerText.trim().toLowerCase() === brandName.toLowerCase()) {
-                    const countEl = card.querySelector('.brand-count');
-                    const totalEl = card.querySelector('.brand-total');
-                    const progressEl = card.querySelector('.progress-fill');
-                    if (countEl && totalEl) {
-                        let current = parseInt(countEl.innerText) || 0;
-                        let total = parseInt(totalEl.innerText.replace('/', '').trim()) || 0;
-                        current += quantity;
-                        total += quantity;
-                        countEl.innerText = current;
-                        totalEl.innerText = `/ ${total}`;
-                        if (progressEl && total > 0) {
-                            const pct = Math.min(100, Math.round((current / total) * 100));
-                            progressEl.style.width = `${pct}%`;
-                        }
-                    }
-                }
-            });
-        }
-
-        // Submissão do formulário de cadastro de equipamento (Marca + Quantidade)
-        function handleEquipmentSubmit(e) {
-            e.preventDefault();
-            const brand = document.getElementById('eq-brand').value;
-            const qty = parseInt(document.getElementById('eq-quantity').value) || 1;
-
-            // Fechar modal e limpar campos
-            closeModal('equipment-modal');
-            document.getElementById('equipmentForm').reset();
-
-            // Atualiza estatísticas da marca na tela caso corresponda
-            updateBrandStats(brand, qty);
-
-            // Exibir notificação de sucesso
-            const unitWord = qty === 1 ? 'notebook' : 'notebooks';
-            showToast(`${qty} ${unitWord} (${brand}) cadastrado${qty > 1 ? 's' : ''} com sucesso!`);
-        }
-
-        // Event listener para o card de cadastrar equipamento
-        document.getElementById('btnOpenEquipmentModal')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            openModal('equipment-modal');
-        });
-    </script>
-
-    <!-- Script Global (Modais e Sidebar Mobile) -->
+    <!-- Scripts -->
+    <script src="../js/store.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+    <script>
+    let currentSession = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
+        if (!currentSession) return;
+
+        AUTH.renderUserInfo(currentSession);
+        AUTH.setupLogout();
+        AUTH.adaptSidebarByRole(currentSession);
+
+        renderTodayReservations();
+        renderBrandGrid();
+    });
+
+    function renderTodayReservations() {
+        const list = document.getElementById('today-reservations-list');
+        const pickup = document.getElementById('next-pickup-box');
+        const todayRes = ERS.getReservationsByDate(ERS.today())
+            .sort((a, b) => a.inicio.localeCompare(b.inicio));
+
+        if (todayRes.length === 0) {
+            list.innerHTML = `<p style="font-size:13px; color:var(--color-text-muted); padding:12px 0;">Nenhuma reserva para hoje.</p>`;
+            pickup.innerHTML = `<p style="font-size:13px; color:var(--color-text-muted);">Nenhuma reserva hoje.</p>`;
+            return;
+        }
+
+        list.innerHTML = todayRes.map((r, i) => `
+            <div class="agenda-item${i === 0 ? ' highlight' : ''}">
+                <span class="agenda-time">${r.inicio}</span>
+                <div class="agenda-details">
+                    <h4 class="agenda-teacher">${r.professorNome}</h4>
+                    <p class="agenda-room">${r.sala || '—'} • ${r.notebooks ? r.notebooks + ' notebooks' : 'sem notebooks'}</p>
+                </div>
+                <span class="badge badge-${i === 0 ? 'primary' : 'neutral'}">${i === 0 ? 'Em breve' : 'Confirmada'}</span>
+            </div>
+        `).join('');
+
+        const next = todayRes[0];
+        pickup.innerHTML = `
+            <div class="pickup-badge-time">
+                <span class="material-symbols-outlined">schedule</span>
+                <span>${next.inicio} — turma ${next.turma}</span>
+            </div>
+            <h4 class="pickup-teacher">${next.professorNome}</h4>
+            <p class="pickup-room">${next.sala || 'Sem sala'} • ${next.notebooks || 0} notebooks</p>
+        `;
+    }
+
+    function renderBrandGrid() {
+        const grid = document.getElementById('brand-grid');
+        const notebooks = ERS.getNotebooks();
+
+        grid.innerHTML = notebooks.map(nb => {
+            const pct = nb.total > 0 ? Math.round((nb.funcionando / nb.total) * 100) : 0;
+            const fillClass = pct >= 70 ? 'primary' : pct >= 40 ? 'secondary' : 'error';
+            return `
+                <div class="brand-card">
+                    <span class="brand-name">${nb.marca}</span>
+                    <div class="brand-count-wrapper">
+                        <span class="brand-count">${nb.funcionando}</span>
+                        <span class="brand-total">/ ${nb.total}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${fillClass}" style="width: ${pct}%;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function handleEquipmentSubmit(e) {
+        e.preventDefault();
+        const brand = document.getElementById('eq-brand').value;
+        const qty = parseInt(document.getElementById('eq-quantity').value) || 1;
+
+        ERS.addNotebooks(brand, qty);
+        closeModal('equipment-modal');
+        document.getElementById('equipmentForm').reset();
+        renderBrandGrid();
+
+        const unitWord = qty === 1 ? 'notebook' : 'notebooks';
+        ERS.showToast(`${qty} ${unitWord} (${brand}) cadastrado${qty > 1 ? 's' : ''} com sucesso!`, 'success');
+    }
+    </script>
 </body>
 </html>

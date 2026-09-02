@@ -28,6 +28,11 @@
     --color-surface-container: #e5e9f2;
     --color-surface-variant: #dfe3e8;
 
+    /* Aliases para compatibilidade com novos componentes */
+    --color-surface: #fafbfd;
+    --color-bg: #f4f6fb;
+
+
     /* Sidebar / Navegação */
     --color-sidebar-bg: #0b1d2f;
     --color-sidebar-hover: #172a40;

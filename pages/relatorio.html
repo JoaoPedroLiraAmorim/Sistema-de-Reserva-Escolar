@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - PROATEC</title>
+    <meta name="description" content="Relatórios diários de reservas e uso de equipamentos do laboratório PROATEC.">
 
     <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,11 +40,11 @@
                     <span class="material-symbols-outlined">calendar_today</span>
                     <span>Reservas</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="equipamentos.html" class="nav-link">
                     <span class="material-symbols-outlined">computer</span>
                     <span>Equipamentos</span>
                 </a>
-                <a href="#" class="nav-link">
+                <a href="salas.html" class="nav-link">
                     <span class="material-symbols-outlined">meeting_room</span>
                     <span>Salas</span>
                 </a>
@@ -63,7 +64,7 @@
                 </div>
 
                 <div class="sidebar-subnav">
-                    <a href="#" class="nav-link">
+                    <a href="salas.html" class="nav-link">
                         <span class="material-symbols-outlined">settings</span>
                         <span>Configurações</span>
                     </a>
@@ -85,168 +86,134 @@
                             <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
                                 <span class="material-symbols-outlined">menu</span>
                             </button>
-                            <h2>Relatórios Detalhados de Hoje</h2>
+                            <h2>Relatórios de Reservas</h2>
                         </div>
-                        <p>Registro diário de uso de equipamentos por turma e aluno.</p>
+                        <p>Registro de uso de equipamentos por professor e turma.</p>
                     </div>
 
-                    <div class="reports-date-badge">
-                        <span class="material-symbols-outlined">calendar_month</span>
-                        <span>Hoje (15 Nov)</span>
+                    <!-- Filtro por data -->
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="date" id="report-date" class="form-control" style="max-width:180px; font-family:inherit; font-size:13px;">
+                        <div class="reports-date-badge">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            <span id="date-label">Hoje</span>
+                        </div>
                     </div>
                 </header>
 
+                <!-- Resumo estatístico -->
+                <div id="report-stats" style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;"></div>
+
                 <!-- Lista de Cartões de Relatório -->
-                <section class="reports-list">
-                    <!-- Registro 1: Prof. Silva -->
-                    <article class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-lead">
-                                <div class="report-icon-box primary">
-                                    <span class="material-symbols-outlined">laptop_mac</span>
-                                </div>
-                                <div class="report-details">
-                                    <div class="report-title-row">
-                                        <h3 class="report-teacher-name">Prof. Silva</h3>
-                                        <span class="report-class-tag">• Turma 3A Info</span>
-                                    </div>
-                                    <div class="report-meta-row">
-                                        <span class="report-meta-item">
-                                            <span class="material-symbols-outlined">schedule</span>
-                                            08:00 - 09:40
-                                        </span>
-                                        <span class="report-meta-item">
-                                            <span class="material-symbols-outlined">meeting_room</span>
-                                            Sala 04
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-view-more">
-                                <span>Ver mais</span>
-                                <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
-                            </button>
-                        </div>
-                        <div class="report-card-body">
-                            <span class="report-section-label">Uso de Notebooks</span>
-                            <div class="student-items-grid">
-                                <div class="student-item">
-                                    <span class="student-item-number">01</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Ana Clara</span>
-                                </div>
-                                <div class="student-item">
-                                    <span class="student-item-number">02</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Bruno Gomes</span>
-                                </div>
-                                <div class="student-item">
-                                    <span class="student-item-number">03</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Carlos Eduardo</span>
-                                </div>
-                                <div class="student-item">
-                                    <span class="student-item-number">04</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Daniela Souza</span>
-                                </div>
-                                <div class="student-item">
-                                    <span class="student-item-number">05</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Eduardo Lima</span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Registro 2: Prof. Maria -->
-                    <article class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-lead">
-                                <div class="report-icon-box secondary">
-                                    <span class="material-symbols-outlined">laptop_chromebook</span>
-                                </div>
-                                <div class="report-details">
-                                    <div class="report-title-row">
-                                        <h3 class="report-teacher-name">Prof. Maria</h3>
-                                        <span class="report-class-tag">• Turma 2B Admin</span>
-                                    </div>
-                                    <div class="report-meta-row">
-                                        <span class="report-meta-item">
-                                            <span class="material-symbols-outlined">schedule</span>
-                                            10:00 - 11:40
-                                        </span>
-                                        <span class="report-meta-item">
-                                            <span class="material-symbols-outlined">meeting_room</span>
-                                            Sala 02
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-view-more">
-                                <span>Ver mais</span>
-                                <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
-                            </button>
-                        </div>
-                        <div class="report-card-body">
-                            <span class="report-section-label">Uso de Notebooks</span>
-                            <div class="student-items-grid">
-                                <div class="student-item">
-                                    <span class="student-item-number secondary">11</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Felipe Santos</span>
-                                </div>
-                                <div class="student-item">
-                                    <span class="student-item-number secondary">12</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Gabriela Costa</span>
-                                </div>
-                                <div class="student-item">
-                                    <span class="student-item-number secondary">13</span>
-                                    <div class="student-item-divider"></div>
-                                    <span class="student-item-name">Henrique Alves</span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Registro 3: Prof. Carlos (Agendado / Em espera) -->
-                    <article class="report-card upcoming">
-                        <div class="report-card-header">
-                            <div class="report-lead">
-                                <div class="report-icon-box tertiary">
-                                    <span class="material-symbols-outlined">laptop_windows</span>
-                                </div>
-                                <div class="report-details">
-                                    <div class="report-title-row">
-                                        <h3 class="report-teacher-name">Prof. Carlos</h3>
-                                        <span class="report-class-tag">• Turma 1A Log</span>
-                                        <span class="badge badge-neutral" style="margin-left: 6px;">Agendado</span>
-                                    </div>
-                                    <div class="report-meta-row">
-                                        <span class="report-meta-item">
-                                            <span class="material-symbols-outlined">schedule</span>
-                                            13:30 - 15:10
-                                        </span>
-                                        <span class="report-meta-item">
-                                            <span class="material-symbols-outlined">meeting_room</span>
-                                            Sala 01
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-view-more">
-                                <span>Ver mais</span>
-                                <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
-                            </button>
-                        </div>
-                    </article>
+                <section class="reports-list" id="reports-list">
+                    <!-- Gerado dinamicamente -->
                 </section>
             </main>
         </div>
     </div>
 
     <!-- Script Global (Modais e Sidebar Mobile) -->
+    <script src="../js/store.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+    <script>
+    const ICON_COLORS = ['primary', 'secondary', 'tertiary'];
+    const ICON_NAMES = ['laptop_mac', 'laptop_chromebook', 'laptop_windows'];
+    let currentSession = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
+        if (!currentSession) return;
+
+        AUTH.renderUserInfo(currentSession);
+        AUTH.setupLogout();
+        AUTH.adaptSidebarByRole(currentSession);
+
+        const dateInput = document.getElementById('report-date');
+        dateInput.value = ERS.today();
+        dateInput.addEventListener('change', () => renderReport(dateInput.value));
+
+        renderReport(ERS.today());
+    });
+
+    function renderReport(dateStr) {
+        // Inclui canceladas para o relatório
+        const reservations = ERS.getReservations()
+            .filter(r => r.data === dateStr)
+            .sort((a, b) => a.inicio.localeCompare(b.inicio));
+
+
+        // Atualiza label da data
+        const d = new Date(dateStr + 'T12:00:00');
+        document.getElementById('date-label').textContent =
+            dateStr === ERS.today() ? 'Hoje' : ERS.formatDate(dateStr);
+
+        // Stats
+        const totalRes = reservations.length;
+        const totalNotebooks = reservations.reduce((a, r) => a + (r.notebooks || 0), 0);
+        const canceladas = reservations.filter(r => r.situacao === 'cancelada').length;
+
+        document.getElementById('report-stats').innerHTML = `
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:14px 20px; min-width:120px;">
+                <p style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Reservas</p>
+                <p style="font-size:26px; font-weight:700; color:var(--color-text-primary);">${totalRes}</p>
+            </div>
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:14px 20px; min-width:120px;">
+                <p style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Notebooks</p>
+                <p style="font-size:26px; font-weight:700; color:var(--color-primary);">${totalNotebooks}</p>
+            </div>
+            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:14px 20px; min-width:120px;">
+                <p style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Canceladas</p>
+                <p style="font-size:26px; font-weight:700; color:#dc2626;">${canceladas}</p>
+            </div>
+        `;
+
+        const list = document.getElementById('reports-list');
+
+        if (reservations.length === 0) {
+            list.innerHTML = `
+                <div style="text-align:center; padding:48px 24px; color:var(--color-text-muted);">
+                    <span class="material-symbols-outlined" style="font-size:48px; display:block; margin-bottom:12px; opacity:0.4;">event_busy</span>
+                    <p>Nenhuma reserva para esta data.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = reservations.map((r, i) => `
+            <article class="report-card${r.situacao === 'cancelada' ? ' upcoming' : ''}">
+                <div class="report-card-header">
+                    <div class="report-lead">
+                        <div class="report-icon-box ${ICON_COLORS[i % ICON_COLORS.length]}">
+                            <span class="material-symbols-outlined">${ICON_NAMES[i % ICON_NAMES.length]}</span>
+                        </div>
+                        <div class="report-details">
+                            <div class="report-title-row">
+                                <h3 class="report-teacher-name">${r.professorNome}</h3>
+                                <span class="report-class-tag">• Turma ${r.turma}</span>
+                                ${r.situacao === 'cancelada' ? '<span class="badge badge-neutral" style="margin-left:6px;">Cancelada</span>' : ''}
+                            </div>
+                            <div class="report-meta-row">
+                                <span class="report-meta-item">
+                                    <span class="material-symbols-outlined">schedule</span>
+                                    ${r.inicio} – ${r.fim}
+                                </span>
+                                ${r.sala ? `<span class="report-meta-item">
+                                    <span class="material-symbols-outlined">meeting_room</span>
+                                    ${r.sala}
+                                </span>` : ''}
+                                ${r.notebooks ? `<span class="report-meta-item">
+                                    <span class="material-symbols-outlined">laptop</span>
+                                    ${r.notebooks} notebooks
+                                </span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge badge-${r.situacao === 'confirmada' ? 'primary' : 'neutral'}">${r.situacao === 'confirmada' ? 'Confirmada' : 'Cancelada'}</span>
+                </div>
+            </article>
+        `).join('');
+    }
+    </script>
 </body>
 </html>
