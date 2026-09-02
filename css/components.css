@@ -139,6 +139,20 @@ textarea.form-control {
     }
 }
 
+/* Mensagens de Erro / Alerta em Formulários e Modais */
+.login-error-msg {
+    display: none;
+    background-color: var(--color-error-bg);
+    border: 1px solid #fecaca;
+    color: var(--color-error);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+
 /* ---------------------------------------------------------
    2. Links e Ações Secundárias
    --------------------------------------------------------- */
@@ -175,6 +189,20 @@ textarea.form-control {
 .btn-primary:hover {
     background-color: var(--color-primary-hover);
 }
+
+.btn-danger {
+    background-color: var(--color-error);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
 
 .btn-google {
     width: 100%;

@@ -1020,3 +1020,149 @@
         display: none;
     }
 }
+
+/* ==========================================================================
+   Estilos Complementares da Agenda Dinâmica do Professor
+   ========================================================================== */
+.calendar-event-card {
+    cursor: pointer;
+}
+.calendar-event-card:hover {
+    opacity: 0.85;
+}
+
+.event-mine {
+    border-left: 3px solid var(--color-primary);
+}
+.event-mine-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.event-block {
+    border-left: 3px solid var(--color-error);
+    background: var(--color-error-bg) !important;
+}
+
+.week-label-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.calendar-empty-cell {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 4px;
+}
+
+#my-reservations-section {
+    margin-top: 28px;
+}
+
+.my-res-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.my-res-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+}
+
+.my-res-item .res-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-primary);
+    min-width: 70px;
+}
+
+.my-res-item .res-info {
+    flex: 1;
+}
+.my-res-item .res-info strong {
+    font-size: 14px;
+    color: var(--color-text-primary);
+}
+.my-res-item .res-info p {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.my-res-item .res-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.btn-res-cancel {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-error);
+    border-radius: var(--radius-md);
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all var(--transition-fast);
+}
+.btn-res-cancel:hover {
+    background: var(--color-error-bg);
+}
+
+.badge-situacao {
+    font-size: 11px;
+    border-radius: var(--radius-full);
+    padding: 2px 8px;
+    font-weight: 600;
+}
+.badge-confirmada {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+.badge-cancelada {
+    background: var(--color-surface-variant);
+    color: var(--color-text-placeholder);
+    text-decoration: line-through;
+}
+
+.active-res-chip.hidden {
+    display: none;
+}
+
+.avail-info {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 6px;
+}
+
+.detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.detail-list div {
+    font-size: 14px;
+}
+.detail-list div strong {
+    color: var(--color-text-primary);
+}
+
+.empty-msg {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    padding: 12px 0;
+}
+

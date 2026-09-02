@@ -5,23 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - EduLab Reserve</title>
     <meta name="description" content="Sistema de reserva de laboratórios e notebooks escolares. Faça login para acessar.">
-    <!-- Fonte do Google Fonts (Inter) -->
+
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Folhas de Estilo Modularizadas -->
+
+    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
     <div class="container">
-        <!-- Lado Esquerdo (60% Imagem) -->
+        <!-- Lado Esquerdo (Imagem) -->
         <div class="left-side">
-            <img src="imagens/ChatGPT Image 31 de ago. de 2026, 21_40_12.png" alt="Sistema de Agendamento" class="hero-image" />
+            <img src="imagens/ChatGPT Image 31 de ago. de 2026, 21_40_12.png" alt="Sistema de Agendamento" class="hero-image">
         </div>
 
-        <!-- Lado Direito (40% Formulário de Login) -->
+        <!-- Lado Direito (Formulário) -->
         <div class="right-side">
             <div class="login-box">
                 <div class="login-header">
@@ -30,7 +32,7 @@
                 </div>
 
                 <form id="login-form" novalidate>
-                    <!-- E-mail Input -->
+                    <!-- E-mail -->
                     <div class="form-group">
                         <label for="email">E-mail</label>
                         <div class="input-wrapper">
@@ -41,7 +43,7 @@
                         </div>
                     </div>
 
-                    <!-- Senha Input -->
+                    <!-- Senha -->
                     <div class="form-group">
                         <label for="password">Senha</label>
                         <div class="input-wrapper">
@@ -57,11 +59,11 @@
                     </div>
 
                     <!-- Mensagem de Erro -->
-                    <div id="login-error" class="login-error-msg" style="display:none;"></div>
+                    <div id="login-error" class="login-error-msg"></div>
 
                     <button type="submit" class="btn-primary" id="btn-login">Entrar</button>
 
-                    <!-- Credenciais de demonstração -->
+                    <!-- Credenciais de Demonstração -->
                     <div class="demo-credentials">
                         <p class="demo-title">Credenciais de demonstração:</p>
                         <div class="demo-pills">
@@ -85,67 +87,8 @@
         </div>
     </div>
 
-    <!-- Store (dados e lógica) -->
+    <!-- Scripts Externos -->
     <script src="js/store.js"></script>
-    <script>
-        // Se já está logado, redirecionar direto
-        (function () {
-            const session = ERS.getSession();
-            if (session) {
-                const map = { professor: 'pages/professor.html', proatec: 'pages/proatec.html', coordenacao: 'pages/proatec.html' };
-                window.location.href = map[session.role] || 'pages/professor.html';
-            }
-        })();
-
-        // Toggle de senha
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        if (togglePassword && passwordInput) {
-            togglePassword.addEventListener('click', () => {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                togglePassword.style.color = type === 'text' ? 'var(--color-primary)' : '';
-            });
-        }
-
-        // Preencher credenciais ao clicar nas pills de demonstração
-        document.querySelectorAll('.demo-pill').forEach(pill => {
-            pill.addEventListener('click', () => {
-                document.getElementById('email').value = pill.dataset.email;
-                document.getElementById('password').value = pill.dataset.pass;
-                document.getElementById('login-error').style.display = 'none';
-            });
-        });
-
-        // Submit do formulário de login
-        document.getElementById('login-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const errorEl = document.getElementById('login-error');
-            const btnLogin = document.getElementById('btn-login');
-
-            errorEl.style.display = 'none';
-            btnLogin.textContent = 'Entrando...';
-            btnLogin.disabled = true;
-
-            setTimeout(() => {
-                const result = ERS.login(email, password);
-                if (result.ok) {
-                    const map = {
-                        professor:   'pages/professor.html',
-                        proatec:     'pages/proatec.html',
-                        coordenacao: 'pages/proatec.html',
-                    };
-                    window.location.href = map[result.user.role] || 'pages/professor.html';
-                } else {
-                    errorEl.textContent = result.message;
-                    errorEl.style.display = 'block';
-                    btnLogin.textContent = 'Entrar';
-                    btnLogin.disabled = false;
-                }
-            }, 400); // Pequeno delay para feedback visual
-        });
-    </script>
+    <script src="js/login.js"></script>
 </body>
 </html>

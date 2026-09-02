@@ -28,6 +28,18 @@
     color: var(--color-text-secondary);
 }
 
+.reports-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-date-input {
+    max-width: 180px;
+    font-family: inherit;
+    font-size: 13px;
+}
+
 .reports-date-badge {
     display: inline-flex;
     align-items: center;
@@ -42,13 +54,65 @@
     box-shadow: var(--shadow-sm);
 }
 
+
 .reports-date-badge .material-symbols-outlined {
     font-size: 18px;
     color: var(--color-primary);
 }
 
 /* ---------------------------------------------------------
-   2. Lista e Cartões de Relatórios
+   2. Resumo de Estatísticas
+   --------------------------------------------------------- */
+.report-stats-grid {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    min-width: 120px;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+}
+
+.stat-value.primary { color: var(--color-primary); }
+.stat-value.danger  { color: var(--color-error); }
+
+.empty-state-report {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--color-text-muted);
+}
+
+.empty-state-report .material-symbols-outlined {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+/* ---------------------------------------------------------
+   3. Lista e Cartões de Relatórios
    --------------------------------------------------------- */
 .reports-list {
     display: flex;
@@ -56,6 +120,7 @@
     gap: 20px;
     padding-bottom: 40px;
 }
+
 
 .report-card {
     background-color: var(--color-bg-white);

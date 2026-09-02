@@ -6,54 +6,20 @@
     <title>EduLab Reserve - Agenda do Professor</title>
     <meta name="description" content="Portal do professor para visualizar e gerenciar reservas de laboratório e notebooks.">
 
-    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-    <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
+    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/professor.css">
-    <style>
-        /* Estilos complementares para a demonstração */
-        .calendar-event-card { cursor: pointer; }
-        .calendar-event-card:hover { opacity: 0.85; }
-        .event-mine { border-left: 3px solid var(--color-primary); }
-        .event-block { border-left: 3px solid #ef4444; background: #fef2f2 !important; }
-        .event-mine-label { font-size: 10px; font-weight: 600; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.3px; }
-        .week-label-text { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
-        .calendar-empty-cell { color: var(--color-text-muted); font-size: 12px; text-align: center; padding: 4px; }
-        /* Reservas do professor na lista */
-        #my-reservations-section { margin-top: 28px; }
-        .my-res-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
-        .my-res-item {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--color-surface); border: 1px solid var(--color-border);
-            border-radius: 10px; padding: 12px 16px;
-        }
-        .my-res-item .res-date { font-size: 13px; font-weight: 600; color: var(--color-primary); min-width: 70px; }
-        .my-res-item .res-info { flex: 1; }
-        .my-res-item .res-info p { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
-        .my-res-item .res-actions { display: flex; gap: 6px; }
-        .btn-res-cancel {
-            background: none; border: 1px solid #fecaca; color: #dc2626;
-            border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
-            transition: all 0.15s;
-        }
-        .btn-res-cancel:hover { background: #fef2f2; }
-        .badge-situacao { font-size: 11px; border-radius: 12px; padding: 2px 8px; font-weight: 600; }
-        .badge-confirmada { background: #dcfce7; color: #16a34a; }
-        .badge-cancelada { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
-        .active-res-chip.hidden { display: none; }
-        /* Chips de disponibilidade */
-        .avail-info { font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; }
-    </style>
 </head>
 <body>
     <div class="teacher-app">
-        <!-- Barra de Navegação Superior (TopNavBar) -->
+        <!-- Barra Superior -->
         <header class="teacher-header">
             <div class="teacher-brand-group">
                 <a href="professor.html" class="teacher-brand-logo">
@@ -65,7 +31,7 @@
                 <span class="teacher-greeting">Olá, Professor</span>
             </div>
 
-            <!-- Ações e Perfil do Usuário -->
+            <!-- Usuário -->
             <div class="teacher-user-actions">
                 <div class="teacher-user-badge">
                     <div class="teacher-avatar">M</div>
@@ -82,14 +48,14 @@
 
         <!-- Conteúdo Principal -->
         <main class="teacher-main-content">
-            <!-- Cabeçalho da Agenda e Ações -->
+            <!-- Cabeçalho da Agenda -->
             <section class="agenda-action-header">
                 <div class="agenda-action-title">
                     <h1>Agenda de Reservas</h1>
                     <p>Visualize e gerencie os equipamentos disponíveis.</p>
                 </div>
                 <div class="agenda-header-right">
-                    <!-- Chip de reserva ativa (oculto por padrão) -->
+                    <!-- Chip de reserva ativa -->
                     <div class="active-res-chip hidden" id="active-chip">
                         <span class="chip-dot"></span>
                         <span class="material-symbols-outlined chip-icon">timer</span>
@@ -99,13 +65,13 @@
                         </div>
                     </div>
                     <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
-                        <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                        <span class="material-symbols-outlined">add</span>
                         <span>Nova reserva</span>
                     </button>
                 </div>
             </section>
 
-            <!-- Barra de Controles e Filtros -->
+            <!-- Controles do Calendário -->
             <section class="calendar-controls-bar">
                 <div class="week-selector">
                     <button type="button" class="btn-week-nav" id="btnPrevWeek" aria-label="Semana anterior">
@@ -124,7 +90,7 @@
                 </div>
             </section>
 
-            <!-- Grade Semanal de Horários -->
+            <!-- Grade de Horários -->
             <section class="calendar-wrapper-card">
                 <div class="calendar-scroll-area">
                     <table class="calendar-table" id="calendarTable">
@@ -136,23 +102,23 @@
 
             <!-- Minhas Reservas -->
             <section id="my-reservations-section">
-                <h3 style="font-size:15px; font-weight:600; color:var(--color-text-primary); margin-bottom:4px;">Minhas Reservas</h3>
-                <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:12px;">Histórico e reservas futuras.</p>
+                <h3>Minhas Reservas</h3>
+                <p>Histórico e reservas futuras.</p>
                 <div class="my-res-list" id="myResList"></div>
             </section>
         </main>
 
-        <!-- Navegação Inferior para Dispositivos Móveis -->
+        <!-- Navegação Mobile -->
         <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
             <a href="professor.html" class="mobile-bottom-item active">
                 <span class="material-symbols-outlined">calendar_month</span>
                 <span>Agenda</span>
             </a>
-            <a href="#" class="mobile-bottom-item" onclick="document.getElementById('btnOpenNewReservation').click(); return false;">
+            <a href="#" class="mobile-bottom-item" id="mobileNewResBtn">
                 <span class="material-symbols-outlined">add_circle</span>
                 <span>Nova reserva</span>
             </a>
-            <a href="#" class="mobile-bottom-item" onclick="document.getElementById('my-reservations-section').scrollIntoView({behavior:'smooth'}); return false;">
+            <a href="#" class="mobile-bottom-item" id="mobileMyResBtn">
                 <span class="material-symbols-outlined">history_edu</span>
                 <span>Reservas</span>
             </a>
@@ -165,9 +131,9 @@
             <div class="modal-header">
                 <div>
                     <h3>Criar nova reserva</h3>
-                    <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 2px;">Selecione os equipamentos e o horário desejado.</p>
+                    <p>Selecione os equipamentos e o horário desejado.</p>
                 </div>
-                <button type="button" class="btn-close" onclick="closeModal('new-reservation-modal')" aria-label="Fechar modal">
+                <button type="button" class="btn-close" aria-label="Fechar modal">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -175,19 +141,19 @@
             <form id="new-reservation-form">
                 <div class="modal-body">
                     <!-- Data -->
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group">
                         <label for="res-date">Data</label>
                         <input type="date" id="res-date" class="form-control" required>
                     </div>
 
                     <!-- Turma -->
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group">
                         <label for="res-turma">Turma</label>
                         <input type="text" id="res-turma" class="form-control" placeholder="Ex: 3A Info, 2B Admin" required>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-col form-group" style="margin-bottom: 0;">
+                        <div class="form-col form-group">
                             <label for="res-start">Horário de início</label>
                             <div class="select-wrapper">
                                 <select id="res-start" required>
@@ -209,7 +175,7 @@
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
                         </div>
-                        <div class="form-col form-group" style="margin-bottom: 0;">
+                        <div class="form-col form-group">
                             <label for="res-end">Horário de fim</label>
                             <div class="select-wrapper">
                                 <select id="res-end" required>
@@ -233,9 +199,9 @@
                         </div>
                     </div>
 
-                    <!-- Sala (opcional) -->
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="res-room">Reservar sala <span style="font-size: 12px; font-weight: normal; color: var(--color-text-muted);">(opcional)</span></label>
+                    <!-- Sala -->
+                    <div class="form-group">
+                        <label for="res-room">Reservar sala</label>
                         <div class="select-wrapper">
                             <select id="res-room">
                                 <option value="">Sem sala (somente notebooks)</option>
@@ -245,19 +211,19 @@
                     </div>
 
                     <!-- Notebooks -->
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="res-quantity">Quantidade de notebooks <span style="font-size: 12px; font-weight: normal; color: var(--color-text-muted);">(opcional)</span></label>
+                    <div class="form-group">
+                        <label for="res-quantity">Quantidade de notebooks</label>
                         <input type="number" id="res-quantity" class="form-control" placeholder="0 = sem notebooks" min="0">
                         <p class="avail-info" id="avail-info"></p>
                     </div>
 
                     <!-- Mensagem de erro -->
-                    <div id="res-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px; line-height:1.4;"></div>
+                    <div id="res-error" class="login-error-msg"></div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('new-reservation-modal')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px;">Confirmar reserva</button>
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Confirmar reserva</button>
                 </div>
             </form>
         </div>
@@ -269,351 +235,30 @@
             <div class="modal-header">
                 <div>
                     <h3>Detalhes da Reserva</h3>
-                    <p style="font-size:13px; color:var(--color-text-secondary); margin-top:2px;">Visualize ou cancele esta reserva.</p>
+                    <p>Visualize ou cancele esta reserva.</p>
                 </div>
-                <button type="button" class="btn-close" onclick="closeModal('res-detail-modal')">
+                <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             <div class="modal-body" id="res-detail-body"></div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeModal('res-detail-modal')">Fechar</button>
-                <button type="button" class="btn-primary" id="btn-cancel-res" style="background:#dc2626; width:auto; padding:10px 22px;">
-                    <span class="material-symbols-outlined" style="font-size:18px;">cancel</span>
+                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
+                <button type="button" class="btn-primary btn-danger" id="btn-cancel-res">
+                    <span class="material-symbols-outlined">cancel</span>
                     Cancelar Reserva
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification Container -->
+    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts -->
+    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
-    <script>
-    // ─────────────────────────────────────────────────────────────
-    //  INICIALIZAÇÃO
-    // ─────────────────────────────────────────────────────────────
-    let currentSession = null;
-    let currentWeekMonday = ERS.getMonday(new Date());
-    let currentShift = 'manha';
-    let selectedResId = null;
-
-    const SHIFT_SLOTS = {
-        manha: [
-            { start: '07:00', end: '07:50' },
-            { start: '07:50', end: '08:40' },
-            { start: '08:40', end: '09:30' },
-            { start: '09:30', end: '10:20' },
-            { start: '10:35', end: '11:25' },
-            { start: '11:25', end: '12:15' },
-        ],
-        tarde: [
-            { start: '13:00', end: '13:50' },
-            { start: '13:50', end: '14:40' },
-            { start: '14:40', end: '15:30' },
-            { start: '15:30', end: '16:20' },
-        ],
-        noite: [
-            { start: '19:00', end: '19:50' },
-            { start: '19:50', end: '20:40' },
-            { start: '20:40', end: '21:30' },
-        ],
-    };
-
-    document.addEventListener('DOMContentLoaded', () => {
-        currentSession = AUTH.requireAuth(['professor']);
-        if (!currentSession) return;
-
-        AUTH.renderUserInfo(currentSession);
-        AUTH.setupLogout();
-
-        // Navegação de semana
-        document.getElementById('btnPrevWeek').addEventListener('click', () => {
-            currentWeekMonday.setDate(currentWeekMonday.getDate() - 7);
-            renderCalendar();
-        });
-        document.getElementById('btnNextWeek').addEventListener('click', () => {
-            currentWeekMonday.setDate(currentWeekMonday.getDate() + 7);
-            renderCalendar();
-        });
-
-        // Turno
-        document.querySelectorAll('.shift-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.shift-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentShift = btn.dataset.shift;
-                renderCalendar();
-            });
-        });
-
-        // Nova reserva: preencher data atual por padrão
-        document.getElementById('btnOpenNewReservation').addEventListener('click', () => {
-            document.getElementById('res-date').value = ERS.today();
-            document.getElementById('res-error').style.display = 'none';
-            updateAvailInfo();
-            populateRoomSelect();
-            openModal('new-reservation-modal');
-        });
-
-        // Disponibilidade ao mudar quantidade
-        document.getElementById('res-quantity').addEventListener('input', updateAvailInfo);
-        document.getElementById('res-start').addEventListener('change', updateAvailInfo);
-        document.getElementById('res-end').addEventListener('change', updateAvailInfo);
-        document.getElementById('res-date').addEventListener('change', updateAvailInfo);
-
-        // Submit da nova reserva
-        document.getElementById('new-reservation-form').addEventListener('submit', handleCreateReservation);
-
-        renderCalendar();
-        renderMyReservations();
-        renderActiveChip();
-    });
-
-    // ─────────────────────────────────────────────────────────────
-    //  CALENDÁRIO
-    // ─────────────────────────────────────────────────────────────
-    function renderCalendar() {
-        const weekDays = ERS.getWeekDays(currentWeekMonday);
-        const slots = SHIFT_SLOTS[currentShift];
-
-        // Label da semana
-        const first = weekDays[0];
-        const last = weekDays[4];
-        document.getElementById('weekLabel').textContent =
-            `${first.getDate()} ${ERS.MESES[first.getMonth()]} — ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
-
-        // Cabeçalho
-        const thead = document.getElementById('calendarHead');
-        const todayStr = ERS.today();
-        thead.innerHTML = `<tr>
-            <th class="time-col-header"><span class="material-symbols-outlined" style="font-size:18px;">schedule</span></th>
-            ${weekDays.map(d => {
-                const dk = ERS.dateKey(d);
-                const isToday = dk === todayStr;
-                return `<th${isToday ? ' class="today-col"' : ''}>
-                    <div class="day-header-tag">${ERS.DIAS_SEMANA_FULL[d.getDay()]}</div>
-                    <div class="day-header-number">${d.getDate()}</div>
-                </th>`;
-            }).join('')}
-        </tr>`;
-
-        // Corpo
-        const tbody = document.getElementById('calendarBody');
-        tbody.innerHTML = '';
-
-        slots.forEach(slot => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="time-col-cell">
-                <span class="time-start">${slot.start}</span>
-                <span class="time-end">${slot.end}</span>
-            </td>`;
-
-            weekDays.forEach(d => {
-                const dk = ERS.dateKey(d);
-                const isToday = dk === todayStr;
-                const td = document.createElement('td');
-                if (isToday) td.className = 'today-cell';
-
-                // Reservas nesse slot/dia
-                const dayReservations = ERS.getReservationsByDate(dk);
-                const slotReservations = dayReservations.filter(r =>
-                    ERS.timesOverlap(slot.start, slot.end, r.inicio, r.fim)
-                );
-
-                // Bloqueios nesse slot/dia
-                const blocks = ERS.getBlocks().filter(b =>
-                    b.data === dk && ERS.timesOverlap(slot.start, slot.end, b.inicio, b.fim)
-                );
-
-                let html = '';
-                if (blocks.length > 0) {
-                    blocks.forEach(b => {
-                        html += `<div class="calendar-events-container">
-                            <div class="calendar-event-card event-block" title="${b.motivo}">
-                                <span class="event-teacher">🔒 Bloqueado</span>
-                                <span class="event-desc">${b.motivo}</span>
-                                <span class="event-room"><span class="material-symbols-outlined">block</span> ${b.inicio}–${b.fim}</span>
-                            </div>
-                        </div>`;
-                    });
-                }
-
-                if (slotReservations.length > 0) {
-                    html += `<div class="calendar-events-container">`;
-                    slotReservations.forEach(r => {
-                        const isMine = r.professorId === currentSession.userId;
-                        const colorClass = isMine ? 'primary' : 'tertiary';
-                        html += `<div class="calendar-event-card ${colorClass}${isMine ? ' event-mine' : ''}"
-                            data-res-id="${r.id}" onclick="openReservationDetail('${r.id}')">
-                            ${isMine ? '<span class="event-mine-label">Minha</span>' : ''}
-                            <span class="event-teacher">${r.professorNome}</span>
-                            <span class="event-desc">${r.notebooks ? r.notebooks + ' notebooks' : ''}${r.notebooks && r.sala ? ', ' : ''}${r.sala || ''}</span>
-                            <span class="event-room">
-                                <span class="material-symbols-outlined">group</span>
-                                ${r.turma}
-                            </span>
-                        </div>`;
-                    });
-                    html += `</div>`;
-                }
-
-                td.innerHTML = html;
-                tr.appendChild(td);
-            });
-
-            tbody.appendChild(tr);
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    //  MINHAS RESERVAS
-    // ─────────────────────────────────────────────────────────────
-    function renderMyReservations() {
-        const list = document.getElementById('myResList');
-        if (!list || !currentSession) return;
-
-        const myRes = ERS.getReservationsByUser(currentSession.userId)
-            .sort((a, b) => a.data.localeCompare(b.data));
-
-        if (myRes.length === 0) {
-            list.innerHTML = `<p style="font-size:13px; color:var(--color-text-muted); padding:12px 0;">Você ainda não tem reservas.</p>`;
-            return;
-        }
-
-        list.innerHTML = myRes.map(r => `
-            <div class="my-res-item">
-                <div class="res-date">${ERS.formatDate(r.data)}</div>
-                <div class="res-info">
-                    <strong style="font-size:14px;">${r.inicio}–${r.fim} • ${r.turma}</strong>
-                    <p>${[r.sala, r.notebooks ? r.notebooks + ' notebooks' : ''].filter(Boolean).join(' • ')}</p>
-                </div>
-                <div class="res-actions">
-                    <span class="badge-situacao badge-${r.situacao}">${r.situacao === 'confirmada' ? 'Confirmada' : 'Cancelada'}</span>
-                    ${r.situacao === 'confirmada' ? `<button class="btn-res-cancel" onclick="cancelRes('${r.id}')">Cancelar</button>` : ''}
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function renderActiveChip() {
-        if (!currentSession) return;
-        const chip = document.getElementById('active-chip');
-        const todayRes = ERS.getReservationsByDate(ERS.today())
-            .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada');
-        if (todayRes.length > 0) {
-            const r = todayRes[0];
-            chip.classList.remove('hidden');
-            document.getElementById('active-chip-text').textContent =
-                `${r.inicio}–${r.fim} ${r.sala ? '• ' + r.sala : ''} ${r.turma ? '• ' + r.turma : ''}`;
-        } else {
-            chip.classList.add('hidden');
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    //  CRIAR RESERVA
-    // ─────────────────────────────────────────────────────────────
-    function populateRoomSelect() {
-        const sel = document.getElementById('res-room');
-        sel.innerHTML = '<option value="">Sem sala (somente notebooks)</option>';
-        ERS.getActiveRooms().forEach(r => {
-            sel.innerHTML += `<option value="${r.nome}">${r.nome}</option>`;
-        });
-    }
-
-    function updateAvailInfo() {
-        const infoEl = document.getElementById('avail-info');
-        const total = ERS.getTotalDisponivel();
-        infoEl.textContent = `${total} notebooks disponíveis no total.`;
-    }
-
-    function handleCreateReservation(e) {
-        e.preventDefault();
-        const errEl = document.getElementById('res-error');
-        errEl.style.display = 'none';
-
-        const data     = document.getElementById('res-date').value;
-        const inicio   = document.getElementById('res-start').value;
-        const fim      = document.getElementById('res-end').value;
-        const sala     = document.getElementById('res-room').value;
-        const qtd      = parseInt(document.getElementById('res-quantity').value) || 0;
-        const turma    = document.getElementById('res-turma').value.trim();
-
-        const result = ERS.createReservation({
-            professorId:   currentSession.userId,
-            professorNome: currentSession.nome,
-            data, inicio, fim,
-            sala: sala || null,
-            notebooks: qtd,
-            turma,
-        });
-
-        if (!result.ok) {
-            errEl.textContent = result.message;
-            errEl.style.display = 'block';
-            return;
-        }
-
-        closeModal('new-reservation-modal');
-        document.getElementById('new-reservation-form').reset();
-        ERS.showToast('Reserva criada com sucesso!', 'success');
-        renderCalendar();
-        renderMyReservations();
-        renderActiveChip();
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    //  DETALHES / CANCELAR
-    // ─────────────────────────────────────────────────────────────
-    function openReservationDetail(id) {
-        const reservations = ERS.getReservations();
-        const r = reservations.find(r => r.id === id);
-        if (!r) return;
-
-        selectedResId = id;
-        const isMine = r.professorId === currentSession.userId;
-
-        document.getElementById('res-detail-body').innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
-                <div><strong>Horário:</strong> ${r.inicio} – ${r.fim}</div>
-                <div><strong>Turma:</strong> ${r.turma}</div>
-                ${r.sala ? `<div><strong>Sala:</strong> ${r.sala}</div>` : ''}
-                ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}</div>` : ''}
-                <div><strong>Professor:</strong> ${r.professorNome}</div>
-                <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
-            </div>
-        `;
-
-        const btnCancel = document.getElementById('btn-cancel-res');
-        if (isMine && r.situacao === 'confirmada') {
-            btnCancel.style.display = '';
-            btnCancel.onclick = () => cancelRes(id);
-        } else {
-            btnCancel.style.display = 'none';
-        }
-
-        openModal('res-detail-modal');
-    }
-
-    function cancelRes(id) {
-        if (!confirm('Tem certeza que deseja cancelar esta reserva? Os recursos ficarão disponíveis novamente.')) return;
-        const result = ERS.cancelReservation(id);
-        if (result.ok) {
-            closeModal('res-detail-modal');
-            ERS.showToast('Reserva cancelada. Recursos liberados.', 'success');
-            renderCalendar();
-            renderMyReservations();
-            renderActiveChip();
-        } else {
-            ERS.showToast(result.message, 'error');
-        }
-    }
-    </script>
+    <script src="../js/professor.js"></script>
 </body>
 </html>

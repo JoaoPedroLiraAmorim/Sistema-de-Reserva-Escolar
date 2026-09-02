@@ -6,47 +6,21 @@
     <title>Salas - PROATEC</title>
     <meta name="description" content="Gestão de salas reserváveis do laboratório PROATEC.">
 
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
+    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/proatec.css">
-    <style>
-        .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 8px; }
-        .room-card {
-            background: var(--color-surface); border: 1px solid var(--color-border);
-            border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px;
-            transition: box-shadow 0.2s;
-        }
-        .room-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-        .room-card.inactive { opacity: 0.55; }
-        .room-card-header { display: flex; align-items: center; justify-content: space-between; }
-        .room-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--color-primary-light, #eff6ff); display: flex; align-items: center; justify-content: center; }
-        .room-icon span { color: var(--color-primary); font-size: 22px; }
-        .room-status { font-size: 12px; font-weight: 600; border-radius: 20px; padding: 4px 12px; }
-        .room-status.ativa { background: #dcfce7; color: #16a34a; }
-        .room-status.inativa { background: #f1f5f9; color: #94a3b8; }
-        .room-name { font-size: 17px; font-weight: 700; color: var(--color-text-primary); }
-        .room-meta { font-size: 13px; color: var(--color-text-secondary); }
-        .room-card-actions { display: flex; gap: 8px; margin-top: 4px; }
-        .btn-toggle-room {
-            flex: 1; border: 1px solid var(--color-border); background: var(--color-bg);
-            border-radius: 8px; padding: 8px; font-size: 13px; font-family: inherit;
-            cursor: pointer; font-weight: 500; transition: all 0.15s; color: var(--color-text-secondary);
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .btn-toggle-room.ativar:hover { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
-        .btn-toggle-room.desativar:hover { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
-        .room-today-reservations { font-size: 12px; color: var(--color-text-muted); padding: 8px 0 0; border-top: 1px solid var(--color-border); }
-        .room-today-reservations strong { color: var(--color-text-primary); }
-    </style>
+    <link rel="stylesheet" href="../css/salas.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
+        <!-- Barra Lateral (Sidebar) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand-icon">
@@ -110,13 +84,12 @@
                             </button>
                             <p class="date-badge">—</p>
                         </div>
-                        <h2 style="font-size:22px;">Gestão de Salas</h2>
+                        <h2>Gestão de Salas</h2>
                         <p>Ative ou desative salas. Salas inativas não aparecem em novas reservas.</p>
                     </div>
-                    <button type="button" class="btn-primary" id="btnAddRoom"
-                        style="height:fit-content; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; width:auto;">
-                        <span class="material-symbols-outlined" style="font-size:18px;">add</span>
-                        Adicionar sala
+                    <button type="button" class="btn-primary" id="btnAddRoom">
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Adicionar sala</span>
                     </button>
                 </section>
 
@@ -131,116 +104,35 @@
             <div class="modal-header">
                 <div>
                     <h3>Adicionar Sala</h3>
-                    <p style="font-size:13px; color:var(--color-text-secondary);">Cadastre uma nova sala para reservas.</p>
+                    <p>Cadastre uma nova sala para reservas.</p>
                 </div>
-                <button type="button" class="btn-close" onclick="closeModal('add-room-modal')">
+                <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             <form id="add-room-form">
                 <div class="modal-body">
-                    <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-group">
                         <label for="room-name-input">Nome da sala</label>
                         <input type="text" id="room-name-input" class="form-control" placeholder="Ex: Sala de Informática 01" required>
                     </div>
-                    <div id="room-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px;"></div>
+                    <div id="room-error" class="login-error-msg"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('add-room-modal')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="width:auto; padding:10px 22px;">Salvar</button>
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
-    <script>
-    let currentSession = null;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
-        if (!currentSession) return;
-
-        AUTH.renderUserInfo(currentSession);
-        AUTH.setupLogout();
-        AUTH.adaptSidebarByRole(currentSession);
-
-        document.getElementById('btnAddRoom').addEventListener('click', () => {
-            document.getElementById('room-error').style.display = 'none';
-            openModal('add-room-modal');
-        });
-        document.getElementById('add-room-form').addEventListener('submit', handleAddRoom);
-
-        renderRooms();
-    });
-
-    function renderRooms() {
-        const rooms = ERS.getRooms();
-        const todayRes = ERS.getReservationsByDate(ERS.today());
-        const grid = document.getElementById('rooms-grid');
-
-        if (rooms.length === 0) {
-            grid.innerHTML = `<p style="font-size:13px; color:var(--color-text-muted);">Nenhuma sala cadastrada.</p>`;
-            return;
-        }
-
-        grid.innerHTML = rooms.map(room => {
-            const roomRes = todayRes.filter(r => r.sala === room.nome);
-            const resText = roomRes.length > 0
-                ? roomRes.map(r => `${r.inicio}–${r.fim} (${r.professorNome})`).join(', ')
-                : 'Sem reservas hoje';
-            return `
-                <div class="room-card${room.ativa ? '' : ' inactive'}">
-                    <div class="room-card-header">
-                        <div class="room-icon">
-                            <span class="material-symbols-outlined">meeting_room</span>
-                        </div>
-                        <span class="room-status ${room.ativa ? 'ativa' : 'inativa'}">${room.ativa ? 'Ativa' : 'Inativa'}</span>
-                    </div>
-                    <div class="room-name">${room.nome}</div>
-                    <div class="room-meta">
-                        <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;">event</span>
-                        ${roomRes.length} reserva(s) hoje
-                    </div>
-                    <div class="room-today-reservations">${resText}</div>
-                    <div class="room-card-actions">
-                        <button class="btn-toggle-room ${room.ativa ? 'desativar' : 'ativar'}"
-                            onclick="toggleRoom('${room.id}')">
-                            <span class="material-symbols-outlined" style="font-size:16px;">${room.ativa ? 'toggle_off' : 'toggle_on'}</span>
-                            ${room.ativa ? 'Desativar' : 'Ativar'}
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function toggleRoom(id) {
-        ERS.toggleRoom(id);
-        renderRooms();
-        const room = ERS.getRooms().find(r => r.id === id);
-        ERS.showToast(`Sala ${room ? (room.ativa ? 'ativada' : 'desativada') : ''} com sucesso.`, 'success');
-    }
-
-    function handleAddRoom(e) {
-        e.preventDefault();
-        const name = document.getElementById('room-name-input').value.trim();
-        const errEl = document.getElementById('room-error');
-        const result = ERS.addRoom(name);
-        if (!result.ok) {
-            errEl.textContent = result.message;
-            errEl.style.display = 'block';
-            return;
-        }
-        closeModal('add-room-modal');
-        document.getElementById('add-room-form').reset();
-        renderRooms();
-        ERS.showToast(`Sala "${name}" cadastrada com sucesso!`, 'success');
-    }
-    </script>
+    <script src="../js/salas.js"></script>
 </body>
 </html>

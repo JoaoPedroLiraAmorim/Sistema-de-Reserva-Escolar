@@ -352,3 +352,38 @@
 .btn-add-notebook .material-symbols-outlined {
     font-size: 18px;
 }
+
+/* ---------------------------------------------------------
+   5. Bloqueios e Detalhes
+   --------------------------------------------------------- */
+.schedule-card.block-card {
+    background-color: var(--color-error-bg);
+    border-left: 3px solid var(--color-error);
+    cursor: default;
+}
+.schedule-card.block-card h4 {
+    color: var(--color-error);
+}
+
+.week-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.coordenacao-only {
+    display: none;
+}
+
+.detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.detail-list div {
+    font-size: 14px;
+}
+.detail-list div strong {
+    color: var(--color-text-primary);
+}
+

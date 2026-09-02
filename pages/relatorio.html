@@ -6,20 +6,21 @@
     <title>Relatórios - PROATEC</title>
     <meta name="description" content="Relatórios diários de reservas e uso de equipamentos do laboratório PROATEC.">
 
-    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-    <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
+    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/proatec.css">
     <link rel="stylesheet" href="../css/relatorio.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Barra Lateral de Navegação (Sidebar) -->
+        <!-- Barra Lateral (Sidebar) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand-icon">
@@ -76,10 +77,10 @@
             </div>
         </aside>
 
-        <!-- Área Principal de Conteúdo -->
+        <!-- Área Principal -->
         <div class="main-wrapper">
-            <main class="dashboard-content" style="padding: 28px 32px;">
-                <!-- Cabeçalho da Página de Relatórios -->
+            <main class="dashboard-content">
+                <!-- Cabeçalho -->
                 <header class="reports-page-header">
                     <div class="reports-title-group">
                         <div class="header-top-row">
@@ -92,8 +93,8 @@
                     </div>
 
                     <!-- Filtro por data -->
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="date" id="report-date" class="form-control" style="max-width:180px; font-family:inherit; font-size:13px;">
+                    <div class="reports-filter-group">
+                        <input type="date" id="report-date" class="form-control report-date-input">
                         <div class="reports-date-badge">
                             <span class="material-symbols-outlined">calendar_month</span>
                             <span id="date-label">Hoje</span>
@@ -101,119 +102,19 @@
                     </div>
                 </header>
 
-                <!-- Resumo estatístico -->
-                <div id="report-stats" style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;"></div>
+                <!-- Resumo Estatístico -->
+                <div id="report-stats" class="report-stats-grid"></div>
 
-                <!-- Lista de Cartões de Relatório -->
-                <section class="reports-list" id="reports-list">
-                    <!-- Gerado dinamicamente -->
-                </section>
+                <!-- Lista de Relatórios -->
+                <section class="reports-list" id="reports-list"></section>
             </main>
         </div>
     </div>
 
-    <!-- Script Global (Modais e Sidebar Mobile) -->
+    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
-    <script>
-    const ICON_COLORS = ['primary', 'secondary', 'tertiary'];
-    const ICON_NAMES = ['laptop_mac', 'laptop_chromebook', 'laptop_windows'];
-    let currentSession = null;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
-        if (!currentSession) return;
-
-        AUTH.renderUserInfo(currentSession);
-        AUTH.setupLogout();
-        AUTH.adaptSidebarByRole(currentSession);
-
-        const dateInput = document.getElementById('report-date');
-        dateInput.value = ERS.today();
-        dateInput.addEventListener('change', () => renderReport(dateInput.value));
-
-        renderReport(ERS.today());
-    });
-
-    function renderReport(dateStr) {
-        // Inclui canceladas para o relatório
-        const reservations = ERS.getReservations()
-            .filter(r => r.data === dateStr)
-            .sort((a, b) => a.inicio.localeCompare(b.inicio));
-
-
-        // Atualiza label da data
-        const d = new Date(dateStr + 'T12:00:00');
-        document.getElementById('date-label').textContent =
-            dateStr === ERS.today() ? 'Hoje' : ERS.formatDate(dateStr);
-
-        // Stats
-        const totalRes = reservations.length;
-        const totalNotebooks = reservations.reduce((a, r) => a + (r.notebooks || 0), 0);
-        const canceladas = reservations.filter(r => r.situacao === 'cancelada').length;
-
-        document.getElementById('report-stats').innerHTML = `
-            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:14px 20px; min-width:120px;">
-                <p style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Reservas</p>
-                <p style="font-size:26px; font-weight:700; color:var(--color-text-primary);">${totalRes}</p>
-            </div>
-            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:14px 20px; min-width:120px;">
-                <p style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Notebooks</p>
-                <p style="font-size:26px; font-weight:700; color:var(--color-primary);">${totalNotebooks}</p>
-            </div>
-            <div style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:14px 20px; min-width:120px;">
-                <p style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Canceladas</p>
-                <p style="font-size:26px; font-weight:700; color:#dc2626;">${canceladas}</p>
-            </div>
-        `;
-
-        const list = document.getElementById('reports-list');
-
-        if (reservations.length === 0) {
-            list.innerHTML = `
-                <div style="text-align:center; padding:48px 24px; color:var(--color-text-muted);">
-                    <span class="material-symbols-outlined" style="font-size:48px; display:block; margin-bottom:12px; opacity:0.4;">event_busy</span>
-                    <p>Nenhuma reserva para esta data.</p>
-                </div>
-            `;
-            return;
-        }
-
-        list.innerHTML = reservations.map((r, i) => `
-            <article class="report-card${r.situacao === 'cancelada' ? ' upcoming' : ''}">
-                <div class="report-card-header">
-                    <div class="report-lead">
-                        <div class="report-icon-box ${ICON_COLORS[i % ICON_COLORS.length]}">
-                            <span class="material-symbols-outlined">${ICON_NAMES[i % ICON_NAMES.length]}</span>
-                        </div>
-                        <div class="report-details">
-                            <div class="report-title-row">
-                                <h3 class="report-teacher-name">${r.professorNome}</h3>
-                                <span class="report-class-tag">• Turma ${r.turma}</span>
-                                ${r.situacao === 'cancelada' ? '<span class="badge badge-neutral" style="margin-left:6px;">Cancelada</span>' : ''}
-                            </div>
-                            <div class="report-meta-row">
-                                <span class="report-meta-item">
-                                    <span class="material-symbols-outlined">schedule</span>
-                                    ${r.inicio} – ${r.fim}
-                                </span>
-                                ${r.sala ? `<span class="report-meta-item">
-                                    <span class="material-symbols-outlined">meeting_room</span>
-                                    ${r.sala}
-                                </span>` : ''}
-                                ${r.notebooks ? `<span class="report-meta-item">
-                                    <span class="material-symbols-outlined">laptop</span>
-                                    ${r.notebooks} notebooks
-                                </span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <span class="badge badge-${r.situacao === 'confirmada' ? 'primary' : 'neutral'}">${r.situacao === 'confirmada' ? 'Confirmada' : 'Cancelada'}</span>
-                </div>
-            </article>
-        `).join('');
-    }
-    </script>
+    <script src="../js/relatorio.js"></script>
 </body>
 </html>

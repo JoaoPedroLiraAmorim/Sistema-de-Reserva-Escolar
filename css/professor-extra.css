@@ -1,0 +1,90 @@
+/* ==========================================================================
+   professor-extra.css
+   Estilos complementares da página do Professor (calendário dinâmico,
+   lista de reservas, badges de situação).
+   ========================================================================== */
+
+/* Evento clicável no calendário */
+.calendar-event-card          { cursor: pointer; }
+.calendar-event-card:hover    { opacity: 0.85; }
+
+/* Destaque de reserva própria */
+.event-mine       { border-left: 3px solid var(--color-primary); }
+.event-mine-label { font-size: 10px; font-weight: 600; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* Bloqueio no calendário */
+.event-block { border-left: 3px solid #ef4444; background: #fef2f2 !important; }
+
+/* Label da semana */
+.week-label-text { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+
+/* Célula vazia */
+.calendar-empty-cell { color: var(--color-text-muted); font-size: 12px; text-align: center; padding: 4px; }
+
+/* Seção "Minhas Reservas" */
+#my-reservations-section { margin-top: 28px; }
+
+.my-res-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.my-res-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+.my-res-item .res-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-primary);
+    min-width: 70px;
+}
+
+.my-res-item .res-info       { flex: 1; }
+.my-res-item .res-info strong { font-size: 14px; }
+.my-res-item .res-info p     { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.my-res-item .res-actions    { display: flex; gap: 6px; align-items: center; }
+
+/* Botão cancelar reserva */
+.btn-res-cancel {
+    background: none;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+.btn-res-cancel:hover { background: #fef2f2; }
+
+/* Badges de situação */
+.badge-situacao   { font-size: 11px; border-radius: 12px; padding: 2px 8px; font-weight: 600; }
+.badge-confirmada { background: #dcfce7; color: #16a34a; }
+.badge-cancelada  { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
+
+/* Chip de reserva ativa */
+.active-res-chip.hidden { display: none; }
+
+/* Info de disponibilidade no modal */
+.avail-info { font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; }
+
+/* Chip ativo no header */
+.section-title h2 { font-size: 13px; color: var(--color-text-muted); }
+
+/* Detail list no modal */
+.detail-list              { display: flex; flex-direction: column; gap: 10px; }
+.detail-list div          { font-size: 14px; }
+.detail-list div strong   { color: var(--color-text-primary); }
+
+/* Mensagem vazia */
+.empty-msg { font-size: 13px; color: var(--color-text-muted); padding: 12px 0; }

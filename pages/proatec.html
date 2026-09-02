@@ -6,20 +6,20 @@
     <title>PROATEC - Gestão de Laboratório</title>
     <meta name="description" content="Dashboard do PROATEC para gestão de reservas, equipamentos e salas.">
 
-    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-    <!-- Folhas de Estilo Modularizadas (Padrão do Projeto) -->
+    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/proatec.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Barra Lateral de Navegação (Sidebar) -->
+        <!-- Barra Lateral (Sidebar) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand-icon">
@@ -76,11 +76,10 @@
             </div>
         </aside>
 
-        <!-- Área Principal de Conteúdo -->
+        <!-- Conteúdo Principal -->
         <div class="main-wrapper">
-            <!-- Conteúdo da Dashboard -->
             <main class="dashboard-content">
-                <!-- Cabeçalho de Boas-Vindas -->
+                <!-- Cabeçalho -->
                 <section class="dashboard-header">
                     <div class="header-greeting">
                         <div class="header-top-row">
@@ -94,7 +93,7 @@
                     </div>
                 </section>
 
-                <!-- Seção de Ações Rápidas -->
+                <!-- Ações Rápidas -->
                 <section class="quick-actions-section">
                     <h3 class="section-label">Ações Rápidas</h3>
                     <div class="quick-actions-grid">
@@ -124,9 +123,9 @@
                     </div>
                 </section>
 
-                <!-- Grid Principal: Reservas do Dia e Inventário -->
+                <!-- Grid Principal -->
                 <section class="dashboard-grid">
-                    <!-- Coluna Esquerda: Próximas Reservas -->
+                    <!-- Reservas do Dia -->
                     <div class="card reservations-card">
                         <div class="card-header card-header-icon">
                             <span class="material-symbols-outlined">calendar_clock</span>
@@ -137,7 +136,7 @@
                         </div>
 
                         <div class="reservations-list" id="today-reservations-list">
-                            <p style="font-size:13px; color:var(--color-text-muted); padding: 12px 0;">Carregando...</p>
+                            <p class="empty-msg">Carregando...</p>
                         </div>
 
                         <div class="card-action-footer">
@@ -148,41 +147,39 @@
                         </div>
                     </div>
 
-                    <!-- Coluna Direita: Próxima reserva em destaque -->
+                    <!-- Próxima Reserva em Destaque -->
                     <div class="card pickup-card">
                         <div class="card-header card-header-icon">
                             <span class="material-symbols-outlined">inventory</span>
                             <div>
-                                <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">Próxima reserva</h3>
-                                <p style="font-size: 12px; color: var(--color-text-secondary);">Prepare-se para a entrega.</p>
+                                <h3>Próxima reserva</h3>
+                                <p>Prepare-se para a entrega.</p>
                             </div>
                         </div>
 
                         <div class="pickup-details-box" id="next-pickup-box">
-                            <p style="font-size:13px; color:var(--color-text-muted);">Nenhuma reserva hoje.</p>
+                            <p class="empty-msg">Nenhuma reserva hoje.</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- Seção Inferior: Inventário por Marca -->
-                <section class="card inventory-card" style="padding: 20px;">
+                <!-- Inventário por Marca -->
+                <section class="card inventory-card">
                     <div class="inventory-header">
                         <span class="material-symbols-outlined">laptop_windows</span>
                         <div>
-                            <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary);">Notebooks disponíveis por marca</h3>
-                            <p style="font-size: 13px; color: var(--color-text-secondary);">Unidades funcionando no momento.</p>
+                            <h3>Notebooks disponíveis por marca</h3>
+                            <p>Unidades funcionando no momento.</p>
                         </div>
                     </div>
 
-                    <div class="brand-grid" id="brand-grid">
-                        <!-- Gerado dinamicamente -->
-                    </div>
+                    <div class="brand-grid" id="brand-grid"></div>
                 </section>
             </main>
         </div>
     </div>
 
-    <!-- Modal: Cadastrar Novo Equipamento / Notebook -->
+    <!-- Modal: Cadastrar Equipamento -->
     <div class="modal-backdrop hidden" id="equipment-modal">
         <div class="modal">
             <div class="modal-header">
@@ -190,12 +187,12 @@
                     <h3>Cadastrar Equipamento</h3>
                     <p>Adicione novos notebooks ao inventário do PROATEC</p>
                 </div>
-                <button type="button" class="btn-close" onclick="closeModal('equipment-modal')" aria-label="Fechar">
+                <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
-            <form id="equipmentForm" onsubmit="handleEquipmentSubmit(event)">
+            <form id="equipmentForm">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="eq-brand">Marca do notebook</label>
@@ -212,16 +209,16 @@
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group">
                         <label for="eq-quantity">Quantidade</label>
                         <input type="number" class="form-control" id="eq-quantity" placeholder="Ex: 5" min="1" required>
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('equipment-modal')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined">save</span>
                         <span>Salvar equipamento</span>
                     </button>
                 </div>
@@ -229,97 +226,13 @@
         </div>
     </div>
 
-    <!-- Container de Notificações Toast -->
+    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts -->
+    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
-    <script>
-    let currentSession = null;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
-        if (!currentSession) return;
-
-        AUTH.renderUserInfo(currentSession);
-        AUTH.setupLogout();
-        AUTH.adaptSidebarByRole(currentSession);
-
-        renderTodayReservations();
-        renderBrandGrid();
-    });
-
-    function renderTodayReservations() {
-        const list = document.getElementById('today-reservations-list');
-        const pickup = document.getElementById('next-pickup-box');
-        const todayRes = ERS.getReservationsByDate(ERS.today())
-            .sort((a, b) => a.inicio.localeCompare(b.inicio));
-
-        if (todayRes.length === 0) {
-            list.innerHTML = `<p style="font-size:13px; color:var(--color-text-muted); padding:12px 0;">Nenhuma reserva para hoje.</p>`;
-            pickup.innerHTML = `<p style="font-size:13px; color:var(--color-text-muted);">Nenhuma reserva hoje.</p>`;
-            return;
-        }
-
-        list.innerHTML = todayRes.map((r, i) => `
-            <div class="agenda-item${i === 0 ? ' highlight' : ''}">
-                <span class="agenda-time">${r.inicio}</span>
-                <div class="agenda-details">
-                    <h4 class="agenda-teacher">${r.professorNome}</h4>
-                    <p class="agenda-room">${r.sala || '—'} • ${r.notebooks ? r.notebooks + ' notebooks' : 'sem notebooks'}</p>
-                </div>
-                <span class="badge badge-${i === 0 ? 'primary' : 'neutral'}">${i === 0 ? 'Em breve' : 'Confirmada'}</span>
-            </div>
-        `).join('');
-
-        const next = todayRes[0];
-        pickup.innerHTML = `
-            <div class="pickup-badge-time">
-                <span class="material-symbols-outlined">schedule</span>
-                <span>${next.inicio} — turma ${next.turma}</span>
-            </div>
-            <h4 class="pickup-teacher">${next.professorNome}</h4>
-            <p class="pickup-room">${next.sala || 'Sem sala'} • ${next.notebooks || 0} notebooks</p>
-        `;
-    }
-
-    function renderBrandGrid() {
-        const grid = document.getElementById('brand-grid');
-        const notebooks = ERS.getNotebooks();
-
-        grid.innerHTML = notebooks.map(nb => {
-            const pct = nb.total > 0 ? Math.round((nb.funcionando / nb.total) * 100) : 0;
-            const fillClass = pct >= 70 ? 'primary' : pct >= 40 ? 'secondary' : 'error';
-            return `
-                <div class="brand-card">
-                    <span class="brand-name">${nb.marca}</span>
-                    <div class="brand-count-wrapper">
-                        <span class="brand-count">${nb.funcionando}</span>
-                        <span class="brand-total">/ ${nb.total}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill ${fillClass}" style="width: ${pct}%;"></div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function handleEquipmentSubmit(e) {
-        e.preventDefault();
-        const brand = document.getElementById('eq-brand').value;
-        const qty = parseInt(document.getElementById('eq-quantity').value) || 1;
-
-        ERS.addNotebooks(brand, qty);
-        closeModal('equipment-modal');
-        document.getElementById('equipmentForm').reset();
-        renderBrandGrid();
-
-        const unitWord = qty === 1 ? 'notebook' : 'notebooks';
-        ERS.showToast(`${qty} ${unitWord} (${brand}) cadastrado${qty > 1 ? 's' : ''} com sucesso!`, 'success');
-    }
-    </script>
+    <script src="../js/proatec.js"></script>
 </body>
 </html>

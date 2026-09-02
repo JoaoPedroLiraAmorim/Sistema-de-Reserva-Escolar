@@ -1,0 +1,99 @@
+/* ==========================================================================
+   equipamentos.css
+   Estilos da página de gestão de equipamentos/notebooks.
+   ========================================================================== */
+
+/* Card contentor da tabela */
+.eq-table-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Tabela principal */
+.eq-table { width: 100%; border-collapse: collapse; }
+
+.eq-table th {
+    background: var(--color-bg);
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.eq-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--color-border); }
+.eq-table tr:last-child td { border-bottom: none; }
+.eq-table tr:hover td { background: var(--color-bg); }
+
+/* Pill de marca */
+.eq-brand-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.eq-brand-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+
+/* Coluna de estatísticas */
+.eq-stat     { text-align: center; }
+.eq-stat-num { font-size: 16px; font-weight: 700; color: var(--color-text-primary); }
+.eq-stat-sub { font-size: 11px; color: var(--color-text-muted); }
+
+.stat-green  { color: #16a34a; }
+.stat-orange { color: #d97706; }
+.stat-red    { color: #dc2626; }
+
+/* Ações +/- */
+.eq-actions { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+
+.btn-add-eq,
+.btn-rm-eq {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.btn-add-eq:hover { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
+.btn-rm-eq:hover  { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
+
+/* Botão "Adicionar" de marca específica */
+.btn-add-brand { width: auto; padding: 4px 10px; font-size: 12px; }
+
+/* Cards de resumo */
+.eq-summary-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.eq-summary-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.eq-summary-card h4 {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.eq-summary-card .num       { font-size: 28px; font-weight: 700; color: var(--color-text-primary); }
+.eq-summary-card .num.green  { color: #16a34a; }
+.eq-summary-card .num.orange { color: #d97706; }
+.eq-summary-card .num.red    { color: #dc2626; }

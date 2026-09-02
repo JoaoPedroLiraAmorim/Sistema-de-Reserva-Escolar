@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ---------------------------------------------------------
-    // 3. Modais: Fechamento por clique no fundo escuro
+    // 3. Modais: Fechamento por clique no fundo escuro ou botões de fechar
     // ---------------------------------------------------------
     document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
         backdrop.addEventListener('click', (e) => {
@@ -46,6 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 backdrop.classList.add('hidden');
             }
         });
+    });
+
+    // Fechamento automático para qualquer botão com data-close-modal ou .btn-close ou .btn-cancel-modal
+    document.addEventListener('click', (e) => {
+        const closeBtn = e.target.closest('[data-close-modal], .btn-close, .btn-cancel-modal');
+        if (closeBtn) {
+            const targetId = closeBtn.getAttribute('data-close-modal');
+            if (targetId) {
+                closeModal(targetId);
+            } else {
+                const backdrop = closeBtn.closest('.modal-backdrop');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+        }
     });
 
     // ---------------------------------------------------------
@@ -58,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
 });
 
 /**

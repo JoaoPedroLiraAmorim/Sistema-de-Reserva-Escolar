@@ -1,0 +1,19 @@
+/* ==========================================================================
+   agenda-extra.css
+   Estilos complementares da agenda PROATEC (bloqueios e controles).
+   ========================================================================== */
+
+/* Card de bloqueio na grade */
+.schedule-card.block-card              { background: #fef2f2; border-left: 3px solid #ef4444; cursor: default; }
+.schedule-card.block-card h4           { color: #dc2626; }
+
+/* Label da semana */
+.week-label { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+
+/* Ocultar botão de bloqueio por padrão (revelado por JS para Coordenação) */
+.coordenacao-only { display: none; }
+
+/* Detail list no modal */
+.detail-list            { display: flex; flex-direction: column; gap: 10px; }
+.detail-list div        { font-size: 14px; }
+.detail-list div strong { color: var(--color-text-primary); }

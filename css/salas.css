@@ -1,0 +1,96 @@
+/* ==========================================================================
+   salas.css
+   Estilos da página de gestão de salas reserváveis.
+   ========================================================================== */
+
+/* Grid de cards */
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+}
+
+/* Card de sala */
+.room-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: box-shadow 0.2s;
+}
+.room-card:hover  { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); }
+.room-card.inactive { opacity: 0.55; }
+
+.room-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.room-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--color-primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.room-icon span { color: var(--color-primary); font-size: 22px; }
+
+/* Badge de status */
+.room-status {
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+.room-status.ativa   { background: #dcfce7; color: #16a34a; }
+.room-status.inativa { background: #f1f5f9; color: #94a3b8; }
+
+/* Nome e metadados */
+.room-name { font-size: 17px; font-weight: 700; color: var(--color-text-primary); }
+
+.room-meta {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.room-meta .material-symbols-outlined { font-size: 14px; }
+
+.room-today-reservations {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    padding: 8px 0 0;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Botão de ativar/desativar */
+.room-card-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+.btn-toggle-room {
+    flex: 1;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.btn-toggle-room .material-symbols-outlined { font-size: 16px; }
+.btn-toggle-room.ativar:hover   { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
+.btn-toggle-room.desativar:hover { background: #fef2f2; border-color: #dc2626; color: #dc2626; }

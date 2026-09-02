@@ -6,27 +6,20 @@
     <title>Agenda de Reservas - PROATEC</title>
     <meta name="description" content="Grade semanal de reservas de laboratório para gestão pelo PROATEC e Coordenação.">
 
-    <!-- Fontes do Google (Inter & Material Symbols Outlined) -->
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
-    <!-- Folhas de Estilo Modularizadas -->
+    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/agenda.css">
-    <style>
-        .schedule-card.block-card { background: #fef2f2; border-left: 3px solid #ef4444; cursor: default; }
-        .schedule-card.block-card h4 { color: #dc2626; }
-        .week-label { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-        .btn-block { display: none; }
-        .coordenacao-only { display: none; }
-    </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Barra Lateral de Navegação (Sidebar) -->
+        <!-- Barra Lateral (Sidebar) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand-icon">
@@ -83,10 +76,10 @@
             </div>
         </aside>
 
-        <!-- Área Principal de Conteúdo -->
+        <!-- Conteúdo Principal -->
         <div class="main-wrapper">
             <main class="dashboard-content">
-                <!-- Cabeçalho da Página -->
+                <!-- Cabeçalho -->
                 <header class="agenda-page-header">
                     <div class="agenda-title-group">
                         <div class="header-top-row">
@@ -98,21 +91,20 @@
                         <p>Planejamento e alocação de notebooks e espaços para a semana letiva.</p>
                     </div>
 
-                    <div style="display:flex; gap:10px; align-items:center;">
+                    <div class="agenda-header-actions">
                         <!-- Botão de bloqueio (apenas Coordenação) -->
-                        <button type="button" class="btn-new-res coordenacao-only" id="btnOpenBlock"
-                            style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">block</span>
+                        <button type="button" class="btn-new-res coordenacao-only" id="btnOpenBlock">
+                            <span class="material-symbols-outlined">block</span>
                             <span>Criar bloqueio</span>
                         </button>
                         <button type="button" class="btn-new-res" id="btnOpenNewReservation">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                            <span class="material-symbols-outlined">add</span>
                             <span>Nova reserva</span>
                         </button>
                     </div>
                 </header>
 
-                <!-- Barra de Filtros e Navegação da Semana -->
+                <!-- Barra de Filtros e Navegação -->
                 <section class="filters-bar">
                     <div class="filter-group">
                         <div class="filter-item">
@@ -134,12 +126,10 @@
                     </div>
                 </section>
 
-                <!-- Grade Semanal de Horários e Salas -->
+                <!-- Grade Semanal -->
                 <section class="schedule-container">
                     <div class="schedule-table-wrapper">
-                        <div class="schedule-grid" id="scheduleGrid">
-                            <!-- Gerado dinamicamente -->
-                        </div>
+                        <div class="schedule-grid" id="scheduleGrid"></div>
                     </div>
                 </section>
             </main>
@@ -151,7 +141,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h3>Criar nova reserva</h3>
-                <button type="button" class="btn-close" onclick="closeModal('new-reservation-modal')">
+                <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -159,25 +149,25 @@
             <form id="new-res-form">
                 <div class="modal-body">
                     <!-- Data -->
-                    <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-group">
                         <label for="res-date">Data</label>
                         <input type="date" id="res-date" class="form-control" required>
                     </div>
 
                     <!-- Turma -->
-                    <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-group">
                         <label for="res-turma">Turma</label>
                         <input type="text" id="res-turma" class="form-control" placeholder="Ex: 3A Info" required>
                     </div>
 
                     <!-- Professor -->
-                    <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-group">
                         <label for="res-professor">Professor</label>
                         <input type="text" id="res-professor" class="form-control" placeholder="Nome do professor" required>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-col form-group" style="margin-bottom:0;">
+                        <div class="form-col form-group">
                             <label for="res-start">Início</label>
                             <div class="select-wrapper">
                                 <select id="res-start" required>
@@ -198,7 +188,7 @@
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
                         </div>
-                        <div class="form-col form-group" style="margin-bottom:0;">
+                        <div class="form-col form-group">
                             <label for="res-end">Fim</label>
                             <div class="select-wrapper">
                                 <select id="res-end" required>
@@ -222,8 +212,8 @@
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label for="res-room">Sala <span style="font-size:12px; color:var(--color-text-muted);">(opcional)</span></label>
+                    <div class="form-group">
+                        <label for="res-room">Sala</label>
                         <div class="select-wrapper">
                             <select id="res-room">
                                 <option value="">Sem sala</option>
@@ -232,8 +222,8 @@
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label for="res-qty">Notebooks <span style="font-size:12px; color:var(--color-text-muted);">(opcional)</span></label>
+                    <div class="form-group">
+                        <label for="res-qty">Notebooks</label>
                         <div class="select-wrapper">
                             <select id="res-qty">
                                 <option value="0">Sem notebooks</option>
@@ -247,34 +237,33 @@
                         </div>
                     </div>
 
-                    <div id="res-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px; line-height:1.4;"></div>
+                    <div id="res-error" class="login-error-msg"></div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('new-reservation-modal')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="width: auto; padding: 10px 22px;">Confirmar reserva</button>
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Confirmar reserva</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal 2: Ver detalhes / Cancelar reserva -->
+    <!-- Modal 2: Detalhes / Cancelar Reserva -->
     <div class="modal-backdrop hidden" id="register-usage-modal">
         <div class="modal">
             <div class="modal-header">
                 <div>
                     <h3 id="modalUsageTitle">Detalhes da reserva</h3>
-                    <p id="modalUsageSubtitle" style="font-size:13px; color:var(--color-text-secondary);"></p>
+                    <p id="modalUsageSubtitle"></p>
                 </div>
-                <button type="button" class="btn-close" onclick="closeModal('register-usage-modal')">
+                <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             <div class="modal-body" id="usageDetailBody"></div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeModal('register-usage-modal')">Fechar</button>
-                <button type="button" id="btn-cancel-detail" class="btn-primary"
-                    style="background:#dc2626; width:auto; padding:10px 22px; display:none;">
+                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
+                <button type="button" id="btn-cancel-detail" class="btn-primary btn-danger hidden">
                     Cancelar Reserva
                 </button>
             </div>
@@ -287,20 +276,20 @@
             <div class="modal-header">
                 <div>
                     <h3>Criar Bloqueio</h3>
-                    <p style="font-size:13px; color:var(--color-text-secondary);">Impede novas reservas no período informado.</p>
+                    <p>Impede novas reservas no período informado.</p>
                 </div>
-                <button type="button" class="btn-close" onclick="closeModal('block-modal')">
+                <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             <form id="block-form">
                 <div class="modal-body">
-                    <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-group">
                         <label for="blk-date">Data</label>
                         <input type="date" id="blk-date" class="form-control" required>
                     </div>
                     <div class="form-row">
-                        <div class="form-col form-group" style="margin-bottom:0;">
+                        <div class="form-col form-group">
                             <label for="blk-start">Início</label>
                             <div class="select-wrapper">
                                 <select id="blk-start" required>
@@ -316,11 +305,12 @@
                                     <option value="14:40">14:40</option>
                                     <option value="15:30">15:30</option>
                                     <option value="19:00">19:00</option>
+                                    <option value="19:50">19:50</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
                         </div>
-                        <div class="form-col form-group" style="margin-bottom:0;">
+                        <div class="form-col form-group">
                             <label for="blk-end">Fim</label>
                             <div class="select-wrapper">
                                 <select id="blk-end" required>
@@ -343,252 +333,27 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-group">
                         <label for="blk-motivo">Motivo</label>
                         <input type="text" id="blk-motivo" class="form-control" placeholder="Ex: Manutenção preventiva" required>
                     </div>
-                    <div id="blk-error" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; font-size:13px;"></div>
+                    <div id="blk-error" class="login-error-msg"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('block-modal')">Cancelar</button>
-                    <button type="submit" class="btn-primary" style="background:#dc2626; width:auto; padding:10px 22px;">Criar bloqueio</button>
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary btn-danger">Criar bloqueio</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
-    <script>
-    let currentSession = null;
-    let currentWeekMonday = ERS.getMonday(new Date());
-    let selectedResId = null;
-
-    // Todos os horários da grade
-    const ALL_SLOTS = [
-        '07:00','07:50','08:40','09:30','10:20','11:10','13:00','13:50','14:40','15:30','19:00','19:50','20:40'
-    ];
-
-    document.addEventListener('DOMContentLoaded', () => {
-        currentSession = AUTH.requireAuth(['proatec', 'coordenacao']);
-        if (!currentSession) return;
-
-        AUTH.renderUserInfo(currentSession);
-        AUTH.setupLogout();
-        AUTH.adaptSidebarByRole(currentSession);
-
-        // Mostrar botão de bloqueio para Coordenação
-        if (currentSession.role === 'coordenacao') {
-            document.querySelectorAll('.coordenacao-only').forEach(el => el.style.display = '');
-            document.getElementById('btnOpenBlock').style.display = '';
-        }
-
-        // Navegação de semana
-        document.getElementById('btnPrevWeek').addEventListener('click', () => {
-            currentWeekMonday.setDate(currentWeekMonday.getDate() - 7);
-            renderSchedule();
-        });
-        document.getElementById('btnNextWeek').addEventListener('click', () => {
-            currentWeekMonday.setDate(currentWeekMonday.getDate() + 7);
-            renderSchedule();
-        });
-
-        // Modais
-        document.getElementById('btnOpenNewReservation').addEventListener('click', () => {
-            populateRoomSelect('res-room');
-            document.getElementById('res-date').value = ERS.today();
-            document.getElementById('res-error').style.display = 'none';
-            openModal('new-reservation-modal');
-        });
-
-        document.getElementById('btnOpenBlock')?.addEventListener('click', () => {
-            document.getElementById('blk-date').value = ERS.today();
-            document.getElementById('blk-error').style.display = 'none';
-            openModal('block-modal');
-        });
-
-        // Forms
-        document.getElementById('new-res-form').addEventListener('submit', handleCreateReservation);
-        document.getElementById('block-form').addEventListener('submit', handleCreateBlock);
-
-        renderSchedule();
-    });
-
-    function populateRoomSelect(selId) {
-        const sel = document.getElementById(selId);
-        sel.innerHTML = '<option value="">Sem sala</option>';
-        ERS.getActiveRooms().forEach(r => {
-            sel.innerHTML += `<option value="${r.nome}">${r.nome}</option>`;
-        });
-    }
-
-    function renderSchedule() {
-        const weekDays = ERS.getWeekDays(currentWeekMonday);
-        const todayStr = ERS.today();
-
-        // Labels
-        const first = weekDays[0];
-        const last = weekDays[4];
-        document.getElementById('weekRangeLabel').textContent =
-            `${first.getDate()} ${ERS.MESES[first.getMonth()]} - ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
-        document.getElementById('weekLabel').textContent =
-            currentWeekMonday.getDate() === ERS.getMonday(new Date()).getDate() ? 'Semana Atual' : 'Semana Selecionada';
-
-        const grid = document.getElementById('scheduleGrid');
-        grid.innerHTML = '';
-
-        // Cabeçalhos
-        const timeHeader = document.createElement('div');
-        timeHeader.className = 'schedule-header time-col';
-        timeHeader.textContent = 'Horário';
-        grid.appendChild(timeHeader);
-
-        weekDays.forEach(d => {
-            const dk = ERS.dateKey(d);
-            const isToday = dk === todayStr;
-            const h = document.createElement('div');
-            h.className = 'schedule-header' + (isToday ? ' today-header' : '');
-            h.innerHTML = `${ERS.DIAS_SEMANA[d.getDay()]} - ${d.getDate()}`;
-            grid.appendChild(h);
-        });
-
-        // Linhas de horário
-        ALL_SLOTS.forEach((slotStart, idx) => {
-            const slotEnd = ALL_SLOTS[idx + 1] || (parseInt(slotStart.split(':')[0]) + 1).toString().padStart(2, '0') + ':00';
-
-            const timeCell = document.createElement('div');
-            timeCell.className = 'schedule-time';
-            timeCell.textContent = slotStart;
-            grid.appendChild(timeCell);
-
-            weekDays.forEach(d => {
-                const dk = ERS.dateKey(d);
-                const cell = document.createElement('div');
-                cell.className = 'schedule-cell';
-
-                // Bloqueios
-                const blocks = ERS.getBlocks().filter(b =>
-                    b.data === dk && ERS.timesOverlap(slotStart, slotEnd, b.inicio, b.fim)
-                );
-                blocks.forEach(b => {
-                    const card = document.createElement('div');
-                    card.className = 'schedule-card error block-card';
-                    card.innerHTML = `<h4>🔒 Bloqueado</h4><p>${b.motivo}</p>`;
-                    cell.appendChild(card);
-                });
-
-                // Reservas
-                const dayRes = ERS.getReservationsByDate(dk);
-                const slotRes = dayRes.filter(r => ERS.timesOverlap(slotStart, slotEnd, r.inicio, r.fim));
-                slotRes.forEach(r => {
-                    const card = document.createElement('div');
-                    card.className = 'schedule-card ' + (r.situacao === 'cancelada' ? 'error' : 'neutral');
-                    card.style.cursor = 'pointer';
-                    card.innerHTML = `<h4>${r.sala || 'Sem sala'} — ${r.notebooks || 0} notebooks</h4><p>${r.professorNome}</p>`;
-                    card.addEventListener('click', () => openDetailModal(r.id));
-                    cell.appendChild(card);
-                });
-
-                grid.appendChild(cell);
-            });
-        });
-    }
-
-    function openDetailModal(id) {
-        const reservations = ERS.getReservations();
-        const r = reservations.find(r => r.id === id);
-        if (!r) return;
-
-        document.getElementById('modalUsageTitle').textContent = `${r.sala || 'Sem sala'} — ${r.professorNome}`;
-        document.getElementById('modalUsageSubtitle').textContent = `${r.inicio}–${r.fim} • ${r.turma}`;
-        document.getElementById('usageDetailBody').innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
-                <div><strong>Horário:</strong> ${r.inicio} – ${r.fim}</div>
-                <div><strong>Turma:</strong> ${r.turma}</div>
-                ${r.sala ? `<div><strong>Sala:</strong> ${r.sala}</div>` : ''}
-                ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}</div>` : ''}
-                <div><strong>Professor:</strong> ${r.professorNome}</div>
-                <div><strong>Situação:</strong> <span style="font-weight:600; color:${r.situacao === 'confirmada' ? '#16a34a' : '#dc2626'}">${r.situacao}</span></div>
-            </div>
-        `;
-
-        const btnCancel = document.getElementById('btn-cancel-detail');
-        if (r.situacao === 'confirmada') {
-            btnCancel.style.display = '';
-            btnCancel.onclick = () => {
-                if (!confirm('Cancelar esta reserva?')) return;
-                ERS.cancelReservation(r.id);
-                closeModal('register-usage-modal');
-                ERS.showToast('Reserva cancelada com sucesso.', 'success');
-                renderSchedule();
-            };
-        } else {
-            btnCancel.style.display = 'none';
-        }
-
-        openModal('register-usage-modal');
-    }
-
-    function handleCreateReservation(e) {
-        e.preventDefault();
-        const errEl = document.getElementById('res-error');
-        errEl.style.display = 'none';
-
-        const data     = document.getElementById('res-date').value;
-        const inicio   = document.getElementById('res-start').value;
-        const fim      = document.getElementById('res-end').value;
-        const sala     = document.getElementById('res-room').value;
-        const qtd      = parseInt(document.getElementById('res-qty').value) || 0;
-        const turma    = document.getElementById('res-turma').value.trim();
-        const profNome = document.getElementById('res-professor').value.trim();
-
-        const result = ERS.createReservation({
-            professorId: currentSession.userId,
-            professorNome: profNome || currentSession.nome,
-            data, inicio, fim,
-            sala: sala || null,
-            notebooks: qtd,
-            turma,
-        });
-
-        if (!result.ok) {
-            errEl.textContent = result.message;
-            errEl.style.display = 'block';
-            return;
-        }
-
-        closeModal('new-reservation-modal');
-        document.getElementById('new-res-form').reset();
-        ERS.showToast('Reserva criada com sucesso!', 'success');
-        renderSchedule();
-    }
-
-    function handleCreateBlock(e) {
-        e.preventDefault();
-        const errEl = document.getElementById('blk-error');
-        errEl.style.display = 'none';
-
-        const data   = document.getElementById('blk-date').value;
-        const inicio = document.getElementById('blk-start').value;
-        const fim    = document.getElementById('blk-end').value;
-        const motivo = document.getElementById('blk-motivo').value.trim();
-
-        const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: currentSession.nome });
-        if (!result.ok) {
-            errEl.textContent = result.message;
-            errEl.style.display = 'block';
-            return;
-        }
-
-        closeModal('block-modal');
-        document.getElementById('block-form').reset();
-        ERS.showToast('Bloqueio criado. Novas reservas nesse período serão impedidas.', 'success');
-        renderSchedule();
-    }
-    </script>
+    <script src="../js/agendaProatec.js"></script>
 </body>
 </html>
