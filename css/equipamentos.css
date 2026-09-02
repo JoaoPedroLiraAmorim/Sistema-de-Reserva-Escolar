@@ -1,99 +1,289 @@
 /* ==========================================================================
    equipamentos.css
-   Estilos da página de gestão de equipamentos/notebooks.
+   Visual simples, direto e amigável para a gestão de notebooks da escola
    ========================================================================== */
 
-/* Card contentor da tabela */
-.eq-table-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    overflow: hidden;
+/* 1. Cabeçalho e Botão Compacto */
+.eq-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-/* Tabela principal */
-.eq-table { width: 100%; border-collapse: collapse; }
-
-.eq-table th {
-    background: var(--color-bg);
-    padding: 12px 16px;
-    font-size: 12px;
+.btn-add-notebook-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--color-text-secondary);
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--color-border);
+    width: auto;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
 }
 
-.eq-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--color-border); }
-.eq-table tr:last-child td { border-bottom: none; }
-.eq-table tr:hover td { background: var(--color-bg); }
+.btn-add-notebook-compact .material-symbols-outlined {
+    font-size: 18px;
+}
 
-/* Pill de marca */
-.eq-brand-pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-.eq-brand-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); }
+/* 2. Barra de Resumo Simples no Topo */
+.eq-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
 
-/* Coluna de estatísticas */
-.eq-stat     { text-align: center; }
-.eq-stat-num { font-size: 16px; font-weight: 700; color: var(--color-text-primary); }
-.eq-stat-sub { font-size: 11px; color: var(--color-text-muted); }
+.eq-stat-pill-card {
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+}
 
-.stat-green  { color: #16a34a; }
-.stat-orange { color: #d97706; }
-.stat-red    { color: #dc2626; }
-
-/* Ações +/- */
-.eq-actions { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
-
-.btn-add-eq,
-.btn-rm-eq {
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg);
-    cursor: pointer;
-    font-size: 16px;
-    font-family: inherit;
+.stat-pill-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s;
+    flex-shrink: 0;
 }
 
-.btn-add-eq:hover { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
-.btn-rm-eq:hover  { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
-
-/* Botão "Adicionar" de marca específica */
-.btn-add-brand { width: auto; padding: 4px 10px; font-size: 12px; }
-
-/* Cards de resumo */
-.eq-summary-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+.stat-pill-icon .material-symbols-outlined {
+    font-size: 20px;
 }
 
-.eq-summary-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 16px 20px;
-    flex: 1;
-    min-width: 140px;
-}
+.stat-pill-icon.blue   { background-color: var(--color-primary-light); color: var(--color-primary); }
+.stat-pill-icon.green  { background-color: #dcfce7; color: #16a34a; }
+.stat-pill-icon.orange { background-color: #fef3c7; color: #d97706; }
+.stat-pill-icon.red    { background-color: #fee2e2; color: #dc2626; }
 
-.eq-summary-card h4 {
-    font-size: 12px;
-    color: var(--color-text-secondary);
+.stat-pill-info h4 {
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+}
+
+.stat-pill-info .stat-num {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+/* 3. Grid de Cards por Marca */
+.eq-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.eq-brand-card {
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.eq-brand-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.eq-brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.eq-brand-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.eq-brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-container);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eq-brand-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.eq-brand-title h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.eq-brand-total {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.btn-icon-del {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-icon-del:hover {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-icon-del .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* 4. Caixas de Status no Card (Verde, Laranja, Vermelho) */
+.eq-status-boxes-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    background-color: #f8fafc;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 10px 8px;
+}
+
+.status-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.status-box-num {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.status-box-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.status-box.green .status-box-num   { color: #16a34a; }
+.status-box.green .status-box-label { color: #15803d; }
+
+.status-box.orange .status-box-num   { color: #d97706; }
+.status-box.orange .status-box-label { color: #b45309; }
+
+.status-box.red .status-box-num   { color: #dc2626; }
+.status-box.red .status-box-label { color: #b91c1c; }
+
+/* 5. Rodapé do Card */
+.eq-card-footer {
+    margin-top: auto;
+}
+
+.btn-card-edit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    background-color: var(--color-surface-low);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    transition: all var(--transition-fast);
+}
+
+.btn-card-edit:hover {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-card-edit .material-symbols-outlined {
+    font-size: 16px;
+}
+
+/* 6. Modais */
+.label-status-green,
+.label-status-orange,
+.label-status-red {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
     margin-bottom: 6px;
 }
 
-.eq-summary-card .num       { font-size: 28px; font-weight: 700; color: var(--color-text-primary); }
-.eq-summary-card .num.green  { color: #16a34a; }
-.eq-summary-card .num.orange { color: #d97706; }
-.eq-summary-card .num.red    { color: #dc2626; }
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-dot.green  { background-color: #16a34a; }
+.status-dot.orange { background-color: #d97706; }
+.status-dot.red    { background-color: #dc2626; }
+
+/* 7. Estado Vazio */
+.eq-empty-state {
+    grid-column: 1 / -1;
+    background-color: var(--color-bg-white);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 36px 20px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .eq-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .btn-add-notebook-compact {
+        width: 100%;
+        justify-content: center;
+    }
+}

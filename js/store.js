@@ -236,18 +236,64 @@
         return getNotebooks().reduce((acc, n) => acc + n.funcionando, 0);
     }
 
-    function addNotebooks(marca, quantidade) {
+    
+    function addNotebooks(marca, quantidade, situacao = 'funcionando') {
         const notebooks = getNotebooks();
-        const nb = notebooks.find(n => n.marca.toLowerCase() === marca.toLowerCase());
+        const qtd = parseInt(quantidade) || 0;
+        if (qtd <= 0) return { ok: false, message: 'Informe uma quantidade válida.' };
+        const cleanBrand = marca.trim();
+        if (!cleanBrand) return { ok: false, message: 'Informe o nome da marca.' };
+
+        let nb = notebooks.find(n => n.marca.toLowerCase() === cleanBrand.toLowerCase());
         if (nb) {
-            nb.total += quantidade;
-            nb.funcionando += quantidade;
+            nb.total += qtd;
+            if (situacao === 'defeito') nb.defeito += qtd;
+            else if (situacao === 'quebrado') nb.quebrado += qtd;
+            else nb.funcionando += qtd;
         } else {
-            notebooks.push({ id: genId(), marca, total: quantidade, funcionando: quantidade, defeito: 0, quebrado: 0 });
+            const func = situacao === 'funcionando' ? qtd : 0;
+            const def  = situacao === 'defeito' ? qtd : 0;
+            const qbr  = situacao === 'quebrado' ? qtd : 0;
+            notebooks.push({
+                id: genId(),
+                marca: cleanBrand,
+                total: qtd,
+                funcionando: func,
+                defeito: def,
+                quebrado: qbr
+            });
         }
         save(KEYS.NOTEBOOKS, notebooks);
         return { ok: true };
     }
+
+    function updateNotebookBrandCounts(id, { funcionando, defeito, quebrado }) {
+        const notebooks = getNotebooks();
+        const nb = notebooks.find(n => n.id === id);
+        if (!nb) return { ok: false, message: 'Marca não encontrada.' };
+
+        const f = Math.max(0, parseInt(funcionando) || 0);
+        const d = Math.max(0, parseInt(defeito) || 0);
+        const q = Math.max(0, parseInt(quebrado) || 0);
+
+        nb.funcionando = f;
+        nb.defeito = d;
+        nb.quebrado = q;
+        nb.total = f + d + q;
+
+        save(KEYS.NOTEBOOKS, notebooks);
+        return { ok: true, notebook: nb };
+    }
+
+    function deleteNotebookBrand(id) {
+        let notebooks = getNotebooks();
+        const nb = notebooks.find(n => n.id === id);
+        if (!nb) return { ok: false, message: 'Marca não encontrada.' };
+        notebooks = notebooks.filter(n => n.id !== id);
+        save(KEYS.NOTEBOOKS, notebooks);
+        return { ok: true };
+    }
+
 
     function updateNotebookStatus(id, field, delta) {
         const notebooks = getNotebooks();
@@ -466,7 +512,7 @@
         // Salas
         getRooms, getActiveRooms, toggleRoom, addRoom,
         // Notebooks
-        getNotebooks, getTotalDisponivel, getBrands, getDisponivelByBrand, addNotebooks, updateNotebookStatus,
+        getNotebooks, getTotalDisponivel, getBrands, getDisponivelByBrand, addNotebooks, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts,

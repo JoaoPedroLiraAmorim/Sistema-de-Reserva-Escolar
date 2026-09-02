@@ -76,7 +76,7 @@
         <div class="main-wrapper">
             <main class="dashboard-content">
                 <!-- Cabeçalho -->
-                <section class="dashboard-header">
+                <section class="dashboard-header eq-page-header">
                     <div class="header-greeting">
                         <div class="header-top-row">
                             <button type="button" class="menu-toggle" id="menuToggle" aria-label="Alternar Menu">
@@ -84,45 +84,32 @@
                             </button>
                             <p class="date-badge">—</p>
                         </div>
-                        <h2>Gestão de Equipamentos</h2>
-                        <p>Controle o inventário de notebooks por marca e situação.</p>
+                        <h2>Equipamentos</h2>
+                        <p>Controle de notebooks disponíveis, com defeito e quebrados.</p>
                     </div>
-                    <button type="button" class="btn-primary" id="btnAddEquipment">
+                    <!-- Botão compacto horizontalmente -->
+                    <button type="button" class="btn-primary btn-add-notebook-compact" id="btnAddEquipment">
                         <span class="material-symbols-outlined">add</span>
-                        <span>Cadastrar notebooks</span>
+                        <span>Adicionar notebook</span>
                     </button>
                 </section>
 
-                <!-- Cards de Resumo -->
-                <div class="eq-summary-row" id="eq-summary"></div>
+                <!-- Resumo Simples (Total, Disponíveis, Defeito, Quebrados) -->
+                <section class="eq-stats-bar" id="eq-stats-bar"></section>
 
-                <!-- Tabela de Notebooks -->
-                <div class="eq-table-card">
-                    <table class="eq-table" id="eq-table">
-                        <thead>
-                            <tr>
-                                <th>Marca</th>
-                                <th class="eq-stat">Total</th>
-                                <th class="eq-stat">Funcionando</th>
-                                <th class="eq-stat">Com defeito</th>
-                                <th class="eq-stat">Quebrados</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="eq-tbody"></tbody>
-                    </table>
-                </div>
+                <!-- Grid de Cards por Marca -->
+                <section class="eq-cards-grid" id="eq-cards-grid"></section>
             </main>
         </div>
     </div>
 
-    <!-- Modal: Cadastrar Notebook -->
+    <!-- Modal 1: Adicionar Notebooks -->
     <div class="modal-backdrop hidden" id="add-eq-modal">
         <div class="modal">
             <div class="modal-header">
                 <div>
-                    <h3>Cadastrar Notebooks</h3>
-                    <p>Adicione unidades ao inventário.</p>
+                    <h3>Adicionar Notebooks</h3>
+                    <p>Cadastre notebooks de uma marca no sistema.</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
@@ -131,27 +118,85 @@
             <form id="add-eq-form">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="add-brand">Marca</label>
+                        <label for="add-brand-select">Marca</label>
                         <div class="select-wrapper">
-                            <select id="add-brand" required>
-                                <option value="">Selecione a marca</option>
+                            <select id="add-brand-select" required>
+                                <option value="">Selecione a marca...</option>
                                 <option value="Dell">Dell</option>
                                 <option value="Lenovo">Lenovo</option>
                                 <option value="Acer">Acer</option>
                                 <option value="Positivo">Positivo</option>
-                                <option value="Outro">Outro fabricante</option>
+                                <option value="__new__">+ Outra marca...</option>
                             </select>
                             <span class="material-symbols-outlined select-icon">expand_more</span>
                         </div>
                     </div>
+
+                    <!-- Campo caso escolha outra marca -->
+                    <div class="form-group hidden" id="new-brand-group">
+                        <label for="add-brand-new">Nome da marca</label>
+                        <input type="text" id="add-brand-new" class="form-control" placeholder="Ex: Samsung, Asus, HP">
+                    </div>
+
                     <div class="form-group">
-                        <label for="add-qty">Quantidade</label>
+                        <label for="add-qty">Quantidade a adicionar</label>
                         <input type="number" id="add-qty" class="form-control" min="1" placeholder="Ex: 5" required>
                     </div>
+
+                    <div id="add-eq-error" class="login-error-msg"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Editar Quantidades da Marca -->
+    <div class="modal-backdrop hidden" id="edit-status-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3 id="edit-modal-title">Editar Quantidades</h3>
+                    <p>Atualize a situação dos notebooks desta marca.</p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Fechar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="edit-status-form">
+                <input type="hidden" id="edit-nb-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit-func" class="label-status-green">
+                            <span class="status-dot green"></span>
+                            Disponíveis (Funcionando)
+                        </label>
+                        <input type="number" id="edit-func" class="form-control" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-def" class="label-status-orange">
+                            <span class="status-dot orange"></span>
+                            Com defeito (Em conserto)
+                        </label>
+                        <input type="number" id="edit-def" class="form-control" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-qbr" class="label-status-red">
+                            <span class="status-dot red"></span>
+                            Quebrados (Indisponíveis)
+                        </label>
+                        <input type="number" id="edit-qbr" class="form-control" min="0" required>
+                    </div>
+
+                    <div id="edit-eq-error" class="login-error-msg"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar alterações</button>
                 </div>
             </form>
         </div>
