@@ -125,6 +125,22 @@
         const sidebar = document.getElementById('sidebar');
         if (!sidebar) return;
 
+        // Se estiver em modo SPA unificado, apenas exibe os itens da coordenação
+        if (window.isSpaMode) {
+            if (session.role === 'coordenacao') {
+                document.body.classList.add('role-coordenacao');
+                document.documentElement.classList.add('role-coordenacao');
+                sidebar.querySelectorAll('.coordenacao-only').forEach(el => {
+                    el.style.display = 'flex';
+                });
+                const brandText = sidebar.querySelector('.sidebar-brand-text p');
+                if (brandText) brandText.textContent = 'Coordenação';
+                const brandH1 = sidebar.querySelector('.sidebar-brand-text h1');
+                if (brandH1) brandH1.textContent = 'EduLab';
+            }
+            return;
+        }
+
         // Adiciona link de Bloqueios para Coordenação
         if (session.role === 'coordenacao') {
             const nav = sidebar.querySelector('.sidebar-nav');
@@ -133,10 +149,11 @@
                 link.href = 'bloqueios.html';
                 link.className = 'nav-link';
                 link.id = 'nav-bloqueios';
+                link.setAttribute('data-tooltip', 'Bloqueios');
                 if (window.location.pathname.includes('bloqueios')) link.classList.add('active');
                 link.innerHTML = `
                     <span class="material-symbols-outlined">block</span>
-                    <span>Bloqueios</span>
+                    <span class="nav-text">Bloqueios</span>
                 `;
                 nav.appendChild(link);
             }

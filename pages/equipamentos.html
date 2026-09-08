@@ -4,73 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equipamentos - PROATEC</title>
-    <meta name="description" content="Gestão de notebooks e equipamentos do laboratório PROATEC.">
+    <meta name="description" content="Gestão e controle de notebooks escolares disponíveis, com defeito e quebrados.">
 
-    <!-- Fontes do Google -->
+    <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
-    <link rel="stylesheet" href="../css/proatec.css">
     <link rel="stylesheet" href="../css/equipamentos.css">
+
+    <!-- Anti-flicker da Sidebar (Executado antes da renderização) -->
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('escola_sidebar_collapsed');
+                var isCollapsed = saved !== null ? saved === 'true' : true;
+                if (!isCollapsed && window.innerWidth > 768) {
+                    document.documentElement.classList.add('sidebar-expanded');
+                } else {
+                    document.documentElement.classList.add('sidebar-collapsed');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="../js/sidebar.js"></script>
 </head>
-<body>
+<body data-page="equipamentos">
     <div class="app-container">
-        <!-- Barra Lateral (Sidebar) -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-brand-icon">
-                    <span class="material-symbols-outlined">laptop_mac</span>
-                </div>
-                <div class="sidebar-brand-text">
-                    <h1>PROATEC</h1>
-                    <p>Gestão de Laboratório</p>
-                </div>
-            </div>
-
-            <nav class="sidebar-nav">
-                <a href="proatec.html" class="nav-link">
-                    <span class="material-symbols-outlined">home</span>
-                    <span>Início</span>
-                </a>
-                <a href="agendaProatec.html" class="nav-link">
-                    <span class="material-symbols-outlined">calendar_today</span>
-                    <span>Reservas</span>
-                </a>
-                <a href="equipamentos.html" class="nav-link active">
-                    <span class="material-symbols-outlined">computer</span>
-                    <span>Equipamentos</span>
-                </a>
-                <a href="salas.html" class="nav-link">
-                    <span class="material-symbols-outlined">meeting_room</span>
-                    <span>Salas</span>
-                </a>
-                <a href="relatorio.html" class="nav-link">
-                    <span class="material-symbols-outlined">bar_chart</span>
-                    <span>Relatórios</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">J</div>
-                    <div class="user-info">
-                        <p class="user-name">João Almeida</p>
-                        <p class="user-role">Coordenador PROATEC</p>
-                    </div>
-                </div>
-                <div class="sidebar-subnav">
-                    <a href="../index.html" class="nav-link logout">
-                        <span class="material-symbols-outlined">logout</span>
-                        <span>Sair</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
+        <!-- Sidebar injetada dinamicamente por sidebar.js -->
+        <div id="sidebar-mount"></div>
 
         <!-- Área Principal -->
         <div class="main-wrapper">

@@ -4,77 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bloqueios - Coordenação</title>
-    <meta name="description" content="Gestão de bloqueios de períodos pelo setor de Coordenação.">
+    <meta name="description" content="Gestão de bloqueios de períodos para impedir reservas em datas e horários específicos.">
 
-    <!-- Fontes do Google -->
+    <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
-    <link rel="stylesheet" href="../css/proatec.css">
     <link rel="stylesheet" href="../css/bloqueios.css">
+
+    <!-- Anti-flicker da Sidebar (Executado antes da renderização) -->
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('escola_sidebar_collapsed');
+                var isCollapsed = saved !== null ? saved === 'true' : true;
+                if (!isCollapsed && window.innerWidth > 768) {
+                    document.documentElement.classList.add('sidebar-expanded');
+                } else {
+                    document.documentElement.classList.add('sidebar-collapsed');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="../js/sidebar.js"></script>
 </head>
-<body>
+<body data-page="bloqueios">
     <div class="app-container">
-        <!-- Barra Lateral (Sidebar Coordenação) -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-brand-icon">
-                    <span class="material-symbols-outlined">laptop_mac</span>
-                </div>
-                <div class="sidebar-brand-text">
-                    <h1>EduLab</h1>
-                    <p>Coordenação</p>
-                </div>
-            </div>
+        <!-- Sidebar injetada dinamicamente por sidebar.js -->
+        <div id="sidebar-mount"></div>
 
-            <nav class="sidebar-nav">
-                <a href="proatec.html" class="nav-link">
-                    <span class="material-symbols-outlined">home</span>
-                    <span>Início</span>
-                </a>
-                <a href="agendaProatec.html" class="nav-link">
-                    <span class="material-symbols-outlined">calendar_today</span>
-                    <span>Reservas</span>
-                </a>
-                <a href="equipamentos.html" class="nav-link">
-                    <span class="material-symbols-outlined">computer</span>
-                    <span>Equipamentos</span>
-                </a>
-                <a href="salas.html" class="nav-link">
-                    <span class="material-symbols-outlined">meeting_room</span>
-                    <span>Salas</span>
-                </a>
-                <a href="relatorio.html" class="nav-link">
-                    <span class="material-symbols-outlined">bar_chart</span>
-                    <span>Relatórios</span>
-                </a>
-                <a href="bloqueios.html" class="nav-link active" id="nav-bloqueios">
-                    <span class="material-symbols-outlined">block</span>
-                    <span>Bloqueios</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">S</div>
-                    <div class="user-info">
-                        <p class="user-name">Dra. Sandra Lima</p>
-                        <p class="user-role">Coordenação</p>
-                    </div>
-                </div>
-                <div class="sidebar-subnav">
-                    <a href="../index.html" class="nav-link logout">
-                        <span class="material-symbols-outlined">logout</span>
-                        <span>Sair</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
+        <!-- Backdrop para Mobile -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
         <!-- Área Principal -->
         <div class="main-wrapper">
@@ -118,7 +83,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="blk-date">Data</label>
-                        <input type="date" id="blk-date" class="form-control" required>
+                        <input type="date" id="blk-date" class="form-control" required style="cursor: pointer;">
                     </div>
                     <div class="form-row">
                         <div class="form-col form-group">
@@ -130,14 +95,15 @@
                                     <option value="07:50">07:50</option>
                                     <option value="08:40">08:40</option>
                                     <option value="09:30">09:30</option>
-                                    <option value="10:20">10:20</option>
-                                    <option value="11:10">11:10</option>
+                                    <option value="10:35">10:35</option>
+                                    <option value="11:25">11:25</option>
                                     <option value="13:00">13:00</option>
                                     <option value="13:50">13:50</option>
                                     <option value="14:40">14:40</option>
                                     <option value="15:30">15:30</option>
                                     <option value="19:00">19:00</option>
                                     <option value="19:50">19:50</option>
+                                    <option value="20:40">20:40</option>
                                 </select>
                                 <span class="material-symbols-outlined select-icon">expand_more</span>
                             </div>
@@ -151,8 +117,8 @@
                                     <option value="08:40">08:40</option>
                                     <option value="09:30">09:30</option>
                                     <option value="10:20">10:20</option>
-                                    <option value="11:10">11:10</option>
-                                    <option value="12:00">12:00</option>
+                                    <option value="11:25">11:25</option>
+                                    <option value="12:15">12:15</option>
                                     <option value="13:50">13:50</option>
                                     <option value="14:40">14:40</option>
                                     <option value="15:30">15:30</option>

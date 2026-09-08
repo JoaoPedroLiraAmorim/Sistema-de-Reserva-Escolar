@@ -20,7 +20,7 @@
         SEEDED:       'ers_seeded',
     };
 
-    // Horários disponíveis no sistema
+    // Horários disponíveis no sistema (fonte única de verdade)
     const TIME_SLOTS = [
         { start: '07:00', end: '07:50' },
         { start: '07:50', end: '08:40' },
@@ -36,6 +36,13 @@
         { start: '19:50', end: '20:40' },
         { start: '20:40', end: '21:30' },
     ];
+
+    // Turnos derivados dos TIME_SLOTS (fonte única — elimina duplicação nos outros JS)
+    const SHIFT_SLOTS = {
+        manha: TIME_SLOTS.slice(0, 6),
+        tarde: TIME_SLOTS.slice(6, 10),
+        noite: TIME_SLOTS.slice(10),
+    };
 
     // ─────────────────────────────────────────────────────────────
     //  UTILITÁRIOS
@@ -77,27 +84,53 @@
         return s1 < e2 && e1 > s2;
     }
 
+    /** Escapa HTML para evitar XSS em inserções dinâmicas */
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return String(str || '');
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Hash SHA-256 assíncrono de uma string.
+     * @returns {Promise<string>} hex digest
+     */
+    async function hashPassword(plain) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plain);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // ─────────────────────────────────────────────────────────────
     //  SEED INICIAL
     // ─────────────────────────────────────────────────────────────
-    function seed() {
+    async function seed() {
         if (load(KEYS.SEEDED)) return; // Já semeado
+
+        // Hashes das senhas demo (todas '123456')
+        const h = await hashPassword('123456');
 
         // Usuários
         save(KEYS.USERS, [
-            { id: 'u1', email: 'professor@demo.com', password: '123456', role: 'professor', nome: 'Prof. Marcelo', avatarLetter: 'M' },
-            { id: 'u2', email: 'proatec@demo.com',   password: '123456', role: 'proatec',   nome: 'João Almeida',    avatarLetter: 'J' },
-            { id: 'u3', email: 'coordenacao@demo.com', password: '123456', role: 'coordenacao', nome: 'Dra. Sandra Lima', avatarLetter: 'S' },
+            { id: 'u1', email: 'professor@demo.com',   passwordHash: h, role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
+            { id: 'u2', email: 'proatec@demo.com',     passwordHash: h, role: 'proatec',     nome: 'João Almeida',     avatarLetter: 'J' },
+            { id: 'u3', email: 'coordenacao@demo.com', passwordHash: h, role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
         ]);
 
         // Salas
         save(KEYS.ROOMS, [
-            { id: 'r1', nome: 'Aquário',        ativa: true },
+            { id: 'r1', nome: 'Aquário',         ativa: true },
             { id: 'r2', nome: 'Sala de Leitura', ativa: true },
             { id: 'r3', nome: 'Sala de Vídeo',   ativa: true },
         ]);
 
-        // Notebooks (por marca; controlamos quantidade total e disponível)
+        // Notebooks (por marca)
         save(KEYS.NOTEBOOKS, [
             { id: 'nb1', marca: 'Dell',     total: 50, funcionando: 42, defeito: 5, quebrado: 3 },
             { id: 'nb2', marca: 'Lenovo',   total: 30, funcionando: 28, defeito: 2, quebrado: 0 },
@@ -105,61 +138,24 @@
             { id: 'nb4', marca: 'Positivo', total: 20, funcionando: 9,  defeito: 8, quebrado: 3 },
         ]);
 
-        // Reservas mock (distribuídas nos próximos dias úteis)
+        // Reservas mock
         const d0 = today();
         const d1 = dayOffset(1);
         const d2 = dayOffset(2);
         const d3 = dayOffset(3);
 
         save(KEYS.RESERVATIONS, [
-            {
-                id: genId(), professorId: 'u1', professorNome: 'Prof. Marcelo',
-                data: d0, inicio: '07:00', fim: '07:50',
-                sala: 'Aquário', notebooks: 20, turma: '3A Info',
-                situacao: 'confirmada',
-            },
-            {
-                id: genId(), professorId: 'u1', professorNome: 'Prof. Marcelo',
-                data: d1, inicio: '08:40', fim: '09:30',
-                sala: 'Sala de Leitura', notebooks: 15, turma: '2B Admin',
-                situacao: 'confirmada',
-            },
-            {
-                id: genId(), professorId: 'u3', professorNome: 'Prof. Ana Souza',
-                data: d0, inicio: '07:50', fim: '08:40',
-                sala: 'Sala de Vídeo', notebooks: 10, turma: '1C Log',
-                situacao: 'confirmada',
-            },
-            {
-                id: genId(), professorId: 'u3', professorNome: 'Prof. Carlos Lima',
-                data: d1, inicio: '07:00', fim: '07:50',
-                sala: 'Aquário', notebooks: 25, turma: '3B Info',
-                situacao: 'confirmada',
-            },
-            {
-                id: genId(), professorId: 'u3', professorNome: 'Prof. Maria Santos',
-                data: d2, inicio: '13:00', fim: '13:50',
-                sala: 'Sala de Leitura', notebooks: 15, turma: '2A Admin',
-                situacao: 'confirmada',
-            },
-            {
-                id: genId(), professorId: 'u3', professorNome: 'Prof. Ricardo Neves',
-                data: d3, inicio: '09:30', fim: '10:20',
-                sala: 'Aquário', notebooks: 30, turma: '3C Info',
-                situacao: 'confirmada',
-            },
+            { id: genId(), professorId: 'u1', professorNome: 'Prof. Marcelo',      data: d0, inicio: '07:00', fim: '07:50', sala: 'Aquário',         notebooks: 20, turma: '3A Info',  situacao: 'confirmada' },
+            { id: genId(), professorId: 'u1', professorNome: 'Prof. Marcelo',      data: d1, inicio: '08:40', fim: '09:30', sala: 'Sala de Leitura', notebooks: 15, turma: '2B Admin', situacao: 'confirmada' },
+            { id: genId(), professorId: 'u3', professorNome: 'Prof. Ana Souza',    data: d0, inicio: '07:50', fim: '08:40', sala: 'Sala de Vídeo',   notebooks: 10, turma: '1C Log',   situacao: 'confirmada' },
+            { id: genId(), professorId: 'u3', professorNome: 'Prof. Carlos Lima',  data: d1, inicio: '07:00', fim: '07:50', sala: 'Aquário',         notebooks: 25, turma: '3B Info',  situacao: 'confirmada' },
+            { id: genId(), professorId: 'u3', professorNome: 'Prof. Maria Santos', data: d2, inicio: '13:00', fim: '13:50', sala: 'Sala de Leitura', notebooks: 15, turma: '2A Admin', situacao: 'confirmada' },
+            { id: genId(), professorId: 'u3', professorNome: 'Prof. Ricardo Neves',data: d3, inicio: '09:30', fim: '10:20', sala: 'Aquário',         notebooks: 30, turma: '3C Info',  situacao: 'confirmada' },
         ]);
 
         // Bloqueio mock
         save(KEYS.BLOCKS, [
-            {
-                id: genId(),
-                data: d2,
-                inicio: '07:00',
-                fim: '09:30',
-                motivo: 'Manutenção preventiva nos equipamentos',
-                criadoPor: 'Dra. Sandra Lima',
-            },
+            { id: genId(), data: d2, inicio: '07:00', fim: '09:30', motivo: 'Manutenção preventiva nos equipamentos', criadoPor: 'Dra. Sandra Lima', criadoEm: new Date().toISOString() },
         ]);
 
         save(KEYS.SEEDED, true);
@@ -168,9 +164,13 @@
     // ─────────────────────────────────────────────────────────────
     //  AUTENTICAÇÃO
     // ─────────────────────────────────────────────────────────────
-    function login(email, password) {
+    async function login(email, password) {
         const users = load(KEYS.USERS) || [];
-        const user = users.find(u => u.email === email.trim().toLowerCase() && u.password === password);
+        const h = await hashPassword(password);
+        const user = users.find(u =>
+            u.email === email.trim().toLowerCase() &&
+            (u.passwordHash === h || u.password === password) // fallback para seeds antigas
+        );
         if (!user) return { ok: false, message: 'E-mail ou senha incorretos.' };
         const session = { userId: user.id, role: user.role, nome: user.nome, avatarLetter: user.avatarLetter, email: user.email };
         save(KEYS.SESSION, session);
@@ -216,14 +216,9 @@
     // ─────────────────────────────────────────────────────────────
     function getNotebooks() { return load(KEYS.NOTEBOOKS) || []; }
 
-    
+    /** Retorna lista de marcas únicas (sem duplicatas) */
     function getBrands() {
-        const nbs = getNotebooks();
-        const brands = [];
-        nbs.forEach(n => {
-            if (n.marca && !brands.includes(n.marca)) brands.push(n.marca);
-        });
-        return brands;
+        return [...new Set(getNotebooks().map(n => n.marca).filter(Boolean))];
     }
 
     function getDisponivelByBrand(marca) {
@@ -236,7 +231,6 @@
         return getNotebooks().reduce((acc, n) => acc + n.funcionando, 0);
     }
 
-    
     function addNotebooks(marca, quantidade, situacao = 'funcionando') {
         const notebooks = getNotebooks();
         const qtd = parseInt(quantidade) || 0;
@@ -254,14 +248,7 @@
             const func = situacao === 'funcionando' ? qtd : 0;
             const def  = situacao === 'defeito' ? qtd : 0;
             const qbr  = situacao === 'quebrado' ? qtd : 0;
-            notebooks.push({
-                id: genId(),
-                marca: cleanBrand,
-                total: qtd,
-                funcionando: func,
-                defeito: def,
-                quebrado: qbr
-            });
+            notebooks.push({ id: genId(), marca: cleanBrand, total: qtd, funcionando: func, defeito: def, quebrado: qbr });
         }
         save(KEYS.NOTEBOOKS, notebooks);
         return { ok: true };
@@ -287,13 +274,11 @@
 
     function deleteNotebookBrand(id) {
         let notebooks = getNotebooks();
-        const nb = notebooks.find(n => n.id === id);
-        if (!nb) return { ok: false, message: 'Marca não encontrada.' };
+        if (!notebooks.find(n => n.id === id)) return { ok: false, message: 'Marca não encontrada.' };
         notebooks = notebooks.filter(n => n.id !== id);
         save(KEYS.NOTEBOOKS, notebooks);
         return { ok: true };
     }
-
 
     function updateNotebookStatus(id, field, delta) {
         const notebooks = getNotebooks();
@@ -319,9 +304,6 @@
         return getReservations().filter(r => r.professorId === userId);
     }
 
-    /**
-     * Retorna quantos notebooks estão reservados num período (sem ser a reserva excluída)
-     */
     function notebooksReservadosNoPeriodo(data, inicio, fim, excludeId = null) {
         const resDia = getReservationsByDate(data);
         return resDia
@@ -329,10 +311,6 @@
             .reduce((acc, r) => acc + (r.notebooks || 0), 0);
     }
 
-    /**
-     * Verifica todos os conflitos antes de criar/editar uma reserva.
-     * Retorna { ok: false, message } ou { ok: true }
-     */
     function checkConflicts({ data, inicio, fim, sala, notebooks, excludeId = null }) {
         const dk = dateKey(data);
 
@@ -368,7 +346,6 @@
     }
 
     function createReservation({ professorId, professorNome, data, inicio, fim, sala, notebooks, turma }) {
-        // Validações básicas
         if (!inicio || !fim) return { ok: false, message: 'Informe o horário de início e fim.' };
         if (inicio >= fim)   return { ok: false, message: 'O horário de início deve ser anterior ao fim.' };
         if (!sala && (!notebooks || notebooks <= 0)) {
@@ -380,11 +357,9 @@
 
         const reservation = {
             id: genId(),
-            professorId,
-            professorNome,
+            professorId, professorNome,
             data: dateKey(data),
-            inicio,
-            fim,
+            inicio, fim,
             sala: sala || null,
             notebooks: notebooks || 0,
             turma: turma || '',
@@ -450,25 +425,52 @@
     //  UTILITÁRIOS DE UI
     // ─────────────────────────────────────────────────────────────
 
-    /** Exibe toast genérico (funciona em qualquer página com #toastContainer) */
+    /**
+     * Exibe toast genérico com botão de fechar.
+     * Usa textContent para evitar XSS.
+     */
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
         if (!container) { console.warn('[Toast]', message); return; }
 
         const icons = { success: 'check_circle', error: 'error', warning: 'warning', info: 'info' };
+
         const toast = document.createElement('div');
         toast.className = `toast-notification ${type}`;
-        toast.innerHTML = `
-            <span class="material-symbols-outlined" style="font-size:20px;">${icons[type] || 'info'}</span>
-            <span>${message}</span>
-        `;
+        toast.setAttribute('role', 'alert');
+
+        // Ícone
+        const iconEl = document.createElement('span');
+        iconEl.className = 'material-symbols-outlined';
+        iconEl.style.fontSize = '20px';
+        iconEl.textContent = icons[type] || 'info';
+
+        // Mensagem (textContent — sem XSS)
+        const msgEl = document.createElement('span');
+        msgEl.textContent = message;
+
+        // Botão fechar
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'toast-close-btn';
+        closeBtn.setAttribute('aria-label', 'Fechar notificação');
+        closeBtn.textContent = '×';
+        closeBtn.addEventListener('click', () => dismissToast(toast));
+
+        toast.appendChild(iconEl);
+        toast.appendChild(msgEl);
+        toast.appendChild(closeBtn);
         container.appendChild(toast);
 
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(12px)';
-            setTimeout(() => toast.remove(), 350);
-        }, 4000);
+        // Auto-dismiss após 5s
+        const timer = setTimeout(() => dismissToast(toast), 5000);
+        toast._dismissTimer = timer;
+    }
+
+    function dismissToast(toast) {
+        if (toast._dismissTimer) clearTimeout(toast._dismissTimer);
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px)';
+        setTimeout(() => toast.remove(), 350);
     }
 
     /** Formata data 'YYYY-MM-DD' → 'DD/MM/YYYY' */
@@ -479,9 +481,9 @@
     }
 
     /** Nomes dos dias da semana em pt-BR */
-    const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const DIAS_SEMANA      = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const DIAS_SEMANA_FULL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const MESES      = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
     /** Retorna a segunda-feira da semana que contém a data dada */
@@ -504,25 +506,37 @@
     }
 
     // ─────────────────────────────────────────────────────────────
+    //  SEGURANÇA — Listener de storage para detectar logout em outra aba
+    // ─────────────────────────────────────────────────────────────
+    window.addEventListener('storage', (e) => {
+        if (e.key === KEYS.SESSION && e.newValue === null) {
+            // Sessão removida em outra aba → redireciona para login
+            const isInPages = window.location.pathname.includes('/pages/');
+            window.location.href = isInPages ? '../index.html' : 'index.html';
+        }
+    });
+
+    // ─────────────────────────────────────────────────────────────
     //  EXPOSIÇÃO PÚBLICA
     // ─────────────────────────────────────────────────────────────
     window.ERS = {
-        // Auth
+        // Auth (login agora é async)
         login, logout, getSession,
         // Salas
         getRooms, getActiveRooms, toggleRoom, addRoom,
         // Notebooks
-        getNotebooks, getTotalDisponivel, getBrands, getDisponivelByBrand, addNotebooks, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
+        getNotebooks, getTotalDisponivel, getBrands, getDisponivelByBrand,
+        addNotebooks, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts,
         // Bloqueios
         getBlocks, createBlock, deleteBlock,
         // Utils
-        showToast, formatDate, dateKey, today, dayOffset,
+        showToast, formatDate, dateKey, today, dayOffset, escapeHtml,
         getMonday, getWeekDays, timesOverlap,
         DIAS_SEMANA, DIAS_SEMANA_FULL, MESES, MESES_FULL,
-        TIME_SLOTS,
+        TIME_SLOTS, SHIFT_SLOTS,
     };
 
     // ─────────────────────────────────────────────────────────────

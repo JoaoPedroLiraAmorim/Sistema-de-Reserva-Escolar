@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso - EduLab Reserve</title>
+    <meta name="description" content="Sistema de gestão e reserva de laboratórios e notebooks escolares.">
+
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Folhas de Estilo -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/login-novo.css">
+</head>
+<body class="login-page">
+
+    <div class="login-split-container">
+        <!-- ==================================================================
+             LADO ESQUERDO: Imagem 100% no Espaço (Sem Zoom / Sem Corte)
+             ================================================================== -->
+        <aside class="image-showcase-panel" aria-label="Apresentação Visual">
+            <div class="image-wrapper">
+                <img src="imagens/ChatGPT Image 31 de ago. de 2026, 21_40_12.png" 
+                     alt="Ilustração do ambiente escolar e laboratórios tecnológicos" 
+                     class="hero-image">
+            </div>
+        </aside>
+
+        <!-- ==================================================================
+             LADO DIREITO: Painel de Login Nativo (Não é Modal)
+             ================================================================== -->
+        <main class="login-form-panel">
+            <div class="login-form-content">
+                <!-- Cabeçalho da Marca -->
+                <header class="brand-header">
+                    <div class="brand-badge">
+                        <div class="brand-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="brand-title">EduLab Reserve</h1>
+                            <p class="brand-subtitle">Gestão de Salas e Equipamentos</p>
+                        </div>
+                    </div>
+
+                    <div class="form-header-text">
+                        <h2>Acesse sua conta</h2>
+                        <p>Informe seu e-mail institucional e senha para continuar.</p>
+                    </div>
+                </header>
+
+                <!-- Seletor Rápido de Perfis (Tabs de Demonstração) -->
+                <div class="role-segmented-section">
+                    <div class="role-section-label">
+                        <span>Acesso Rápido:</span>
+                        <span>Clique para preencher</span>
+                    </div>
+                    <div class="role-segmented-control" role="tablist">
+                        <button type="button" class="role-tab-btn" data-role="professor" data-email="professor@demo.com" data-pass="123456" title="Preencher dados de Professor">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span>Professor</span>
+                        </button>
+                        <button type="button" class="role-tab-btn" data-role="proatec" data-email="proatec@demo.com" data-pass="123456" title="Preencher dados de PROATEC">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span>PROATEC</span>
+                        </button>
+                        <button type="button" class="role-tab-btn" data-role="coordenacao" data-email="coordenacao@demo.com" data-pass="123456" title="Preencher dados de Coordenação">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <span>Coordenação</span>
+                        </button>
+                    </div>
+                    <div id="roleFeedbackPill" class="role-feedback-pill">
+                        <span id="roleFeedbackText"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Formulário de Autenticação -->
+                <form id="login-form" novalidate>
+                    <!-- Campo E-mail -->
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <div class="input-container">
+                            <svg class="input-icon-left" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <input type="email" id="email" placeholder="seu.email@escola.educacao.sp.gov.br" autocomplete="username" required>
+                        </div>
+                    </div>
+
+                    <!-- Campo Senha -->
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <div class="input-container">
+                            <svg class="input-icon-left" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+                            <button type="button" class="password-toggle-btn" id="togglePassword" aria-label="Mostrar ou ocultar senha" title="Mostrar/ocultar senha">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Opções: Lembrar e Esqueceu Senha -->
+                    <div class="form-options-row">
+                        <label class="checkbox-control" for="rememberEmail">
+                            <input type="checkbox" id="rememberEmail">
+                            <span>Lembrar meu e-mail</span>
+                        </label>
+                        <a href="javascript:void(0)" class="forgot-pwd-link" onclick="alert('Para redefinir sua senha institucional, solicite auxílio ao PROATEC ou à coordenação da sua unidade escolar.')">Esqueceu a senha?</a>
+                    </div>
+
+                    <!-- Mensagem de Erro -->
+                    <div id="login-error" class="login-error-box" role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12" stroke-width="2"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"></line>
+                        </svg>
+                        <span class="error-text">E-mail ou senha incorretos.</span>
+                    </div>
+
+                    <!-- Botão de Entrar -->
+                    <button type="submit" class="btn-submit" id="btn-login">
+                        <svg class="btn-spinner" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="btn-text">Entrar</span>
+                    </button>
+                </form>
+
+                <!-- Rodapé -->
+                <footer class="form-footer">
+                    Dúvidas ou dificuldades? <a href="javascript:void(0)" onclick="alert('Contate a equipe do PROATEC na sala dos professores ou via ramal interno.')">Fale com o suporte escolar</a>
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts do Sistema -->
+    <script src="js/store.js"></script>
+    <script src="js/login-novo.js"></script>
+</body>
+</html>

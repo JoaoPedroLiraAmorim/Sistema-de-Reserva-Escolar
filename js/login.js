@@ -5,6 +5,13 @@
 
 'use strict';
 
+// Credenciais demo (definidas em JS, não no HTML como atributos visíveis)
+const DEMO_CREDENTIALS = [
+    { email: 'professor@demo.com',   password: '123456' },
+    { email: 'proatec@demo.com',     password: '123456' },
+    { email: 'coordenacao@demo.com', password: '123456' },
+];
+
 // Se já logado, redireciona direto
 (function () {
     const session = ERS.getSession();
@@ -23,23 +30,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput  = document.getElementById('password');
 
-    togglePassword.addEventListener('click', () => {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        togglePassword.style.color = type === 'text' ? 'var(--color-primary)' : '';
-    });
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.style.color = type === 'text' ? 'var(--color-primary)' : '';
+        });
+    }
 
-    // Pills de demonstração
-    document.querySelectorAll('.demo-pill').forEach(pill => {
+    // Preencher credenciais demo via JS (sem data-pass exposto no HTML)
+    document.querySelectorAll('.demo-pill').forEach((pill, index) => {
+        const cred = DEMO_CREDENTIALS[index];
+        if (!cred) return;
         pill.addEventListener('click', () => {
-            document.getElementById('email').value    = pill.dataset.email;
-            document.getElementById('password').value = pill.dataset.pass;
+            document.getElementById('email').value    = cred.email;
+            document.getElementById('password').value = cred.password;
             document.getElementById('login-error').style.display = 'none';
         });
     });
 
-    // Formulário de login
-    document.getElementById('login-form').addEventListener('submit', function (e) {
+    // Formulário de login (ERS.login é async)
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const email    = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
@@ -50,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogin.textContent   = 'Entrando...';
         btnLogin.disabled      = true;
 
-        setTimeout(() => {
-            const result = ERS.login(email, password);
+        try {
+            const result = await ERS.login(email, password);
             if (result.ok) {
                 const map = {
                     professor:   'pages/professor.html',
@@ -60,11 +71,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 window.location.href = map[result.user.role] || 'pages/professor.html';
             } else {
-                errorEl.textContent  = result.message;
+                errorEl.textContent   = result.message;
                 errorEl.style.display = 'block';
                 btnLogin.textContent  = 'Entrar';
                 btnLogin.disabled     = false;
             }
-        }, 400);
+        } catch (err) {
+            errorEl.textContent   = 'Erro ao processar login. Tente novamente.';
+            errorEl.style.display = 'block';
+            btnLogin.textContent  = 'Entrar';
+            btnLogin.disabled     = false;
+        }
     });
 });
