@@ -1,5 +1,5 @@
 /**
- * equipamentos.js — Gestão simples e amigável de notebooks da escola
+ * equipamentos.js — Gestão de equipamentos e frota de notebooks escolares
  * Depende de: store.js, auth.js, main.js
  */
 
@@ -10,49 +10,95 @@ window.EquipamentosModule = (function() {
     let isInitialized = false;
 
     function init(session) {
-        currentSession = session || AUTH.getSession();
+        currentSession = session || (window.AUTH ? AUTH.getSession() : null);
         if (!currentSession) return;
 
         if (!isInitialized) {
             isInitialized = true;
-
-            // Botão Adicionar Notebook (Cabeçalho)
-            document.getElementById('btnAddEquipment')?.addEventListener('click', () => {
-                document.getElementById('add-eq-form')?.reset();
-                document.getElementById('new-brand-group')?.classList.add('hidden');
-                const brandNewInput = document.getElementById('add-brand-new');
-                if (brandNewInput) brandNewInput.required = false;
-                const errEl = document.getElementById('add-eq-error');
-                if (errEl) errEl.style.display = 'none';
-                populateBrandOptions();
-                openModal('add-eq-modal');
-            });
-
-            // Seletor de Marca no Modal
-            const brandSelect = document.getElementById('add-brand-select');
-            if (brandSelect) {
-                brandSelect.addEventListener('change', () => {
-                    const newGroup = document.getElementById('new-brand-group');
-                    const newInput = document.getElementById('add-brand-new');
-                    if (brandSelect.value === '__new__') {
-                        newGroup?.classList.remove('hidden');
-                        if (newInput) {
-                            newInput.required = true;
-                            newInput.focus();
-                        }
-                    } else {
-                        newGroup?.classList.add('hidden');
-                        if (newInput) newInput.required = false;
-                    }
-                });
-            }
-
-            // Submissão dos Formulários
-            document.getElementById('add-eq-form')?.addEventListener('submit', handleAddEquipment);
-            document.getElementById('edit-status-form')?.addEventListener('submit', handleEditStatus);
+            setupEventListeners();
         }
 
         renderEquipmentView();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  CONFIGURAÇÃO DE LISTENERS
+    // ─────────────────────────────────────────────────────────────
+    function setupEventListeners() {
+        // 1. Botão Adicionar Notebook (Cabeçalho)
+        document.getElementById('btnAddEquipment')?.addEventListener('click', () => {
+            const form = document.getElementById('add-eq-form');
+            if (form) form.reset();
+
+            const newGroup = document.getElementById('new-brand-group');
+            if (newGroup) newGroup.classList.add('hidden');
+
+            const brandNewInput = document.getElementById('add-brand-new');
+            if (brandNewInput) brandNewInput.required = false;
+
+            const errEl = document.getElementById('add-eq-error');
+            if (errEl) errEl.style.display = 'none';
+
+            populateBrandOptions();
+            openModal('add-eq-modal');
+        });
+
+        // 2. Seletor de Marca no Modal
+        const brandSelect = document.getElementById('add-brand-select');
+        if (brandSelect) {
+            brandSelect.addEventListener('change', () => {
+                const newGroup = document.getElementById('new-brand-group');
+                const newInput = document.getElementById('add-brand-new');
+                if (brandSelect.value === '__new__') {
+                    newGroup?.classList.remove('hidden');
+                    if (newInput) {
+                        newInput.required = true;
+                        newInput.focus();
+                    }
+                } else {
+                    newGroup?.classList.add('hidden');
+                    if (newInput) newInput.required = false;
+                }
+            });
+        }
+
+        // 3. Botões rápidos de quantidade (+5, +10, +20) no Modal de Adicionar
+        document.querySelectorAll('.btn-qty-quick').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const toAdd = parseInt(btn.getAttribute('data-add')) || 0;
+                const qtyInput = document.getElementById('add-qty');
+                if (qtyInput) {
+                    const currentVal = parseInt(qtyInput.value) || 0;
+                    qtyInput.value = currentVal + toAdd;
+                    qtyInput.dispatchEvent(new Event('input'));
+                }
+            });
+        });
+
+        // 4. Steppers numéricos (+ e -) no Modal de Ajustar Estoque
+        document.querySelectorAll('.stepper-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const delta = parseInt(btn.getAttribute('data-delta')) || 0;
+                const input = document.getElementById(targetId);
+                if (input) {
+                    const currentVal = parseInt(input.value) || 0;
+                    const newVal = Math.max(0, currentVal + delta);
+                    input.value = newVal;
+                    updateEditModalCalculatedTotal();
+                }
+            });
+        });
+
+        // Atualização em tempo real do total no modal ao digitar
+        ['edit-func', 'edit-def', 'edit-qbr'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updateEditModalCalculatedTotal);
+        });
+
+        // 5. Submissão dos Formulários
+        document.getElementById('add-eq-form')?.addEventListener('submit', handleAddEquipment);
+        document.getElementById('edit-status-form')?.addEventListener('submit', handleEditStatus);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -62,7 +108,7 @@ window.EquipamentosModule = (function() {
         const sel = document.getElementById('add-brand-select');
         if (!sel) return;
 
-        const existingBrands = ERS.getBrands();
+        const existingBrands = ERS.getBrands ? ERS.getBrands() : [];
         const defaultBrands = ['Dell', 'Lenovo', 'Acer', 'Positivo'];
         const allBrands = Array.from(new Set([...defaultBrands, ...existingBrands]));
 
@@ -72,93 +118,128 @@ window.EquipamentosModule = (function() {
     }
 
     // ─────────────────────────────────────────────────────────────
-    //  RENDERIZAÇÃO DOS CARDS E RESUMO SIMPLES
+    //  CÁLCULO DINÂMICO DO TOTAL NO MODAL DE EDIÇÃO
+    // ─────────────────────────────────────────────────────────────
+    function updateEditModalCalculatedTotal() {
+        const func = parseInt(document.getElementById('edit-func')?.value) || 0;
+        const def  = parseInt(document.getElementById('edit-def')?.value) || 0;
+        const qbr  = parseInt(document.getElementById('edit-qbr')?.value) || 0;
+        const total = Math.max(0, func) + Math.max(0, def) + Math.max(0, qbr);
+
+        const totalBadge = document.getElementById('edit-calc-total');
+        if (totalBadge) {
+            totalBadge.textContent = `${total} ${total === 1 ? 'unidade' : 'unidades'}`;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  RENDERIZAÇÃO GERAL DA VIEW
     // ─────────────────────────────────────────────────────────────
     function renderEquipmentView() {
-        const notebooks = ERS.getNotebooks();
+        const allNotebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
 
-        const total = notebooks.reduce((a, n) => a + n.total, 0);
-        const func  = notebooks.reduce((a, n) => a + n.funcionando, 0);
-        const def   = notebooks.reduce((a, n) => a + n.defeito, 0);
-        const qbr   = notebooks.reduce((a, n) => a + n.quebrado, 0);
+        // 1. Atualizar Barra de Indicadores (KPIs sem porcentagem)
+        renderKPIStats(allNotebooks);
 
-        // 1. Mini Resumo no topo
+        // 2. Renderizar Grid de Cards com todos os equipamentos
+        renderCardsView(allNotebooks);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  RENDERIZAR KPI STATS (SEM PORCENTAGEM)
+    // ─────────────────────────────────────────────────────────────
+    function renderKPIStats(notebooks) {
         const statsBar = document.getElementById('eq-stats-bar');
-        if (statsBar) {
-            statsBar.innerHTML = `
-                <div class="eq-stat-pill-card">
-                    <div class="stat-pill-icon blue">
-                        <span class="material-symbols-outlined">laptop</span>
-                    </div>
-                    <div class="stat-pill-info">
-                        <h4>Total</h4>
-                        <div class="stat-num">${total}</div>
-                    </div>
-                </div>
+        if (!statsBar) return;
 
-                <div class="eq-stat-pill-card">
-                    <div class="stat-pill-icon green">
-                        <span class="material-symbols-outlined">check_circle</span>
-                    </div>
-                    <div class="stat-pill-info">
-                        <h4>Disponíveis</h4>
-                        <div class="stat-num">${func}</div>
-                    </div>
-                </div>
+        const total = notebooks.reduce((a, n) => a + (n.total || 0), 0);
+        const func  = notebooks.reduce((a, n) => a + (n.funcionando || 0), 0);
+        const def   = notebooks.reduce((a, n) => a + (n.defeito || 0), 0);
+        const qbr   = notebooks.reduce((a, n) => a + (n.quebrado || 0), 0);
 
-                <div class="eq-stat-pill-card">
-                    <div class="stat-pill-icon orange">
-                        <span class="material-symbols-outlined">build</span>
-                    </div>
-                    <div class="stat-pill-info">
-                        <h4>Com defeito</h4>
-                        <div class="stat-num">${def}</div>
-                    </div>
+        statsBar.innerHTML = `
+            <div class="eq-stat-pill-card">
+                <div class="stat-pill-icon blue">
+                    <span class="material-symbols-outlined">inventory_2</span>
                 </div>
-
-                <div class="eq-stat-pill-card">
-                    <div class="stat-pill-icon red">
-                        <span class="material-symbols-outlined">error</span>
-                    </div>
-                    <div class="stat-pill-info">
-                        <h4>Quebrados</h4>
-                        <div class="stat-num">${qbr}</div>
-                    </div>
+                <div class="stat-pill-info">
+                    <h4>Frota Total</h4>
+                    <div class="stat-num">${total}</div>
                 </div>
-            `;
-        }
+            </div>
 
-        // 2. Grid de Cards por Marca
+            <div class="eq-stat-pill-card">
+                <div class="stat-pill-icon green">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <div class="stat-pill-info">
+                    <h4>Disponíveis</h4>
+                    <div class="stat-num">${func}</div>
+                </div>
+            </div>
+
+            <div class="eq-stat-pill-card">
+                <div class="stat-pill-icon orange">
+                    <span class="material-symbols-outlined">build_circle</span>
+                </div>
+                <div class="stat-pill-info">
+                    <h4>Em Manutenção</h4>
+                    <div class="stat-num">${def}</div>
+                </div>
+            </div>
+
+            <div class="eq-stat-pill-card">
+                <div class="stat-pill-icon red">
+                    <span class="material-symbols-outlined">report_problem</span>
+                </div>
+                <div class="stat-pill-info">
+                    <h4>Inoperantes / Baixa</h4>
+                    <div class="stat-num">${qbr}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  RENDERIZAR VIEW EM CARDS (SEM PORCENTAGEM)
+    // ─────────────────────────────────────────────────────────────
+    function renderCardsView(notebooks) {
         const grid = document.getElementById('eq-cards-grid');
         if (!grid) return;
 
         if (notebooks.length === 0) {
             grid.innerHTML = `
-                <div class="empty-state-eq">
-                    <span class="material-symbols-outlined">devices</span>
-                    <p>Nenhum notebook cadastrado no momento.</p>
+                <div class="eq-empty-state">
+                    <span class="material-symbols-outlined">laptop</span>
+                    <p>Nenhum equipamento cadastrado no patrimônio ainda.</p>
+                    <button type="button" class="btn-primary" onclick="document.getElementById('btnAddEquipment')?.click()">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        <span>Cadastrar Novos Notebooks</span>
+                    </button>
                 </div>
             `;
             return;
         }
 
         grid.innerHTML = notebooks.map(nb => {
-            const pctFunc = nb.total > 0 ? Math.round((nb.funcionando / nb.total) * 100) : 0;
-            const pctDef  = nb.total > 0 ? Math.round((nb.defeito / nb.total) * 100) : 0;
-            const pctQbr  = nb.total > 0 ? Math.round((nb.quebrado / nb.total) * 100) : 0;
+            const funcWidth = nb.total > 0 ? (nb.funcionando / nb.total) * 100 : 0;
+            const defWidth  = nb.total > 0 ? (nb.defeito / nb.total) * 100 : 0;
+            const qbrWidth  = nb.total > 0 ? (nb.quebrado / nb.total) * 100 : 0;
 
             return `
                 <div class="eq-brand-card">
                     <div class="eq-brand-header">
                         <div class="brand-badge-name">
-                            <span class="material-symbols-outlined">laptop_mac</span>
+                            <div class="brand-icon-box">
+                                <span class="material-symbols-outlined">laptop_mac</span>
+                            </div>
                             <h3>${nb.marca}</h3>
                         </div>
                         <div class="eq-brand-actions">
-                            <button type="button" class="btn-icon-action" onclick="openEditStatusModal('${nb.id}')" title="Editar quantidades">
-                                <span class="material-symbols-outlined">edit</span>
+                            <button type="button" class="btn-icon-action" onclick="window.openEditStatusModal('${nb.id}')" title="Ajustar estoque">
+                                <span class="material-symbols-outlined">tune</span>
                             </button>
-                            <button type="button" class="btn-icon-action danger" onclick="handleDeleteBrand('${nb.id}', '${nb.marca}')" title="Remover marca">
+                            <button type="button" class="btn-icon-action danger" onclick="window.handleDeleteBrand('${nb.id}', '${nb.marca}')" title="Excluir marca">
                                 <span class="material-symbols-outlined">delete</span>
                             </button>
                         </div>
@@ -166,17 +247,17 @@ window.EquipamentosModule = (function() {
 
                     <div class="eq-total-banner">
                         <span class="eq-total-number">${nb.total}</span>
-                        <span class="eq-total-label">notebooks no total</span>
+                        <span class="eq-total-label">notebooks registrados</span>
                     </div>
 
-                    <!-- Linha visual empilhada -->
-                    <div class="eq-stacked-bar" title="${nb.funcionando} disponíveis / ${nb.defeito} em conserto / ${nb.quebrado} quebrados">
-                        <div class="stacked-fill green" style="width: ${pctFunc}%;"></div>
-                        <div class="stacked-fill orange" style="width: ${pctDef}%;"></div>
-                        <div class="stacked-fill red" style="width: ${pctQbr}%;"></div>
+                    <!-- Barra visual de proporção (sem porcentagem) -->
+                    <div class="eq-stacked-bar" title="${nb.funcionando} disponíveis / ${nb.defeito} em conserto / ${nb.quebrado} inoperantes">
+                        <div class="stacked-fill green" style="width: ${funcWidth}%;"></div>
+                        <div class="stacked-fill orange" style="width: ${defWidth}%;"></div>
+                        <div class="stacked-fill red" style="width: ${qbrWidth}%;"></div>
                     </div>
 
-                    <!-- 3 contadores com cores -->
+                    <!-- 3 contadores numéricos diretos -->
                     <div class="eq-status-row">
                         <div class="status-box green">
                             <span class="status-num">${nb.funcionando}</span>
@@ -188,7 +269,7 @@ window.EquipamentosModule = (function() {
                         </div>
                         <div class="status-box red">
                             <span class="status-num">${nb.quebrado}</span>
-                            <span class="status-name">Quebrados</span>
+                            <span class="status-name">Inoperantes</span>
                         </div>
                     </div>
                 </div>
@@ -220,7 +301,9 @@ window.EquipamentosModule = (function() {
             return;
         }
 
-        const result = ERS.addNotebooks(brand, qty, 'funcionando');
+        const statusInitial = document.getElementById('add-status-initial')?.value || 'funcionando';
+
+        const result = ERS.addNotebooks(brand, qty, statusInitial);
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
             return;
@@ -229,7 +312,15 @@ window.EquipamentosModule = (function() {
         closeModal('add-eq-modal');
         document.getElementById('add-eq-form')?.reset();
         renderEquipmentView();
-        ERS.showToast(`${qty} notebook(s) ${brand} adicionado(s) com sucesso!`, 'success');
+
+        const statusLabelMap = {
+            'funcionando': 'disponível(is)',
+            'defeito': 'em manutenção',
+            'quebrado': 'inoperante(s)'
+        };
+        const statusLabel = statusLabelMap[statusInitial] || 'registrado(s)';
+
+        ERS.showToast(`${qty} notebook(s) ${brand} adicionado(s) como ${statusLabel}!`, 'success');
         if (window.ProatecModule?.renderBrandGrid) window.ProatecModule.renderBrandGrid();
     }
 
@@ -237,7 +328,8 @@ window.EquipamentosModule = (function() {
     //  MODAL: EDITAR QUANTIDADES DA MARCA
     // ─────────────────────────────────────────────────────────────
     function openEditStatusModal(id) {
-        const nb = ERS.getNotebooks().find(n => n.id === id);
+        const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
+        const nb = notebooks.find(n => n.id === id);
         if (!nb) return;
 
         const idInput = document.getElementById('edit-nb-id');
@@ -248,12 +340,13 @@ window.EquipamentosModule = (function() {
         const errEl = document.getElementById('edit-eq-error');
 
         if (idInput) idInput.value = nb.id;
-        if (titleEl) titleEl.textContent = `Editar Notebooks: ${nb.marca}`;
+        if (titleEl) titleEl.textContent = `Ajustar Estoque: ${nb.marca}`;
         if (funcEl) funcEl.value = nb.funcionando;
         if (defEl) defEl.value = nb.defeito;
         if (qbrEl) qbrEl.value = nb.quebrado;
         if (errEl) errEl.style.display = 'none';
 
+        updateEditModalCalculatedTotal();
         openModal('edit-status-modal');
     }
 
@@ -268,7 +361,7 @@ window.EquipamentosModule = (function() {
         const quebrado = parseInt(document.getElementById('edit-qbr')?.value);
 
         if (isNaN(funcionando) || isNaN(defeito) || isNaN(quebrado) || funcionando < 0 || defeito < 0 || quebrado < 0) {
-            if (errEl) { errEl.textContent = 'Informe apenas números positivos.'; errEl.style.display = 'block'; }
+            if (errEl) { errEl.textContent = 'Informe apenas números inteiros positivos.'; errEl.style.display = 'block'; }
             return;
         }
 
@@ -283,7 +376,7 @@ window.EquipamentosModule = (function() {
 
         closeModal('edit-status-modal');
         renderEquipmentView();
-        ERS.showToast('Quantidades atualizadas com sucesso!', 'success');
+        ERS.showToast('Estoque e disponibilidades atualizados com sucesso!', 'success');
         if (window.ProatecModule?.renderBrandGrid) window.ProatecModule.renderBrandGrid();
     }
 
@@ -291,7 +384,7 @@ window.EquipamentosModule = (function() {
     //  EXCLUIR MARCA
     // ─────────────────────────────────────────────────────────────
     function handleDeleteBrand(id, marca) {
-        if (!confirm(`Deseja remover os notebooks da marca "${marca}"?`)) {
+        if (!confirm(`Deseja remover os notebooks da marca "${marca}" do inventário?`)) {
             return;
         }
 
@@ -301,17 +394,17 @@ window.EquipamentosModule = (function() {
 
         if (result.ok) {
             renderEquipmentView();
-            ERS.showToast(`Marca "${marca}" removida.`, 'success');
+            ERS.showToast(`Marca "${marca}" removida do patrimônio.`, 'success');
             if (window.ProatecModule?.renderBrandGrid) window.ProatecModule.renderBrandGrid();
         } else {
             ERS.showToast(result.message, 'error');
         }
     }
 
-    // Fallback para carregamento isolado da página
+    // Carregamento da página
     if (!window.isSpaMode) {
         document.addEventListener('DOMContentLoaded', () => {
-            const s = AUTH.requireAuth(['proatec', 'coordenacao']);
+            const s = window.AUTH ? AUTH.requireAuth(['proatec', 'coordenacao']) : null;
             if (s) {
                 AUTH.renderUserInfo(s);
                 AUTH.setupLogout();
@@ -329,7 +422,7 @@ window.EquipamentosModule = (function() {
     };
 })();
 
-// Exporta funções chamadas inline no HTML / onclick
+// Exporta funções globais chamadas pelo HTML / onclick
 window.openEditStatusModal = function(id) {
     window.EquipamentosModule?.openEditStatusModal(id);
 };

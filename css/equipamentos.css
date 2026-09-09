@@ -1,22 +1,23 @@
 /* ==========================================================================
    equipamentos.css
-   Visual simples, direto e amigável para a gestão de notebooks da escola
+   Estilos da gestão de equipamentos / notebooks
    ========================================================================== */
 
-/* 1. Cabeçalho e Botão Compacto */
+/* 1. Cabeçalho e Botão Principal */
 .eq-page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
 .btn-add-notebook-compact {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 8px;
+    padding: 10px 18px;
     font-size: 13px;
     font-weight: 600;
     width: auto;
@@ -30,29 +31,35 @@
     font-size: 18px;
 }
 
-/* 2. Barra de Resumo Simples no Topo */
+/* 2. Barra de Indicadores / KPI */
 .eq-stats-bar {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
 }
 
 .eq-stat-pill-card {
     background-color: var(--color-bg-white);
     border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-lg);
-    padding: 14px 18px;
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.eq-stat-pill-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .stat-pill-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -60,7 +67,7 @@
 }
 
 .stat-pill-icon .material-symbols-outlined {
-    font-size: 20px;
+    font-size: 22px;
 }
 
 .stat-pill-icon.blue   { background-color: var(--color-primary-light); color: var(--color-primary); }
@@ -70,32 +77,32 @@
 
 .stat-pill-info h4 {
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     color: var(--color-text-muted);
-    letter-spacing: 0.3px;
-    margin-bottom: 2px;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
 }
 
 .stat-pill-info .stat-num {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     color: var(--color-text-primary);
     line-height: 1;
 }
 
-/* 3. Grid de Cards por Marca */
+/* 3. Grid de Cards */
 .eq-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
 }
 
 .eq-brand-card {
     background-color: var(--color-bg-white);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-xl);
-    padding: 18px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -114,45 +121,46 @@
     justify-content: space-between;
 }
 
-.eq-brand-title {
+.brand-badge-name {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.eq-brand-icon {
+.brand-icon-box {
     width: 38px;
     height: 38px;
     border-radius: var(--radius-md);
-    background-color: var(--color-surface-container);
+    background-color: var(--color-primary-light);
     color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.eq-brand-icon .material-symbols-outlined {
+.brand-icon-box .material-symbols-outlined {
     font-size: 20px;
 }
 
-.eq-brand-title h4 {
+.brand-badge-name h3 {
     font-size: 16px;
     font-weight: 700;
     color: var(--color-text-primary);
     margin: 0;
 }
 
-.eq-brand-total {
-    font-size: 12px;
-    color: var(--color-text-muted);
+.eq-brand-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.btn-icon-del {
+.btn-icon-action {
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: var(--color-text-muted);
     cursor: pointer;
-    padding: 6px;
+    padding: 7px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
@@ -160,21 +168,66 @@
     transition: all var(--transition-fast);
 }
 
-.btn-icon-del:hover {
+.btn-icon-action:hover {
+    background-color: var(--color-surface-container);
+    color: var(--color-primary);
+}
+
+.btn-icon-action.danger:hover {
     background-color: #fee2e2;
     color: #dc2626;
 }
 
-.btn-icon-del .material-symbols-outlined {
+.btn-icon-action .material-symbols-outlined {
     font-size: 18px;
 }
 
-/* 4. Caixas de Status no Card (Verde, Laranja, Vermelho) */
-.eq-status-boxes-row {
+/* Banner de total */
+.eq-total-banner {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.eq-total-number {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+.eq-total-label {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+/* Barra empilhada de status proporcional */
+.eq-stacked-bar {
+    height: 8px;
+    width: 100%;
+    background-color: var(--color-surface-container);
+    border-radius: var(--radius-full);
+    display: flex;
+    overflow: hidden;
+    gap: 2px;
+}
+
+.stacked-fill {
+    height: 100%;
+    transition: width var(--transition-normal);
+}
+
+.stacked-fill.green  { background-color: #16a34a; }
+.stacked-fill.orange { background-color: #d97706; }
+.stacked-fill.red    { background-color: #dc2626; }
+
+/* Três caixas de contagem */
+.eq-status-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
-    background-color: #f8fafc;
+    background-color: var(--color-bg-subtle);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     padding: 10px 8px;
@@ -187,68 +240,173 @@
     text-align: center;
 }
 
-.status-box-num {
-    font-size: 18px;
+.status-box .status-num {
+    font-size: 17px;
     font-weight: 700;
     line-height: 1.1;
 }
 
-.status-box-label {
+.status-box .status-name {
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    margin-top: 2px;
+    letter-spacing: 0.3px;
+    margin-top: 3px;
 }
 
-.status-box.green .status-box-num   { color: #16a34a; }
-.status-box.green .status-box-label { color: #15803d; }
+.status-box.green .status-num   { color: #16a34a; }
+.status-box.green .status-name { color: #15803d; }
 
-.status-box.orange .status-box-num   { color: #d97706; }
-.status-box.orange .status-box-label { color: #b45309; }
+.status-box.orange .status-num   { color: #d97706; }
+.status-box.orange .status-name { color: #b45309; }
 
-.status-box.red .status-box-num   { color: #dc2626; }
-.status-box.red .status-box-label { color: #b91c1c; }
+.status-box.red .status-num   { color: #dc2626; }
+.status-box.red .status-name { color: #b91c1c; }
 
-/* 5. Rodapé do Card */
-.eq-card-footer {
-    margin-top: auto;
-}
-
-.btn-card-edit {
-    width: 100%;
+/* 4. Modais: Controles Específicos */
+.qty-input-row {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+}
+
+.qty-input-row .form-control {
+    flex: 1;
+}
+
+.qty-quick-buttons {
+    display: flex;
+    align-items: center;
     gap: 6px;
-    padding: 9px 12px;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    background-color: var(--color-surface-low);
+}
+
+.btn-qty-quick {
+    background-color: var(--color-bg-subtle);
     border: 1px solid var(--color-border);
-    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    padding: 8px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--color-text-secondary);
+    cursor: pointer;
     transition: all var(--transition-fast);
 }
 
-.btn-card-edit:hover {
+.btn-qty-quick:hover {
     background-color: var(--color-primary-light);
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
 
-.btn-card-edit .material-symbols-outlined {
-    font-size: 16px;
+/* Banner de total calculado no modal de edição */
+.eq-calc-total-banner {
+    background-color: var(--color-primary-light);
+    border: 1px solid rgba(17, 66, 188, 0.15);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
 }
 
-/* 6. Modais */
+.eq-calc-total-banner .calc-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.eq-calc-total-banner .calc-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.eq-calc-total-banner .calc-sub {
+    font-size: 11px;
+    color: var(--color-text-muted);
+}
+
+.eq-calc-total-banner .calc-value-badge {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Stepper numérico nos modais */
+.input-stepper-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: var(--color-bg-white);
+    transition: border-color var(--transition-fast);
+}
+
+.input-stepper-wrapper:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-ring);
+}
+
+.stepper-btn {
+    background-color: var(--color-bg-subtle);
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.stepper-btn:hover {
+    background-color: var(--color-surface-container);
+    color: var(--color-text-primary);
+}
+
+.stepper-btn:active {
+    background-color: var(--color-border);
+}
+
+.stepper-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.stepper-input {
+    flex: 1;
+    border: none !important;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px 10px;
+    background: transparent;
+    color: var(--color-text-primary);
+    outline: none !important;
+    box-shadow: none !important;
+    -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Rótulos dos modais com dots */
 .label-status-green,
 .label-status-orange,
 .label-status-red {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 13px;
     font-weight: 600;
     margin-bottom: 6px;
@@ -265,25 +423,39 @@
 .status-dot.orange { background-color: #d97706; }
 .status-dot.red    { background-color: #dc2626; }
 
-/* 7. Estado Vazio */
+/* 5. Estado Vazio */
 .eq-empty-state {
     grid-column: 1 / -1;
     background-color: var(--color-bg-white);
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-xl);
-    padding: 36px 20px;
+    padding: 48px 24px;
     text-align: center;
     color: var(--color-text-muted);
-    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
-@media (max-width: 600px) {
-    .eq-page-header {
+.eq-empty-state .material-symbols-outlined {
+    font-size: 48px;
+    color: var(--color-text-placeholder);
+}
+
+.eq-empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* 6. Responsividade */
+@media (max-width: 768px) {
+    .qty-input-row {
         flex-direction: column;
         align-items: stretch;
     }
-    .btn-add-notebook-compact {
-        width: 100%;
-        justify-content: center;
+
+    .qty-quick-buttons {
+        justify-content: flex-end;
     }
 }

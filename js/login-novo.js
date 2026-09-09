@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnText   = btnLogin ? btnLogin.querySelector('.btn-text') : null;
 
     if (loginForm) {
-        loginForm.addEventListener('submit', function (e) {
+        loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const email    = emailInput ? emailInput.value.trim() : '';
@@ -119,14 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btnText) btnText.textContent = 'Entrando...';
             }
 
-            setTimeout(() => {
+            try {
                 if (typeof ERS === 'undefined') {
                     showError('Erro interno: Módulo de dados não encontrado.');
                     resetButton();
                     return;
                 }
 
-                const result = ERS.login(email, password);
+                // ERS.login é uma função assíncrona (retorna Promise)
+                const result = await ERS.login(email, password);
 
                 if (result.ok) {
                     if (btnText) btnText.textContent = 'Sucesso!';
@@ -146,12 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
 
                     const targetUrl = roleMap[result.user.role] || 'pages/professor.html';
-                    window.location.href = targetUrl;
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 200);
                 } else {
                     showError(result.message || 'E-mail ou senha incorretos.');
                     resetButton();
                 }
-            }, 350);
+            } catch (err) {
+                console.error('Erro na autenticação:', err);
+                showError('Erro ao processar login. Tente novamente.');
+                resetButton();
+            }
         });
     }
 
