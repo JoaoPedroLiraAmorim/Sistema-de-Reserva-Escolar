@@ -44,19 +44,14 @@
         return `
         <aside class="sidebar collapsed" id="sidebar" aria-label="Menu Lateral">
             <div class="sidebar-header">
-                <div class="sidebar-brand-wrapper" id="sidebarBrandWrapper" title="PROATEC - Gestão de Laboratório">
-                    <div class="sidebar-brand-icon">
-                        <span class="material-symbols-outlined">laptop_mac</span>
-                    </div>
-                    <div class="sidebar-brand-text">
-                        <h1>PROATEC</h1>
-                        <p>Gestão de Laboratório</p>
-                    </div>
-                </div>
                 <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn"
-                        aria-label="Recolher ou expandir menu lateral" title="Alternar Menu">
+                        aria-label="Recolher ou expandir menu lateral" title="Alternar Menu Lateral">
                     <span class="material-symbols-outlined toggle-icon">chevron_left</span>
                 </button>
+                <div class="sidebar-brand-text" id="sidebarBrandWrapper" title="PROATEC - Gestão de Laboratório">
+                    <h1>PROATEC</h1>
+                    <p>Gestão de Laboratório</p>
+                </div>
             </div>
 
             <nav class="sidebar-nav">

@@ -543,8 +543,7 @@ textarea.form-control {
 .sidebar-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
     padding-bottom: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     min-height: 52px;
@@ -552,53 +551,55 @@ textarea.form-control {
 }
 
 .sidebar.collapsed .sidebar-header {
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding-bottom: 12px;
+    padding-bottom: 16px;
+    gap: 0;
 }
 
-.sidebar-brand-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-    cursor: pointer;
-    border-radius: var(--radius-md);
-    padding: 2px 4px;
-    transition: opacity 0.2s ease;
-    user-select: none;
-}
-
-.sidebar-brand-wrapper:hover {
-    opacity: 0.92;
-}
-
-.sidebar-brand-icon {
-    width: 40px;
-    height: 40px;
+/* Botão de Toggle da Sidebar (No topo, no lugar do antigo ícone) */
+.sidebar-toggle-btn {
+    width: 42px;
+    height: 42px;
     border-radius: var(--radius-md);
     background: linear-gradient(135deg, var(--color-primary), #2563eb);
+    border: none;
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
-    flex-shrink: 0;
+    cursor: pointer;
     box-shadow: 0 2px 8px rgba(17, 66, 188, 0.35);
-    transition: transform 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
 }
 
-.sidebar-brand-wrapper:hover .sidebar-brand-icon {
-    transform: scale(1.05);
+.sidebar-toggle-btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-hover), #1d4ed8);
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(17, 66, 188, 0.55);
+    color: #ffffff;
+}
+
+.sidebar-toggle-btn .toggle-icon {
+    font-size: 24px;
+    color: #ffffff;
+    line-height: 1;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Quando recolhida: seta vira 180° para a direita (indica expandir) */
+.sidebar.collapsed .sidebar-toggle-btn .toggle-icon {
+    transform: rotate(180deg);
 }
 
 .sidebar-brand-text {
     min-width: 0;
     opacity: 1;
-    max-width: 150px;
+    max-width: 170px;
     overflow: hidden;
     white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -622,38 +623,6 @@ textarea.form-control {
     color: var(--color-sidebar-text-muted);
     line-height: 1.2;
     margin-top: 2px;
-}
-
-/* Botão de Toggle da Sidebar */
-.sidebar-toggle-btn {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-    color: var(--color-sidebar-text);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0;
-}
-
-.sidebar-toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: scale(1.06);
-}
-
-.sidebar-toggle-btn .toggle-icon {
-    font-size: 20px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.sidebar.collapsed .sidebar-toggle-btn .toggle-icon {
-    transform: rotate(180deg);
 }
 
 /* Navegação da Sidebar */
@@ -987,7 +956,8 @@ body.sidebar-collapsed .main-wrapper,
 
     .sidebar.collapsed .sidebar-header {
         flex-direction: row !important;
-        justify-content: space-between !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
     }
 
     .sidebar.collapsed .sidebar-brand-text,
@@ -1100,7 +1070,8 @@ html.sidebar-expanded .sidebar {
 
 html.sidebar-expanded .sidebar .sidebar-header {
     flex-direction: row !important;
-    justify-content: space-between !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
 }
 
 html.sidebar-expanded .sidebar .sidebar-brand-text,

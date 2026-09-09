@@ -86,19 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Botões de menu nos cabeçalhos dos dashboards/painéis
-        document.querySelectorAll('.menu-toggle, #menuToggle').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (window.innerWidth <= 768) {
-                    const isOpen = sidebar.classList.toggle('open');
-                    if (sidebarBackdrop) sidebarBackdrop.classList.toggle('active', isOpen);
-                } else {
-                    toggleSidebar();
-                }
-            });
-        });
-
         // Fechamento no Mobile via Backdrop
         if (sidebarBackdrop) {
             sidebarBackdrop.addEventListener('click', () => {
@@ -107,14 +94,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Fecha a sidebar ao clicar fora dela em dispositivos móveis
+        // Fecha a sidebar ao clicar fora dela na página (desktop e mobile)
         document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && 
-                sidebar.classList.contains('open') &&
-                !sidebar.contains(e.target) && 
-                !e.target.closest('.menu-toggle, #menuToggle')) {
-                sidebar.classList.remove('open');
-                if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+            if (sidebar.contains(e.target)) return;
+
+            if (window.innerWidth > 768) {
+                // No desktop: se estiver expandida (não-collapsed), recolhe/fecha
+                if (!sidebar.classList.contains('collapsed')) {
+                    setSidebarCollapsed(true);
+                }
+            } else {
+                // No mobile: se estiver aberta, fecha
+                if (sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+                }
             }
         });
 
