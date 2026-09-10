@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipamentos - PROATEC</title>
-    <meta name="description" content="Gestão e controle de notebooks escolares disponíveis, com defeito e quebrados.">
+    <title>Equipamentos - EduLab Reserve</title>
+    <meta name="description" content="Gerencie os notebooks disponíveis na escola.">
 
-    <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
+    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
@@ -41,177 +41,189 @@
         <!-- Área Principal -->
         <div class="main-wrapper">
             <main class="dashboard-content">
-                <!-- Cabeçalho Principal -->
-                <section class="dashboard-header eq-page-header">
-                    <div class="header-greeting">
-                        <div class="header-top-row">
-                            <p class="date-badge">—</p>
-                        </div>
-                        <h2>Controle de Equipamentos</h2>
-                        <p>Visão geral do inventário e estado de conservação dos notebooks escolares.</p>
+                <!-- 1. Cabeçalho -->
+                <section class="eq-page-header">
+                    <div class="eq-header-info">
+                        <h1 class="eq-page-title">Equipamentos</h1>
+                        <p class="eq-page-desc">Gerencie os notebooks disponíveis na escola.</p>
                     </div>
                     <!-- Ação Principal -->
-                    <button type="button" class="btn-primary btn-add-notebook-compact" id="btnAddEquipment">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        <span>Novos Notebooks</span>
+                    <button type="button" class="btn-primary btn-add-equipment" id="btnAddEquipment">
+                        <span class="material-symbols-outlined">add</span>
+                        <span>+ Adicionar equipamentos</span>
                     </button>
                 </section>
 
-                <!-- Cards de Indicadores de Desempenho / KPI -->
-                <section class="eq-stats-bar" id="eq-stats-bar"></section>
+                <!-- 2. Cards de Resumo (Exatamente 3 cards) -->
+                <section class="eq-summary-section" aria-label="Resumo dos equipamentos">
+                    <div class="eq-summary-cards" id="eq-summary-cards">
+                        <!-- Renderizado dinamicamente por equipamentos.js -->
+                    </div>
+                </section>
 
-                <!-- Grid de Cards por Marca -->
-                <section class="eq-cards-grid" id="eq-cards-grid"></section>
+                <!-- 3. Seção Equipamentos por Marca -->
+                <section class="eq-brands-section" aria-label="Equipamentos por marca">
+                    <h2 class="eq-section-title">Equipamentos por marca</h2>
+                    <div class="eq-brands-grid" id="eq-brands-grid">
+                        <!-- Renderizado dinamicamente por equipamentos.js -->
+                    </div>
+                </section>
             </main>
         </div>
     </div>
 
-    <!-- Modal 1: Adicionar Notebooks -->
-    <div class="modal-backdrop hidden" id="add-eq-modal">
+    <!-- ==============================================================
+         MODAL 1: Detalhes da Marca
+         ============================================================== -->
+    <div class="modal-backdrop hidden" id="brand-detail-modal" role="dialog" aria-modal="true" aria-labelledby="brand-detail-title">
         <div class="modal modal-md">
             <div class="modal-header">
-                <div>
-                    <h3>Cadastrar Equipamentos</h3>
-                    <p>Adicione novos notebooks ao patrimônio escolar.</p>
+                <div class="brand-detail-header-info">
+                    <div class="brand-avatar-badge" id="brand-detail-badge">L</div>
+                    <div>
+                        <h3 id="brand-detail-title">Marca</h3>
+                        <p class="brand-detail-subtitle">Detalhes do equipamento</p>
+                    </div>
                 </div>
-                <button type="button" class="btn-close" aria-label="Fechar">
+                <button type="button" class="btn-close" aria-label="Fechar modal">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <form id="add-eq-form">
+            <div class="modal-body">
+                <div class="brand-detail-stats">
+                    <div class="detail-stat-card">
+                        <span class="detail-stat-label">Total</span>
+                        <span class="detail-stat-value" id="brand-detail-total">0</span>
+                    </div>
+                    <div class="detail-stat-card available">
+                        <span class="detail-stat-label">Disponíveis</span>
+                        <span class="detail-stat-value" id="brand-detail-available">0</span>
+                    </div>
+                    <div class="detail-stat-card defect">
+                        <span class="detail-stat-label">Com defeito</span>
+                        <span class="detail-stat-value" id="brand-detail-defect">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
+                <button type="button" class="btn-primary btn-defect-action" id="btnOpenRegisterDefect">
+                    <span class="material-symbols-outlined">build</span>
+                    <span>Registrar defeito</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         MODAL 2: Adicionar Equipamentos
+         ============================================================== -->
+    <div class="modal-backdrop hidden" id="add-equipment-modal" role="dialog" aria-modal="true" aria-labelledby="add-equipment-title">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <div>
+                    <h3 id="add-equipment-title">Adicionar equipamentos</h3>
+                    <p>Adicione novos notebooks ao estoque escolar.</p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Fechar modal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="add-equipment-form" novalidate>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="add-brand-select">Marca do Equipamento</label>
+                        <label for="add-brand-select">Marca</label>
                         <div class="select-wrapper">
-                            <select id="add-brand-select" required>
-                                <option value="">Selecione a marca...</option>
-                                <option value="Dell">Dell</option>
-                                <option value="Lenovo">Lenovo</option>
-                                <option value="Acer">Acer</option>
-                                <option value="Positivo">Positivo</option>
-                                <option value="__new__">+ Cadastrar outra marca...</option>
+                            <select id="add-brand-select" class="form-control" required>
+                                <option value="">Selecione uma marca existente...</option>
+                                <option value="__new__">+ Cadastrar nova marca</option>
                             </select>
                             <span class="material-symbols-outlined select-icon">expand_more</span>
                         </div>
                     </div>
 
-                    <!-- Campo caso escolha outra marca -->
+                    <!-- Campo condicional para cadastrar nova marca -->
                     <div class="form-group hidden" id="new-brand-group">
-                        <label for="add-brand-new">Nome da Nova Marca</label>
-                        <input type="text" id="add-brand-new" class="form-control" placeholder="Ex: Samsung, Asus, HP, Apple">
+                        <label for="add-brand-new">Nome da nova marca</label>
+                        <input type="text" id="add-brand-new" class="form-control" placeholder="Digite o nome da marca (Ex: Samsung, Asus, HP)">
                     </div>
 
                     <div class="form-group">
-                        <label for="add-qty">Quantidade a Adicionar</label>
-                        <div class="qty-input-row">
-                            <input type="number" id="add-qty" class="form-control" min="1" placeholder="Ex: 10" required>
-                            <div class="qty-quick-buttons">
-                                <button type="button" class="btn-qty-quick" data-add="5">+5</button>
-                                <button type="button" class="btn-qty-quick" data-add="10">+10</button>
-                                <button type="button" class="btn-qty-quick" data-add="20">+20</button>
-                            </div>
-                        </div>
+                        <label for="add-equipment-qty">Quantidade</label>
+                        <input type="number" id="add-equipment-qty" class="form-control" min="1" step="1" placeholder="Informe a quantidade (Ex: 5)" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="add-status-initial">Condição Inicial</label>
-                        <div class="select-wrapper">
-                            <select id="add-status-initial">
-                                <option value="funcionando">🟢 Disponíveis (Prontos para uso em aula)</option>
-                                <option value="defeito">🟡 Com defeito (Aguardando reparo técnico)</option>
-                                <option value="quebrado">🔴 Quebrados (Inoperantes)</option>
-                            </select>
-                            <span class="material-symbols-outlined select-icon">expand_more</span>
-                        </div>
-                    </div>
-
-                    <div id="add-eq-error" class="login-error-msg"></div>
+                    <div id="add-equipment-error" class="login-error-msg" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
-                    <button type="submit" class="btn-primary">Adicionar ao Inventário</button>
+                    <button type="submit" class="btn-primary" id="btnAddEquipmentSubmit">
+                        <span>Adicionar</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal 2: Editar Quantidades da Marca -->
-    <div class="modal-backdrop hidden" id="edit-status-modal">
+    <!-- ==============================================================
+         MODAL 3: Registrar Defeito
+         ============================================================== -->
+    <div class="modal-backdrop hidden" id="register-defect-modal" role="dialog" aria-modal="true" aria-labelledby="register-defect-title">
         <div class="modal modal-md">
             <div class="modal-header">
                 <div>
-                    <h3 id="edit-modal-title">Ajustar Estoque</h3>
-                    <p>Atualize a disponibilidade e o estado de conservação.</p>
+                    <h3 id="register-defect-title">Registrar defeito</h3>
+                    <p>Informe os equipamentos que apresentaram problemas.</p>
                 </div>
-                <button type="button" class="btn-close" aria-label="Fechar">
+                <button type="button" class="btn-close" aria-label="Fechar modal">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <form id="edit-status-form">
-                <input type="hidden" id="edit-nb-id">
+            <form id="register-defect-form" novalidate>
+                <input type="hidden" id="defect-brand-id">
                 <div class="modal-body">
-                    <!-- Banner de Resumo da Marca e Total Calculado -->
-                    <div class="eq-calc-total-banner">
-                        <div class="calc-info">
-                            <span class="calc-label">Total Calculado da Marca:</span>
-                            <span class="calc-sub">Soma de disponíveis + manutenção + quebrados</span>
+                    <!-- Marca e Disponíveis Atualmente -->
+                    <div class="defect-brand-banner">
+                        <div class="defect-brand-info">
+                            <span class="defect-brand-label">Marca</span>
+                            <span class="defect-brand-name" id="defect-brand-display">—</span>
                         </div>
-                        <div class="calc-value-badge" id="edit-calc-total">0 unidades</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit-func" class="label-status-green">
-                            <span class="status-dot green"></span>
-                            <span>Disponíveis (100% Funcionais)</span>
-                        </label>
-                        <div class="input-stepper-wrapper">
-                            <button type="button" class="stepper-btn" data-target="edit-func" data-delta="-1" aria-label="Diminuir">
-                                <span class="material-symbols-outlined">remove</span>
-                            </button>
-                            <input type="number" id="edit-func" class="form-control stepper-input" min="0" required>
-                            <button type="button" class="stepper-btn" data-target="edit-func" data-delta="1" aria-label="Aumentar">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
+                        <div class="defect-stock-badge">
+                            <span class="defect-stock-label">Disponíveis atualmente:</span>
+                            <span class="defect-stock-value" id="defect-available-current">0</span>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="edit-def" class="label-status-orange">
-                            <span class="status-dot orange"></span>
-                            <span>Em Manutenção (Com Defeito Técnico)</span>
-                        </label>
-                        <div class="input-stepper-wrapper">
-                            <button type="button" class="stepper-btn" data-target="edit-def" data-delta="-1" aria-label="Diminuir">
-                                <span class="material-symbols-outlined">remove</span>
-                            </button>
-                            <input type="number" id="edit-def" class="form-control stepper-input" min="0" required>
-                            <button type="button" class="stepper-btn" data-target="edit-def" data-delta="1" aria-label="Aumentar">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
+                        <label for="defect-qty">Quantidade com defeito</label>
+                        <input type="number" id="defect-qty" class="form-control" min="1" step="1" placeholder="Ex: 2" required>
+                    </div>
+
+                    <!-- Prévia calculada após alteração -->
+                    <div class="defect-preview-card" id="defect-preview-card">
+                        <div class="preview-header">
+                            <span class="material-symbols-outlined">sync_alt</span>
+                            <span>Prévia após alteração</span>
+                        </div>
+                        <div class="preview-grid">
+                            <div class="preview-item">
+                                <span class="preview-label">Disponíveis após alteração:</span>
+                                <span class="preview-number available" id="preview-disponiveis">—</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Com defeito após alteração:</span>
+                                <span class="preview-number defect" id="preview-defeito">—</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="edit-qbr" class="label-status-red">
-                            <span class="status-dot red"></span>
-                            <span>Inoperantes (Quebrados / Baixa)</span>
-                        </label>
-                        <div class="input-stepper-wrapper">
-                            <button type="button" class="stepper-btn" data-target="edit-qbr" data-delta="-1" aria-label="Diminuir">
-                                <span class="material-symbols-outlined">remove</span>
-                            </button>
-                            <input type="number" id="edit-qbr" class="form-control stepper-input" min="0" required>
-                            <button type="button" class="stepper-btn" data-target="edit-qbr" data-delta="1" aria-label="Aumentar">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="edit-eq-error" class="login-error-msg"></div>
+                    <div id="register-defect-error" class="login-error-msg" role="alert"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar Alterações</button>
+                    <button type="submit" class="btn-primary" id="btnConfirmDefect">
+                        <span>Confirmar</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -220,7 +232,7 @@
     <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts Externos -->
+    <!-- Scripts do Sistema -->
     <script src="../js/store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>

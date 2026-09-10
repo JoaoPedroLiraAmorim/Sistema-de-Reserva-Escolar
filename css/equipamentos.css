@@ -1,100 +1,152 @@
 /* ==========================================================================
-   equipamentos.css
-   Estilos da gestão de equipamentos / notebooks
+   equipamentos.css — Sistema de Reserva Escolar
+   Estilos específicos para a tela de Equipamentos
+   Paleta: Branco, Azul-marinho/escuro (#0b1d2f, #1142bc, #1e3a8a) e tons suaves.
    ========================================================================== */
 
-/* 1. Cabeçalho e Botão Principal */
+/* ─────────────────────────────────────────────────────────────
+   1. CABEÇALHO DA PÁGINA
+   ───────────────────────────────────────────────────────────── */
 .eq-page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
-.btn-add-notebook-compact {
+.eq-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.eq-page-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.eq-page-desc {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-weight: 400;
+}
+
+.btn-add-equipment {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 18px;
-    font-size: 13px;
+    padding: 10px 20px;
+    font-size: 14px;
     font-weight: 600;
     width: auto;
     border-radius: var(--radius-md);
     cursor: pointer;
+    background-color: var(--color-primary);
+    color: #ffffff;
     box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.btn-add-notebook-compact .material-symbols-outlined {
-    font-size: 18px;
-}
-
-/* 2. Barra de Indicadores / KPI */
-.eq-stats-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.eq-stat-pill-card {
-    background-color: var(--color-bg-white);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-xl);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.eq-stat-pill-card:hover {
+.btn-add-equipment:hover {
+    background-color: var(--color-primary-hover);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
 
-.stat-pill-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-lg);
+.btn-add-equipment .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. CARDS DE RESUMO (EXATAMENTE 3 CARDS)
+   ───────────────────────────────────────────────────────────── */
+.eq-summary-section {
+    margin-bottom: 32px;
+}
+
+.eq-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.eq-kpi-card {
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl);
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.eq-kpi-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.eq-kpi-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    justify-content: space-between;
 }
 
-.stat-pill-icon .material-symbols-outlined {
-    font-size: 22px;
-}
-
-.stat-pill-icon.blue   { background-color: var(--color-primary-light); color: var(--color-primary); }
-.stat-pill-icon.green  { background-color: #dcfce7; color: #16a34a; }
-.stat-pill-icon.orange { background-color: #fef3c7; color: #d97706; }
-.stat-pill-icon.red    { background-color: #fee2e2; color: #dc2626; }
-
-.stat-pill-info h4 {
+.eq-kpi-title {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.6px;
     color: var(--color-text-muted);
-    letter-spacing: 0.4px;
-    margin-bottom: 3px;
 }
 
-.stat-pill-info .stat-num {
-    font-size: 24px;
+.eq-kpi-icon {
+    font-size: 20px;
+    color: var(--color-primary);
+}
+
+.eq-kpi-card.available .eq-kpi-icon {
+    color: #16a34a;
+}
+
+.eq-kpi-card.defect .eq-kpi-icon {
+    color: #d97706;
+}
+
+.eq-kpi-value {
+    font-size: 34px;
     font-weight: 800;
     color: var(--color-text-primary);
     line-height: 1;
+    letter-spacing: -0.5px;
 }
 
-/* 3. Grid de Cards */
-.eq-cards-grid {
+/* ─────────────────────────────────────────────────────────────
+   3. SEÇÃO EQUIPAMENTOS POR MARCA
+   ───────────────────────────────────────────────────────────── */
+.eq-brands-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.eq-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.3px;
+}
+
+/* Grade de 3 colunas no desktop */
+.eq-brands-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 18px;
 }
 
@@ -102,328 +154,143 @@
     background-color: var(--color-bg-white);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-xl);
-    padding: 20px;
+    padding: 20px 22px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 18px;
     box-shadow: var(--shadow-sm);
-    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    cursor: pointer;
+    user-select: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .eq-brand-card:hover {
-    box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
 }
 
-.eq-brand-header {
+.eq-brand-card:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.eq-brand-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.brand-badge-name {
+.brand-identity {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
-.brand-icon-box {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-icon-box .material-symbols-outlined {
-    font-size: 20px;
-}
-
-.brand-badge-name h3 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0;
-}
-
-.eq-brand-actions {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.btn-icon-action {
-    background: transparent;
-    border: none;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    padding: 7px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-fast);
-}
-
-.btn-icon-action:hover {
-    background-color: var(--color-surface-container);
-    color: var(--color-primary);
-}
-
-.btn-icon-action.danger:hover {
-    background-color: #fee2e2;
-    color: #dc2626;
-}
-
-.btn-icon-action .material-symbols-outlined {
-    font-size: 18px;
-}
-
-/* Banner de total */
-.eq-total-banner {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-}
-
-.eq-total-number {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--color-text-primary);
-    line-height: 1;
-}
-
-.eq-total-label {
-    font-size: 12px;
-    color: var(--color-text-muted);
-    font-weight: 500;
-}
-
-/* Barra empilhada de status proporcional */
-.eq-stacked-bar {
-    height: 8px;
-    width: 100%;
-    background-color: var(--color-surface-container);
-    border-radius: var(--radius-full);
-    display: flex;
-    overflow: hidden;
-    gap: 2px;
-}
-
-.stacked-fill {
-    height: 100%;
-    transition: width var(--transition-normal);
-}
-
-.stacked-fill.green  { background-color: #16a34a; }
-.stacked-fill.orange { background-color: #d97706; }
-.stacked-fill.red    { background-color: #dc2626; }
-
-/* Três caixas de contagem */
-.eq-status-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    background-color: var(--color-bg-subtle);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-lg);
-    padding: 10px 8px;
-}
-
-.status-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.status-box .status-num {
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 1.1;
-}
-
-.status-box .status-name {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-top: 3px;
-}
-
-.status-box.green .status-num   { color: #16a34a; }
-.status-box.green .status-name { color: #15803d; }
-
-.status-box.orange .status-num   { color: #d97706; }
-.status-box.orange .status-name { color: #b45309; }
-
-.status-box.red .status-num   { color: #dc2626; }
-.status-box.red .status-name { color: #b91c1c; }
-
-/* 4. Modais: Controles Específicos */
-.qty-input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.qty-input-row .form-control {
-    flex: 1;
-}
-
-.qty-quick-buttons {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-qty-quick {
-    background-color: var(--color-bg-subtle);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 8px 11px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: inherit;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn-qty-quick:hover {
-    background-color: var(--color-primary-light);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
-/* Banner de total calculado no modal de edição */
-.eq-calc-total-banner {
-    background-color: var(--color-primary-light);
-    border: 1px solid rgba(17, 66, 188, 0.15);
-    border-radius: var(--radius-lg);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-}
-
-.eq-calc-total-banner .calc-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.eq-calc-total-banner .calc-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--color-primary);
-}
-
-.eq-calc-total-banner .calc-sub {
-    font-size: 11px;
-    color: var(--color-text-muted);
-}
-
-.eq-calc-total-banner .calc-value-badge {
-    background-color: var(--color-primary);
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 5px 12px;
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-sm);
-}
-
-/* Stepper numérico nos modais */
-.input-stepper-wrapper {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background-color: var(--color-bg-white);
-    transition: border-color var(--transition-fast);
-}
-
-.input-stepper-wrapper:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-ring);
-}
-
-.stepper-btn {
-    background-color: var(--color-bg-subtle);
-    border: none;
+.brand-initial-avatar {
     width: 40px;
     height: 40px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 800;
+    font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    color: var(--color-text-secondary);
-    transition: all var(--transition-fast);
     flex-shrink: 0;
 }
 
-.stepper-btn:hover {
-    background-color: var(--color-surface-container);
-    color: var(--color-text-primary);
+.brand-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.stepper-btn:active {
-    background-color: var(--color-border);
-}
-
-.stepper-btn .material-symbols-outlined {
-    font-size: 18px;
-}
-
-.stepper-input {
-    flex: 1;
-    border: none !important;
-    text-align: center;
+.brand-name {
     font-size: 16px;
     font-weight: 700;
-    padding: 8px 10px;
-    background: transparent;
     color: var(--color-text-primary);
-    outline: none !important;
-    box-shadow: none !important;
-    -moz-appearance: textfield;
-}
-
-.stepper-input::-webkit-outer-spin-button,
-.stepper-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
     margin: 0;
+    letter-spacing: 0.2px;
 }
 
-/* Rótulos dos modais com dots */
-.label-status-green,
-.label-status-orange,
-.label-status-red {
+.brand-total-count {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.brand-arrow-icon {
+    font-size: 18px;
+    color: var(--color-text-muted);
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.eq-brand-card:hover .brand-arrow-icon {
+    transform: translateX(3px);
+    color: var(--color-primary);
+}
+
+.eq-brand-stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.brand-stat-box {
+    background-color: var(--color-bg-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brand-stat-box.available {
+    background-color: #f0fdf4;
+    border: 1px solid #dcfce7;
+}
+
+.brand-stat-box.defect {
+    background-color: #fffbeb;
+    border: 1px solid #fef3c7;
+}
+
+.brand-stat-label {
+    font-size: 11px;
     font-weight: 600;
-    margin-bottom: 6px;
+    color: var(--color-text-muted);
 }
 
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
+.brand-stat-box.available .brand-stat-label {
+    color: #15803d;
 }
 
-.status-dot.green  { background-color: #16a34a; }
-.status-dot.orange { background-color: #d97706; }
-.status-dot.red    { background-color: #dc2626; }
+.brand-stat-box.defect .brand-stat-label {
+    color: #b45309;
+}
 
-/* 5. Estado Vazio */
+.brand-stat-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.brand-stat-box.available .brand-stat-num {
+    color: #166534;
+}
+
+.brand-stat-box.defect .brand-stat-num {
+    color: #9a3412;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. ESTADO VAZIO (EMPTY STATE)
+   ───────────────────────────────────────────────────────────── */
 .eq-empty-state {
     grid-column: 1 / -1;
     background-color: var(--color-bg-white);
@@ -431,31 +298,320 @@
     border-radius: var(--radius-xl);
     padding: 48px 24px;
     text-align: center;
-    color: var(--color-text-muted);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 
-.eq-empty-state .material-symbols-outlined {
-    font-size: 48px;
-    color: var(--color-text-placeholder);
+.empty-icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-icon-circle .material-symbols-outlined {
+    font-size: 30px;
+}
+
+.eq-empty-state h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
 }
 
 .eq-empty-state p {
     font-size: 14px;
-    margin: 0;
+    color: var(--color-text-secondary);
+    max-width: 380px;
 }
 
-/* 6. Responsividade */
+.btn-empty-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 10px 20px;
+    width: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. MODAL 1: DETALHES DA MARCA
+   ───────────────────────────────────────────────────────────── */
+.brand-detail-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-avatar-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-detail-subtitle {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.brand-detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.detail-stat-card {
+    background-color: var(--color-bg-subtle);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.detail-stat-card.available {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.detail-stat-card.defect {
+    background-color: #fffbeb;
+    border-color: #fef08a;
+}
+
+.detail-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+}
+
+.detail-stat-card.available .detail-stat-label {
+    color: #15803d;
+}
+
+.detail-stat-card.defect .detail-stat-label {
+    color: #b45309;
+}
+
+.detail-stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+.detail-stat-card.available .detail-stat-value {
+    color: #166534;
+}
+
+.detail-stat-card.defect .detail-stat-value {
+    color: #9a3412;
+}
+
+.btn-defect-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    padding: 10px 20px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. MODAL 2 & 3: FORMULÁRIOS E PRÉVIA
+   ───────────────────────────────────────────────────────────── */
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select-wrapper select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    background-color: var(--color-bg-white);
+}
+
+.select-icon {
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+    color: var(--color-text-muted);
+    font-size: 20px;
+}
+
+/* Banner de marca e estoque no modal de defeito */
+.defect-brand-banner {
+    background-color: #f8fafc;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.defect-brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.defect-brand-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.defect-brand-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.defect-stock-badge {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.defect-stock-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #15803d;
+}
+
+.defect-stock-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #166534;
+}
+
+/* Cartão de prévia calculada */
+.defect-preview-card {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1d4ed8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.preview-header .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.preview-item {
+    background-color: #ffffff;
+    border: 1px solid #dbeafe;
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.preview-label {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.preview-number {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.preview-number.available {
+    color: #16a34a;
+}
+
+.preview-number.defect {
+    color: #d97706;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. RESPONSIVIDADE
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .eq-brands-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
-    .qty-input-row {
+    .eq-page-header {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
     }
 
-    .qty-quick-buttons {
-        justify-content: flex-end;
+    .btn-add-equipment {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .eq-summary-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .eq-brands-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .brand-detail-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .defect-brand-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .preview-grid {
+        grid-template-columns: 1fr;
     }
 }

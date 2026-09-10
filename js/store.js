@@ -133,6 +133,16 @@
                     { id: 'u3', email: 'coordenacao@demo.com', password: '123456', passwordHash: h, role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
                 ]);
             }
+
+            // Normaliza seed de notebooks caso possua a estrutura anterior com campo 'quebrado'
+            const currentNotebooks = load(KEYS.NOTEBOOKS);
+            if (currentNotebooks && currentNotebooks.some(n => n.quebrado !== undefined || n.marca === 'Positivo')) {
+                save(KEYS.NOTEBOOKS, [
+                    { id: 'nb1', marca: 'Dell',   total: 8,  funcionando: 7,  defeito: 1 },
+                    { id: 'nb2', marca: 'Lenovo', total: 12, funcionando: 10, defeito: 2 },
+                    { id: 'nb3', marca: 'Acer',   total: 10, funcionando: 7,  defeito: 3 },
+                ]);
+            }
             return;
         }
 
@@ -152,10 +162,9 @@
 
         // Notebooks (por marca)
         save(KEYS.NOTEBOOKS, [
-            { id: 'nb1', marca: 'Dell',     total: 50, funcionando: 42, defeito: 5, quebrado: 3 },
-            { id: 'nb2', marca: 'Lenovo',   total: 30, funcionando: 28, defeito: 2, quebrado: 0 },
-            { id: 'nb3', marca: 'Acer',     total: 25, funcionando: 15, defeito: 7, quebrado: 3 },
-            { id: 'nb4', marca: 'Positivo', total: 20, funcionando: 9,  defeito: 8, quebrado: 3 },
+            { id: 'nb1', marca: 'Dell',   total: 8,  funcionando: 7,  defeito: 1 },
+            { id: 'nb2', marca: 'Lenovo', total: 12, funcionando: 10, defeito: 2 },
+            { id: 'nb3', marca: 'Acer',   total: 10, funcionando: 7,  defeito: 3 },
         ]);
 
         // Reservas mock
@@ -267,7 +276,21 @@
     // ─────────────────────────────────────────────────────────────
     //  NOTEBOOKS
     // ─────────────────────────────────────────────────────────────
-    function getNotebooks() { return load(KEYS.NOTEBOOKS) || []; }
+    function getNotebooks() {
+        const raw = load(KEYS.NOTEBOOKS);
+        if (!raw || !Array.isArray(raw)) return [];
+        return raw.map(n => {
+            const func = Math.max(0, parseInt(n.funcionando, 10) || 0);
+            const def = Math.max(0, parseInt(n.defeito, 10) || 0) + Math.max(0, parseInt(n.quebrado, 10) || 0);
+            return {
+                id: n.id,
+                marca: n.marca,
+                total: func + def,
+                funcionando: func,
+                defeito: def,
+            };
+        });
+    }
 
     /** Retorna lista de marcas únicas (sem duplicatas) */
     function getBrands() {
@@ -280,31 +303,66 @@
         return nb ? nb.funcionando : 0;
     }
 
+    function getTotalEquipamentos() {
+        return getNotebooks().reduce((acc, n) => acc + n.total, 0);
+    }
+
     function getTotalDisponivel() {
         return getNotebooks().reduce((acc, n) => acc + n.funcionando, 0);
     }
 
-    function addNotebooks(marca, quantidade, situacao = 'funcionando') {
+    function getTotalDefeito() {
+        return getNotebooks().reduce((acc, n) => acc + n.defeito, 0);
+    }
+
+    function addNotebooks(marca, quantidade) {
         const notebooks = getNotebooks();
-        const qtd = parseInt(quantidade) || 0;
-        if (qtd <= 0) return { ok: false, message: 'Informe uma quantidade válida.' };
-        const cleanBrand = marca.trim();
+        const qtd = parseInt(quantidade, 10);
+        if (isNaN(qtd) || qtd <= 0) return { ok: false, message: 'Informe uma quantidade válida (maior que zero).' };
+        const cleanBrand = (marca || '').trim();
         if (!cleanBrand) return { ok: false, message: 'Informe o nome da marca.' };
 
         let nb = notebooks.find(n => n.marca.toLowerCase() === cleanBrand.toLowerCase());
         if (nb) {
             nb.total += qtd;
-            if (situacao === 'defeito') nb.defeito += qtd;
-            else if (situacao === 'quebrado') nb.quebrado += qtd;
-            else nb.funcionando += qtd;
+            nb.funcionando += qtd;
         } else {
-            const func = situacao === 'funcionando' ? qtd : 0;
-            const def  = situacao === 'defeito' ? qtd : 0;
-            const qbr  = situacao === 'quebrado' ? qtd : 0;
-            notebooks.push({ id: genId(), marca: cleanBrand, total: qtd, funcionando: func, defeito: def, quebrado: qbr });
+            notebooks.push({
+                id: genId(),
+                marca: cleanBrand,
+                total: qtd,
+                funcionando: qtd,
+                defeito: 0,
+            });
         }
         save(KEYS.NOTEBOOKS, notebooks);
-        return { ok: true };
+        return { ok: true, notebooks };
+    }
+
+    function registerNotebookDefect(idOrBrand, quantidade) {
+        const notebooks = getNotebooks();
+        const target = (idOrBrand || '').toString().trim().toLowerCase();
+        const nb = notebooks.find(n => n.id === idOrBrand || n.marca.toLowerCase() === target);
+        if (!nb) return { ok: false, message: 'Equipamento ou marca não encontrado.' };
+
+        const qtd = parseInt(quantidade, 10);
+        if (isNaN(qtd) || qtd <= 0) {
+            return { ok: false, message: 'Informe uma quantidade válida com defeito (maior que zero).' };
+        }
+
+        if (qtd > nb.funcionando) {
+            return {
+                ok: false,
+                message: `A quantidade informada (${qtd}) excede os equipamentos disponíveis (${nb.funcionando}).`
+            };
+        }
+
+        nb.funcionando -= qtd;
+        nb.defeito = (nb.defeito || 0) + qtd;
+        nb.total = nb.funcionando + nb.defeito;
+
+        save(KEYS.NOTEBOOKS, notebooks);
+        return { ok: true, notebook: nb };
     }
 
     function updateNotebookBrandCounts(id, { funcionando, defeito, quebrado }) {
@@ -312,14 +370,12 @@
         const nb = notebooks.find(n => n.id === id);
         if (!nb) return { ok: false, message: 'Marca não encontrada.' };
 
-        const f = Math.max(0, parseInt(funcionando) || 0);
-        const d = Math.max(0, parseInt(defeito) || 0);
-        const q = Math.max(0, parseInt(quebrado) || 0);
+        const f = Math.max(0, parseInt(funcionando, 10) || 0);
+        const d = Math.max(0, parseInt(defeito, 10) || 0) + Math.max(0, parseInt(quebrado, 10) || 0);
 
         nb.funcionando = f;
         nb.defeito = d;
-        nb.quebrado = q;
-        nb.total = f + d + q;
+        nb.total = f + d;
 
         save(KEYS.NOTEBOOKS, notebooks);
         return { ok: true, notebook: nb };
@@ -339,6 +395,7 @@
         if (!nb) return { ok: false, message: 'Notebook não encontrado.' };
         if (nb[field] + delta < 0) return { ok: false, message: 'Quantidade não pode ser negativa.' };
         nb[field] += delta;
+        nb.total = (nb.funcionando || 0) + (nb.defeito || 0);
         save(KEYS.NOTEBOOKS, notebooks);
         return { ok: true };
     }
@@ -578,8 +635,8 @@
         // Salas
         getRooms, getActiveRooms, toggleRoom, addRoom,
         // Notebooks
-        getNotebooks, getTotalDisponivel, getBrands, getDisponivelByBrand,
-        addNotebooks, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
+        getNotebooks, getTotalEquipamentos, getTotalDisponivel, getTotalDefeito, getBrands, getDisponivelByBrand,
+        addNotebooks, registerNotebookDefect, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts,
