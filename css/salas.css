@@ -3,7 +3,87 @@
    Estilos da página de gestão de salas reserváveis.
    ========================================================================== */
 
-/* Grid de cards */
+/* 1. Cabeçalho da página de Salas */
+.salas-page-header,
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.salas-page-header .header-greeting,
+.dashboard-header .header-greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.salas-page-header h2,
+.dashboard-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 2px 0;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.salas-page-header p,
+.dashboard-header p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.header-top-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+/* Botão Nova Sala (padronizado, menor, no canto direito e alinhado) */
+.btn-add-room,
+#btnAddRoom {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    width: auto;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-add-room:hover,
+#btnAddRoom:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-add-room .material-symbols-outlined,
+#btnAddRoom .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* 2. Grid de cards */
 .rooms-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -94,3 +174,18 @@
 .btn-toggle-room .material-symbols-outlined { font-size: 16px; }
 .btn-toggle-room.ativar:hover   { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
 .btn-toggle-room.desativar:hover { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
+
+/* 3. Responsividade */
+@media (max-width: 768px) {
+    .salas-page-header,
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-add-room,
+    #btnAddRoom {
+        width: 100%;
+        justify-content: center;
+    }
+}
