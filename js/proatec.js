@@ -33,8 +33,16 @@ window.ProatecModule = (function() {
             .sort((a, b) => a.inicio.localeCompare(b.inicio));
 
         if (todayRes.length === 0) {
-            list.innerHTML   = `<p class="empty-msg">Nenhuma reserva para hoje.</p>`;
-            pickup.innerHTML = `<p class="empty-msg">Nenhuma reserva hoje.</p>`;
+            list.innerHTML = `
+                <div class="agenda-empty-state">
+                    <span class="material-symbols-outlined">event_available</span>
+                    <p>Nenhuma reserva registrada para hoje.</p>
+                </div>`;
+            pickup.innerHTML = `
+                <div class="pickup-empty-state">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    <p>Nenhuma entrega agendada para hoje.</p>
+                </div>`;
             return;
         }
 
@@ -53,10 +61,10 @@ window.ProatecModule = (function() {
         pickup.innerHTML = `
             <div class="pickup-badge-time">
                 <span class="material-symbols-outlined">schedule</span>
-                <span>${next.inicio} — turma ${next.turma}</span>
+                <span>${next.inicio} — turma ${next.turma || 'Geral'}</span>
             </div>
             <h4 class="pickup-teacher">${next.professorNome}</h4>
-            <p class="pickup-room">${next.sala || 'Sem sala'} • ${next.notebooks || 0} notebooks</p>
+            <p class="pickup-room">${next.sala || 'Sem sala'} • ${next.notebooks ? next.notebooks + ' notebooks' : 'Sem notebooks'}</p>
         `;
     }
 
@@ -68,18 +76,33 @@ window.ProatecModule = (function() {
         if (!grid) return;
         const notebooks = ERS.getNotebooks();
 
+        if (notebooks.length === 0) {
+            grid.innerHTML = `
+                <div class="brand-empty-state">
+                    <span class="material-symbols-outlined">devices</span>
+                    <p>Nenhum equipamento cadastrado no momento.</p>
+                </div>
+            `;
+            return;
+        }
+
         grid.innerHTML = notebooks.map(nb => {
-            const pct = nb.total > 0 ? Math.round((nb.funcionando / nb.total) * 100) : 0;
-            const fillClass = pct >= 70 ? 'primary' : pct >= 40 ? 'secondary' : 'error';
+            const ratio = nb.total > 0 ? (nb.funcionando / nb.total) : 0;
+            const fillClass = ratio >= 0.7 ? 'primary' : ratio >= 0.4 ? 'warning' : 'error';
+            const fillWidth = Math.round(ratio * 100);
+
             return `
                 <div class="brand-card">
-                    <span class="brand-name">${nb.marca}</span>
+                    <div class="brand-card-top">
+                        <span class="brand-name">${nb.marca}</span>
+                        <span class="brand-status-dot ${fillClass}"></span>
+                    </div>
                     <div class="brand-count-wrapper">
                         <span class="brand-count">${nb.funcionando}</span>
                         <span class="brand-total">/ ${nb.total}</span>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill ${fillClass}" style="width: ${pct}%;"></div>
+                    <div class="progress-bar" title="${nb.funcionando} de ${nb.total} notebooks disponíveis">
+                        <div class="progress-fill ${fillClass}" style="width: ${fillWidth}%;"></div>
                     </div>
                 </div>
             `;

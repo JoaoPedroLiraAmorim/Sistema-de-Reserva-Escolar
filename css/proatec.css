@@ -1,6 +1,6 @@
 /* ==========================================================================
    PROATEC CSS - Painel Administrativo / Dashboard
-   Layout e estilos específicos da tela PROATEC
+   Layout e estilos específicos da tela PROATEC (Início)
    ========================================================================== */
 
 /* 1. Layout Principal */
@@ -11,29 +11,34 @@
 }
 
 /* 2. Área Principal - Estilos da Dashboard */
-
 .dashboard-content {
     padding: 32px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 28px;
+}
+
+/* Cabeçalho */
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 4px;
+}
+
+.header-greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .header-top-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 4px;
-}
-
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    padding: 2px;
-    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
 }
 
 .date-badge {
@@ -42,23 +47,21 @@
     color: var(--color-primary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
 }
 
 .dashboard-header h2 {
     font-size: 26px;
     font-weight: 700;
     color: var(--color-text-primary);
-    margin-bottom: 2px;
+    margin: 0;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
 }
 
-.dashboard-header p,
-.action-card p,
-.card-header-titles p,
-.agenda-room,
-.pickup-room {
-    font-size: 13px;
+.dashboard-header p {
+    font-size: 14px;
     color: var(--color-text-secondary);
+    margin: 0;
 }
 
 .section-label {
@@ -66,11 +69,16 @@
     font-weight: 700;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     margin-bottom: 12px;
 }
 
-/* 4. Ações Rápidas */
+/* 3. Ações Rápidas */
+.quick-actions-section {
+    display: flex;
+    flex-direction: column;
+}
+
 .quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -80,23 +88,25 @@
 .action-card {
     background: var(--color-bg-white);
     border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-lg);
-    padding: 18px;
+    border-radius: var(--radius-xl);
+    padding: 20px;
     text-decoration: none;
     color: inherit;
     box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .action-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    border-color: var(--color-border);
+    border-color: #cbd5e1;
 }
 
 .action-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
@@ -104,23 +114,42 @@
     margin-bottom: 14px;
 }
 
-.action-icon.primary { background: var(--color-primary-light); color: var(--color-primary); }
-.action-icon.secondary { background: #f1f5f9; color: var(--color-text-secondary); }
-.action-icon.tertiary { background: #f8fafc; color: #475569; border: 1px solid var(--color-border-light); }
-
-.action-card h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 2px;
+.action-icon .material-symbols-outlined {
+    font-size: 22px;
 }
 
-/* 5. Grid Principal (Reservas & Retirada) */
+.action-icon.primary   { background: var(--color-primary-light); color: var(--color-primary); }
+.action-icon.secondary { background: #e0f2fe; color: #0284c7; }
+.action-icon.tertiary  { background: #dcfce7; color: #16a34a; }
+
+.action-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
+}
+
+.action-card p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* 4. Grid Principal (Reservas & Retirada) */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 20px;
-    align-items: start;
+    align-items: stretch;
+}
+
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .card-header-icon {
@@ -132,16 +161,41 @@
     color: var(--color-primary);
 }
 
+.card-header-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .card-header-titles h3 {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-text-primary);
+    margin: 0;
+}
+
+.card-header-titles p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Lista de Reservas */
+.reservations-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.reservations-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .agenda-item {
     display: flex;
     align-items: center;
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-bottom: 1px solid var(--color-border-light);
     gap: 16px;
     transition: background-color var(--transition-fast);
@@ -177,6 +231,13 @@
     font-size: 14px;
     font-weight: 600;
     color: var(--color-text-primary);
+    margin: 0 0 2px 0;
+}
+
+.agenda-room {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
 }
 
 .card-action-footer {
@@ -201,109 +262,121 @@
     gap: 8px;
 }
 
-/* Card de Retirada Imediata */
+/* Card de Próxima Reserva em Destaque */
 .pickup-card {
-    border-color: var(--color-primary);
-    position: relative;
-    box-shadow: var(--shadow-lg);
-}
-
-.pickup-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--color-primary);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border-light);
 }
 
 .pickup-details-box {
     margin: 16px;
-    padding: 14px;
+    padding: 16px;
     background: var(--color-surface-low);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border-light);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
 }
 
 .pickup-badge-time {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-primary);
     background-color: var(--color-primary-light);
-    padding: 3px 8px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 8px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    margin-bottom: 10px;
+    width: fit-content;
+}
+
+.pickup-badge-time .material-symbols-outlined {
+    font-size: 15px;
 }
 
 .pickup-teacher {
     font-size: 16px;
     font-weight: 700;
     color: var(--color-text-primary);
-    margin-bottom: 2px;
+    margin: 0 0 4px 0;
 }
 
-.pickup-actions {
-    padding: 0 16px 16px;
+.pickup-room {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* 5. Inventário por Marca (Sem ícone de notebook no cabeçalho) */
+.inventory-card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
 }
 
-.btn-dismiss {
-    width: 100%;
-    padding: 8px;
-    background: transparent;
-    border: none;
-    color: var(--color-text-secondary);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: var(--radius-md);
-    transition: background-color var(--transition-fast);
-}
-
-.btn-dismiss:hover {
-    background: var(--color-surface-container);
-    color: var(--color-text-primary);
-}
-
-/* 6. Inventário por Marca */
-.inventory-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.inventory-header .material-symbols-outlined {
-    font-size: 22px;
-    color: var(--color-text-secondary);
+.inventory-body {
+    padding: 20px;
 }
 
 .brand-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
 }
 
 .brand-card {
     background: var(--color-bg-subtle);
     border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    padding: 14px;
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.brand-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: #cbd5e1;
+}
+
+.brand-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .brand-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.brand-status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.brand-status-dot.primary {
+    background-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.brand-status-dot.warning {
+    background-color: #d97706;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+.brand-status-dot.error {
+    background-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
 }
 
 .brand-count-wrapper {
@@ -313,23 +386,99 @@
 }
 
 .brand-count {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     color: var(--color-text-primary);
+    line-height: 1;
 }
 
 .brand-total {
     font-size: 13px;
     color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--color-border-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal);
+}
+
+.progress-fill.primary {
+    background-color: #16a34a;
+}
+
+.progress-fill.warning {
+    background-color: #d97706;
+}
+
+.progress-fill.error {
+    background-color: #dc2626;
+}
+
+/* 6. Empty States e Mensagens Limpas */
+.empty-msg {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    padding: 24px 20px;
+    text-align: center;
+    margin: 0;
+}
+
+.agenda-empty-state,
+.pickup-empty-state,
+.brand-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    gap: 8px;
+    text-align: center;
+}
+
+.agenda-empty-state .material-symbols-outlined,
+.pickup-empty-state .material-symbols-outlined,
+.brand-empty-state .material-symbols-outlined {
+    font-size: 32px;
+    color: var(--color-text-placeholder);
+}
+
+.agenda-empty-state p,
+.pickup-empty-state p,
+.brand-empty-state p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 0;
 }
 
 /* 7. Responsividade */
 @media (max-width: 1024px) {
-    .dashboard-grid { grid-template-columns: 1fr; }
-    .brand-grid { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
-    .dashboard-content { padding: 20px 16px; }
-    .quick-actions-grid, .brand-grid { grid-template-columns: 1fr; }
+    .dashboard-content {
+        padding: 20px 16px;
+        gap: 20px;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-grid {
+        grid-template-columns: 1fr;
+    }
 }
