@@ -32,16 +32,19 @@
         { start: '13:50', end: '14:40' },
         { start: '14:40', end: '15:30' },
         { start: '15:30', end: '16:20' },
+        { start: '16:35', end: '17:25' },
+        { start: '17:25', end: '18:15' },
         { start: '19:00', end: '19:50' },
         { start: '19:50', end: '20:40' },
-        { start: '20:40', end: '21:30' },
+        { start: '20:50', end: '21:40' },
+        { start: '21:40', end: '22:30' },
     ];
 
     // Turnos derivados dos TIME_SLOTS (fonte única — elimina duplicação nos outros JS)
     const SHIFT_SLOTS = {
         manha: TIME_SLOTS.slice(0, 6),
-        tarde: TIME_SLOTS.slice(6, 10),
-        noite: TIME_SLOTS.slice(10),
+        tarde: TIME_SLOTS.slice(6, 12),
+        noite: TIME_SLOTS.slice(12),
     };
 
     // ─────────────────────────────────────────────────────────────

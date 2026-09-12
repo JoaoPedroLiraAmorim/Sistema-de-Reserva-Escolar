@@ -24,11 +24,14 @@ const SHIFT_SLOTS = {
         { start: '13:50', end: '14:40' },
         { start: '14:40', end: '15:30' },
         { start: '15:30', end: '16:20' },
+        { start: '16:35', end: '17:25' },
+        { start: '17:25', end: '18:15' },
     ],
     noite: [
         { start: '19:00', end: '19:50' },
         { start: '19:50', end: '20:40' },
-        { start: '20:40', end: '21:30' },
+        { start: '20:50', end: '21:40' },
+        { start: '21:40', end: '22:30' },
     ],
 };
 
