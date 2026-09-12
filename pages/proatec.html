@@ -186,6 +186,36 @@
         </div>
     </div>
 
+    <!-- Modal: Seleção de Turma para Confirmar Retirada -->
+    <div class="modal-backdrop hidden" id="pickup-selection-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <span class="material-symbols-outlined" style="color: var(--color-primary); font-size: 24px;">inventory_2</span>
+                        <h3 style="margin: 0; font-size: 17px;">Confirmar Retirada de Notebooks</h3>
+                    </div>
+                    <p id="pickup-modal-subtitle" style="margin: 0; font-size: 13px; color: var(--color-text-secondary);">
+                        Selecione a turma correspondente conforme os alunos ou professor forem chegando ao PROATEC.
+                    </p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Fechar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="pickup-cards-container" class="pickup-cards-list">
+                    <!-- Cards dinâmicos das turmas -->
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content: flex-end;">
+                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 

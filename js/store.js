@@ -535,10 +535,39 @@
         return { ok: true, reservation: r };
     }
 
+    /** Retorna o horário atual no formato HH:MM (suporta mock em window._ers_mock_time) */
+    function getCurrentTime() {
+        if (typeof window !== 'undefined' && window._ers_mock_time) {
+            return window._ers_mock_time;
+        }
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    /** Verifica se o horário de início da reserva já chegou hoje */
+    function isPickupTimeReady(res) {
+        if (!res || !res.data || !res.inicio) return false;
+        if (res.data !== today()) return false;
+        const curTime = getCurrentTime();
+        return curTime >= res.inicio;
+    }
+
     function confirmPickup(id, proatecNome = 'PROATEC') {
         const list = getReservations();
         const r = list.find(r => r.id === id);
         if (!r) return { ok: false, message: 'Reserva não encontrada.' };
+        if (r.situacao === 'cancelada') return { ok: false, message: 'Não é possível confirmar a retirada de uma reserva cancelada.' };
+
+        // Regra de Negócio: O PROATEC só pode confirmar quando der o horário da reserva, nunca antes!
+        if (!isPickupTimeReady(r)) {
+            const curTime = getCurrentTime();
+            return {
+                ok: false,
+                message: `A retirada só pode ser confirmada quando der o horário da reserva (a partir das ${r.inicio}). Horário atual: ${curTime}.`
+            };
+        }
 
         r.retiradaConfirmada = true;
         r.retiradaConfirmadaEm = new Date().toISOString();
@@ -695,7 +724,7 @@
         getBlocks, createBlock, deleteBlock,
         // Utils
         showToast, formatDate, dateKey, today, dayOffset, escapeHtml,
-        getMonday, getWeekDays, timesOverlap,
+        getMonday, getWeekDays, timesOverlap, getCurrentTime, isPickupTimeReady,
         DIAS_SEMANA, DIAS_SEMANA_FULL, MESES, MESES_FULL,
         TIME_SLOTS, SHIFT_SLOTS,
     };

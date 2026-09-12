@@ -318,6 +318,7 @@ function renderMyReservations() {
 let currentRegResId = null;
 
 function renderActiveChip() {
+    currentSession = ERS.getSession() || currentSession;
     if (!currentSession) return;
     const chip = document.getElementById('active-chip');
     if (!chip) return;

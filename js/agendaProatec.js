@@ -495,25 +495,6 @@ window.AgendaProatecModule = (function() {
             `;
         }
 
-        const btnPickup = document.getElementById('btn-confirm-pickup-modal');
-        if (btnPickup) {
-            if (r.notebooks > 0 && !r.retiradaConfirmada && r.situacao === 'confirmada') {
-                btnPickup.style.display = '';
-                btnPickup.onclick = () => {
-                    const confirmMsg = `Confirmar a entrega de ${r.notebooks} notebook(s) para ${r.professorNome}?\n\nIsso liberará imediatamente o registro de alunos na tela do professor.`;
-                    if (!confirm(confirmMsg)) return;
-
-                    const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
-                    if (result.ok) {
-                        ERS.showToast(`Retirada confirmada para ${r.professorNome}!`, 'success');
-                        closeModal('res-detail-modal');
-                        renderCalendar();
-                    }
-                };
-            } else {
-                btnPickup.style.display = 'none';
-            }
-        }
 
         const btnCancel = document.getElementById('btn-cancel-res');
         if (btnCancel) {
