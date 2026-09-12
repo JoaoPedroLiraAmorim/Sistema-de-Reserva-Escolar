@@ -61,9 +61,13 @@
                         <span class="chip-dot"></span>
                         <span class="material-symbols-outlined chip-icon">timer</span>
                         <div class="chip-body">
-                            <span class="chip-label">Reserva hoje</span>
+                            <span class="chip-label" id="active-chip-status">Reserva hoje</span>
                             <span class="chip-text" id="active-chip-text">—</span>
                         </div>
+                        <button type="button" class="btn-chip-action" id="btnRegisterNotebooks" style="display: none;">
+                            <span class="material-symbols-outlined">assignment_ind</span>
+                            <span id="btnRegisterNotebooksText">Registrar Alunos</span>
+                        </button>
                     </div>
                     <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
                         <span class="material-symbols-outlined">add</span>
@@ -226,11 +230,93 @@
             <div class="modal-body" id="res-detail-body"></div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
+                <button type="button" class="btn-primary" id="btn-detail-register-students" style="display: none; background: linear-gradient(135deg, #10b981, #059669);">
+                    <span class="material-symbols-outlined">assignment_ind</span>
+                    Registrar Alunos
+                </button>
                 <button type="button" class="btn-primary btn-danger" id="btn-cancel-res">
                     <span class="material-symbols-outlined">cancel</span>
                     Cancelar Reserva
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal: Registrar Alunos e Etiquetas dos Notebooks -->
+    <div class="modal-backdrop hidden" id="register-students-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h3>Registrar Uso dos Notebooks</h3>
+                    <p>Informe o número da etiqueta do notebook e o aluno que está utilizando cada aparelho.</p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Fechar modal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form id="register-students-form">
+                <div class="modal-body">
+                    <!-- Resumo da Reserva -->
+                    <div class="reservation-summary-banner" id="reg-modal-summary">
+                        <div class="summary-item">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            <span id="reg-summary-date">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="material-symbols-outlined">schedule</span>
+                            <span id="reg-summary-time">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="material-symbols-outlined">laptop_chromebook</span>
+                            <span id="reg-summary-notebooks">—</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="material-symbols-outlined">meeting_room</span>
+                            <span id="reg-summary-room">—</span>
+                        </div>
+                    </div>
+
+                    <p class="reg-instructions">
+                        Preencha a etiqueta de patrimônio/identificação de cada notebook e o nome do aluno correspondente.
+                    </p>
+
+                    <!-- Lista de Alunos e Etiquetas -->
+                    <div class="student-registration-table-wrapper">
+                        <table class="student-registration-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">#</th>
+                                    <th style="width: 170px;">Nº da Etiqueta</th>
+                                    <th>Nome do Aluno</th>
+                                    <th style="width: 50px; text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-rows-body">
+                                <!-- Linhas geradas dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="reg-actions-row">
+                        <button type="button" class="btn-secondary btn-sm" id="btnAddStudentRow">
+                            <span class="material-symbols-outlined">add</span>
+                            Adicionar Notebook
+                        </button>
+                        <span class="reg-counter-text" id="reg-counter-text">0 preenchidos</span>
+                    </div>
+
+                    <div id="reg-error" class="login-error-msg"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Salvar Registro
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

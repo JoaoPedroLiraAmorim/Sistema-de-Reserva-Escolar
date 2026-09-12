@@ -46,18 +46,53 @@ window.ProatecModule = (function() {
             return;
         }
 
-        list.innerHTML = todayRes.map((r, i) => `
-            <div class="agenda-item${i === 0 ? ' highlight' : ''}">
-                <span class="agenda-time">${r.inicio}</span>
-                <div class="agenda-details">
-                    <h4 class="agenda-teacher">${r.professorNome}</h4>
-                    <p class="agenda-room">${r.sala || '—'} • ${r.notebooks ? r.notebooks + ' notebooks' : 'sem notebooks'}</p>
+        list.innerHTML = todayRes.map((r, i) => {
+            let actionBadge = '';
+            if (r.notebooks > 0) {
+                if (!r.retiradaConfirmada) {
+                    actionBadge = `<button type="button" class="btn-mini-pickup" onclick="ProatecModule.handleConfirmPickup('${r.id}')" title="Confirmar entrega de notebooks"><span class="material-symbols-outlined">inventory_2</span> Entregar</button>`;
+                } else {
+                    actionBadge = `<span class="badge badge-success"><span class="material-symbols-outlined" style="font-size:13px;vertical-align:-1px;">verified</span> Entregue</span>`;
+                }
+            } else {
+                actionBadge = `<span class="badge badge-neutral">Somente Sala</span>`;
+            }
+
+            return `
+                <div class="agenda-item${i === 0 ? ' highlight' : ''}">
+                    <span class="agenda-time">${r.inicio}</span>
+                    <div class="agenda-details">
+                        <h4 class="agenda-teacher">${r.professorNome}</h4>
+                        <p class="agenda-room">${r.sala || '—'} • ${r.notebooks ? r.notebooks + ' notebooks' : 'sem notebooks'}</p>
+                    </div>
+                    <div class="agenda-actions-col">
+                        ${actionBadge}
+                    </div>
                 </div>
-                <span class="badge badge-${i === 0 ? 'primary' : 'neutral'}">${i === 0 ? 'Em breve' : 'Confirmada'}</span>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         const next = todayRes[0];
+        let heroAction = '';
+        if (next.notebooks > 0) {
+            if (!next.retiradaConfirmada) {
+                heroAction = `
+                    <button type="button" class="btn-pickup-hero" onclick="ProatecModule.handleConfirmPickup('${next.id}')">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Confirmar Retirada (${next.notebooks} notebooks)
+                    </button>
+                `;
+            } else {
+                heroAction = `
+                    <div class="pickup-hero-done">
+                        <span class="material-symbols-outlined">verified</span>
+                        <span>Retirada confirmada por <strong>${next.retiradaConfirmadaPor || 'PROATEC'}</strong></span>
+                        ${next.alunosRegistrados ? `<span class="badge badge-primary" style="margin-left:auto;">${next.alunosNotebooks.length} alunos registrados</span>` : `<span class="badge badge-neutral" style="margin-left:auto;">Aguardando professor registrar alunos</span>`}
+                    </div>
+                `;
+            }
+        }
+
         pickup.innerHTML = `
             <div class="pickup-badge-time">
                 <span class="material-symbols-outlined">schedule</span>
@@ -65,7 +100,23 @@ window.ProatecModule = (function() {
             </div>
             <h4 class="pickup-teacher">${next.professorNome}</h4>
             <p class="pickup-room">${next.sala || 'Sem sala'} • ${next.notebooks ? next.notebooks + ' notebooks' : 'Sem notebooks'}</p>
+            ${heroAction}
         `;
+    }
+
+    function handleConfirmPickup(id) {
+        const r = ERS.getReservations().find(x => x.id === id);
+        if (!r) return;
+        const confirmMsg = `Confirmar a entrega de ${r.notebooks} notebook(s) para ${r.professorNome}?\n\nIsso liberará imediatamente o botão de registro de alunos na tela do professor.`;
+        if (!confirm(confirmMsg)) return;
+
+        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
+        if (result.ok) {
+            ERS.showToast(`Retirada de notebooks confirmada para ${r.professorNome}! O professor já pode registrar os alunos.`, 'success');
+            render();
+        } else {
+            ERS.showToast(result.message, 'error');
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -142,6 +193,7 @@ window.ProatecModule = (function() {
         init,
         render,
         renderTodayReservations,
-        renderBrandGrid
+        renderBrandGrid,
+        handleConfirmPickup
     };
 })();

@@ -535,6 +535,30 @@
         return { ok: true, reservation: r };
     }
 
+    function confirmPickup(id, proatecNome = 'PROATEC') {
+        const list = getReservations();
+        const r = list.find(r => r.id === id);
+        if (!r) return { ok: false, message: 'Reserva não encontrada.' };
+
+        r.retiradaConfirmada = true;
+        r.retiradaConfirmadaEm = new Date().toISOString();
+        r.retiradaConfirmadaPor = proatecNome;
+        save(KEYS.RESERVATIONS, list);
+        return { ok: true, reservation: r };
+    }
+
+    function saveStudentAssignments(id, assignments) {
+        const list = getReservations();
+        const r = list.find(r => r.id === id);
+        if (!r) return { ok: false, message: 'Reserva não encontrada.' };
+
+        r.alunosNotebooks = Array.isArray(assignments) ? assignments : [];
+        r.alunosRegistrados = r.alunosNotebooks.length > 0;
+        r.registradoEm = new Date().toISOString();
+        save(KEYS.RESERVATIONS, list);
+        return { ok: true, reservation: r };
+    }
+
     // ─────────────────────────────────────────────────────────────
     //  BLOQUEIOS
     // ─────────────────────────────────────────────────────────────
@@ -666,6 +690,7 @@
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts,
+        confirmPickup, saveStudentAssignments,
         // Bloqueios
         getBlocks, createBlock, deleteBlock,
         // Utils

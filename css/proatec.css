@@ -482,3 +482,84 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* 8. Botões de Confirmação de Retirada (PROATEC) */
+.agenda-actions-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-mini-pickup {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm, 6px);
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.25);
+    transition: all var(--transition-fast, 0.2s);
+}
+
+.btn-mini-pickup .material-symbols-outlined {
+    font-size: 14px;
+}
+
+.btn-mini-pickup:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(16, 185, 129, 0.35);
+}
+
+.btn-pickup-hero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md, 8px);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 14px;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    transition: all var(--transition-fast, 0.2s);
+}
+
+.btn-pickup-hero .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-pickup-hero:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+.pickup-hero-done {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: var(--radius-md, 8px);
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #065f46;
+}
+
+.pickup-hero-done .material-symbols-outlined {
+    font-size: 18px;
+    color: #059669;
+}
+

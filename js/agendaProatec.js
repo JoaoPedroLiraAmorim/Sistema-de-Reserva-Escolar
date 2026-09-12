@@ -450,6 +450,38 @@ window.AgendaProatecModule = (function() {
 
         const body = document.getElementById('res-detail-body');
         if (body) {
+            let pickupStatusHtml = '';
+            if (r.notebooks > 0) {
+                if (r.retiradaConfirmada) {
+                    pickupStatusHtml = `
+                        <div style="margin-top: 6px; padding: 8px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
+                            <strong style="color: #065f46; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">verified</span>
+                                Retirada confirmada por ${r.retiradaConfirmadaPor || 'PROATEC'}
+                            </strong>
+                            ${r.alunosRegistrados && r.alunosNotebooks && r.alunosNotebooks.length > 0 ? `
+                                <div style="margin-top: 8px; font-size: 12px;">
+                                    <strong>Alunos registrados (${r.alunosNotebooks.length}):</strong>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                                        ${r.alunosNotebooks.map(a => `<span style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:11px;"><strong>${a.etiqueta}:</strong> ${a.aluno}</span>`).join('')}
+                                    </div>
+                                </div>
+                            ` : '<p style="margin: 4px 0 0; font-size: 11px; color: #047857;">Aguardando professor registrar alunos/etiquetas.</p>'}
+                        </div>
+                    `;
+                } else {
+                    pickupStatusHtml = `
+                        <div style="margin-top: 6px; padding: 8px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; color: #92400e;">
+                            <strong style="display: flex; align-items: center; gap: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">pending_actions</span>
+                                Aguardando confirmação de entrega dos notebooks
+                            </strong>
+                            <p style="margin: 4px 0 0; font-size: 11px;">Confirme a entrega para liberar o registro de alunos na tela do professor.</p>
+                        </div>
+                    `;
+                }
+            }
+
             body.innerHTML = `
                 <div class="detail-list">
                     <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
@@ -458,8 +490,29 @@ window.AgendaProatecModule = (function() {
                     ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}</div>` : ''}
                     <div><strong>Professor:</strong> ${r.professorNome}</div>
                     <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
+                    ${pickupStatusHtml}
                 </div>
             `;
+        }
+
+        const btnPickup = document.getElementById('btn-confirm-pickup-modal');
+        if (btnPickup) {
+            if (r.notebooks > 0 && !r.retiradaConfirmada && r.situacao === 'confirmada') {
+                btnPickup.style.display = '';
+                btnPickup.onclick = () => {
+                    const confirmMsg = `Confirmar a entrega de ${r.notebooks} notebook(s) para ${r.professorNome}?\n\nIsso liberará imediatamente o registro de alunos na tela do professor.`;
+                    if (!confirm(confirmMsg)) return;
+
+                    const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
+                    if (result.ok) {
+                        ERS.showToast(`Retirada confirmada para ${r.professorNome}!`, 'success');
+                        closeModal('res-detail-modal');
+                        renderCalendar();
+                    }
+                };
+            } else {
+                btnPickup.style.display = 'none';
+            }
         }
 
         const btnCancel = document.getElementById('btn-cancel-res');

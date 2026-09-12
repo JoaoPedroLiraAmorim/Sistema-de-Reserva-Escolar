@@ -116,8 +116,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('res-end')?.addEventListener('change', updateAvailInfo);
     document.getElementById('res-date')?.addEventListener('change', updateAvailInfo);
 
-    // Submit do formulário
+    // Submit do formulário de reserva
     document.getElementById('new-reservation-form').addEventListener('submit', handleCreateReservation);
+
+    // Registro de Alunos e Notebooks
+    document.getElementById('btnAddStudentRow')?.addEventListener('click', () => addStudentRow());
+    document.getElementById('register-students-form')?.addEventListener('submit', handleSaveStudentRegistration);
+
+    // Sincronização em tempo real quando o PROATEC confirmar em outra aba
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'ers_reservations') {
+            renderActiveChip();
+            renderCalendar();
+            renderMyReservations();
+        }
+    });
 
     populateTimeSlots(currentShift);
     renderCalendar();
@@ -302,19 +315,212 @@ function renderMyReservations() {
     }).join('');
 }
 
+let currentRegResId = null;
+
 function renderActiveChip() {
     if (!currentSession) return;
     const chip = document.getElementById('active-chip');
-    const todayRes = ERS.getReservationsByDate(ERS.today())
-        .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada');
+    if (!chip) return;
 
-    if (todayRes.length > 0) {
-        const r = todayRes[0];
+    // Busca reserva ativa de hoje do professor que contenha notebooks
+    const todayNotebookRes = ERS.getReservationsByDate(ERS.today())
+        .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && (r.notebooks > 0));
+
+    const statusLabel = document.getElementById('active-chip-status');
+    const textLabel = document.getElementById('active-chip-text');
+    const btnRegister = document.getElementById('btnRegisterNotebooks');
+    const btnRegisterText = document.getElementById('btnRegisterNotebooksText');
+
+    if (todayNotebookRes.length > 0) {
+        const r = todayNotebookRes[0];
         chip.classList.remove('hidden');
-        document.getElementById('active-chip-text').textContent =
-            `${r.inicio}–${r.fim} ${r.sala ? '• ' + r.sala : ''} ${r.notebooks ? '• ' + r.notebooks + ' notebooks' : ''}`;
+        if (textLabel) {
+            textLabel.textContent = `${r.inicio}–${r.fim} ${r.sala ? '• ' + r.sala : ''} • ${r.notebooks} notebooks`;
+        }
+
+        // REGRA DE NEGÓCIO CRÍTICA:
+        // O botão de registrar só aparece se o PROATEC tiver confirmado a retirada!
+        if (r.retiradaConfirmada) {
+            chip.classList.add('chip-ready');
+            if (statusLabel) {
+                statusLabel.textContent = r.alunosRegistrados ? 'Notebooks entregues • Alunos registrados' : 'Notebooks entregues pelo PROATEC';
+            }
+            if (btnRegister) {
+                btnRegister.style.display = 'inline-flex';
+                if (btnRegisterText) {
+                    btnRegisterText.textContent = r.alunosRegistrados && r.alunosNotebooks && r.alunosNotebooks.length > 0
+                        ? `Editar Alunos (${r.alunosNotebooks.length})`
+                        : 'Registrar Alunos';
+                }
+                btnRegister.onclick = () => openRegisterStudentsModal(r.id);
+            }
+        } else {
+            chip.classList.remove('chip-ready');
+            if (statusLabel) {
+                statusLabel.textContent = 'Aguardando liberação do PROATEC';
+            }
+            if (btnRegister) {
+                btnRegister.style.display = 'none';
+            }
+        }
     } else {
-        chip.classList.add('hidden');
+        // Verifica se há reserva hoje apenas de sala (sem notebooks)
+        const todayRoomOnly = ERS.getReservationsByDate(ERS.today())
+            .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada');
+
+        if (todayRoomOnly.length > 0) {
+            const r = todayRoomOnly[0];
+            chip.classList.remove('hidden');
+            chip.classList.remove('chip-ready');
+            if (textLabel) textLabel.textContent = `${r.inicio}–${r.fim} • ${r.sala}`;
+            if (statusLabel) statusLabel.textContent = 'Reserva hoje';
+            if (btnRegister) btnRegister.style.display = 'none';
+        } else {
+            chip.classList.add('hidden');
+            if (btnRegister) btnRegister.style.display = 'none';
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  MODAL: REGISTRAR ALUNOS E ETIQUETAS DOS NOTEBOOKS
+// ─────────────────────────────────────────────────────────────
+function openRegisterStudentsModal(resId) {
+    const r = ERS.getReservations().find(x => x.id === resId);
+    if (!r) return;
+
+    currentRegResId = resId;
+
+    document.getElementById('reg-summary-date').textContent = ERS.formatDate(r.data);
+    document.getElementById('reg-summary-time').textContent = `${r.inicio} – ${r.fim}`;
+    document.getElementById('reg-summary-notebooks').textContent = `${r.notebooks} notebook(s)`;
+    document.getElementById('reg-summary-room').textContent = r.sala || 'Sem sala fixa';
+
+    const tbody = document.getElementById('student-rows-body');
+    tbody.innerHTML = '';
+
+    const existingAssignments = r.alunosNotebooks || [];
+    const countToGenerate = existingAssignments.length > 0 ? existingAssignments.length : (r.notebooks || 1);
+
+    for (let i = 0; i < countToGenerate; i++) {
+        const item = existingAssignments[i] || { etiqueta: '', aluno: '' };
+        addStudentRow(i + 1, item.etiqueta, item.aluno);
+    }
+
+    updateRegCounter();
+    const errEl = document.getElementById('reg-error');
+    if (errEl) errEl.style.display = 'none';
+
+    openModal('register-students-modal');
+}
+
+function addStudentRow(num, etiqueta = '', aluno = '') {
+    const tbody = document.getElementById('student-rows-body');
+    if (!tbody) return;
+    const rowNum = num || (tbody.children.length + 1);
+
+    const tr = document.createElement('tr');
+    tr.className = 'student-row';
+    tr.innerHTML = `
+        <td style="text-align: center; font-weight: 600; color: var(--color-text-muted);" class="row-index">${rowNum}</td>
+        <td>
+            <input type="text" class="form-control input-etiqueta" placeholder="Ex: NT-0${rowNum}" value="${ERS.escapeHtml(etiqueta)}">
+        </td>
+        <td>
+            <input type="text" class="form-control input-aluno" placeholder="Nome completo do aluno" value="${ERS.escapeHtml(aluno)}">
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="btn-remove-row" title="Remover linha" aria-label="Remover">
+                <span class="material-symbols-outlined">delete</span>
+            </button>
+        </td>
+    `;
+
+    tr.querySelector('.btn-remove-row').addEventListener('click', () => {
+        if (tbody.children.length > 1) {
+            tr.remove();
+            reindexRows();
+            updateRegCounter();
+        } else {
+            ERS.showToast('Ao menos um notebook deve constar no registro.', 'warning');
+        }
+    });
+
+    tr.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', updateRegCounter);
+    });
+
+    tbody.appendChild(tr);
+}
+
+function reindexRows() {
+    const tbody = document.getElementById('student-rows-body');
+    if (!tbody) return;
+    Array.from(tbody.children).forEach((tr, i) => {
+        const idxEl = tr.querySelector('.row-index');
+        if (idxEl) idxEl.textContent = i + 1;
+    });
+}
+
+function updateRegCounter() {
+    const tbody = document.getElementById('student-rows-body');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('.student-row'));
+    let filled = 0;
+    rows.forEach(r => {
+        const et = r.querySelector('.input-etiqueta')?.value.trim();
+        const al = r.querySelector('.input-aluno')?.value.trim();
+        if (et && al) filled++;
+    });
+    const counterEl = document.getElementById('reg-counter-text');
+    if (counterEl) {
+        counterEl.textContent = `${filled} de ${rows.length} notebooks registrados`;
+    }
+}
+
+function handleSaveStudentRegistration(e) {
+    e.preventDefault();
+    if (!currentRegResId) return;
+
+    const tbody = document.getElementById('student-rows-body');
+    const rows = Array.from(tbody.querySelectorAll('.student-row'));
+    const assignments = [];
+    const errEl = document.getElementById('reg-error');
+
+    for (let i = 0; i < rows.length; i++) {
+        const et = rows[i].querySelector('.input-etiqueta').value.trim();
+        const al = rows[i].querySelector('.input-aluno').value.trim();
+        if (et || al) {
+            if (!et) {
+                errEl.textContent = `Por favor, informe a etiqueta do notebook na linha ${i + 1}.`;
+                errEl.style.display = 'block';
+                return;
+            }
+            if (!al) {
+                errEl.textContent = `Por favor, informe o nome do aluno na linha ${i + 1}.`;
+                errEl.style.display = 'block';
+                return;
+            }
+            assignments.push({ etiqueta: et, aluno: al });
+        }
+    }
+
+    if (assignments.length === 0) {
+        errEl.textContent = 'Preencha ao menos uma etiqueta de notebook e o nome do aluno correspondente.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const result = ERS.saveStudentAssignments(currentRegResId, assignments);
+    if (result.ok) {
+        closeModal('register-students-modal');
+        ERS.showToast(`Uso de ${assignments.length} notebooks registrado com sucesso!`, 'success');
+        renderActiveChip();
+        renderCalendar();
+        renderMyReservations();
+    } else {
+        errEl.textContent = result.message || 'Erro ao salvar registro.';
+        errEl.style.display = 'block';
     }
 }
 
@@ -446,6 +652,21 @@ function openReservationDetail(id) {
     selectedResId = id;
     const isMine = r.professorId === currentSession.userId;
 
+    let studentsHtml = '';
+    if (r.alunosRegistrados && r.alunosNotebooks && r.alunosNotebooks.length > 0) {
+        studentsHtml = `
+            <div style="margin-top: 10px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <strong style="font-size: 13px; color: var(--color-primary); display: flex; align-items: center; gap: 4px;">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">assignment_turned_in</span>
+                    Alunos e Notebooks Registrados (${r.alunosNotebooks.length})
+                </strong>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                    ${r.alunosNotebooks.map(a => `<span style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 11px;"><strong>${ERS.escapeHtml(a.etiqueta)}:</strong> ${ERS.escapeHtml(a.aluno)}</span>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
     document.getElementById('res-detail-body').innerHTML = `
         <div class="detail-list">
             <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
@@ -454,8 +675,24 @@ function openReservationDetail(id) {
             ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}</div>` : ''}
             <div><strong>Professor:</strong> ${r.professorNome}</div>
             <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
+            ${r.retiradaConfirmada ? `<div><strong>Entrega:</strong> <span class="badge badge-success">Retirada confirmada pelo PROATEC</span></div>` : (r.notebooks ? `<div><strong>Entrega:</strong> <span class="badge badge-warning">Aguardando confirmação do PROATEC</span></div>` : '')}
+            ${studentsHtml}
         </div>
     `;
+
+    const btnDetailReg = document.getElementById('btn-detail-register-students');
+    if (btnDetailReg) {
+        if (isMine && r.notebooks > 0 && r.retiradaConfirmada) {
+            btnDetailReg.style.display = '';
+            btnDetailReg.innerHTML = `<span class="material-symbols-outlined">assignment_ind</span> ${r.alunosRegistrados ? 'Editar Alunos' : 'Registrar Alunos'}`;
+            btnDetailReg.onclick = () => {
+                closeModal('res-detail-modal');
+                openRegisterStudentsModal(id);
+            };
+        } else {
+            btnDetailReg.style.display = 'none';
+        }
+    }
 
     const btnCancel = document.getElementById('btn-cancel-res');
     if (isMine && r.situacao === 'confirmada') {
