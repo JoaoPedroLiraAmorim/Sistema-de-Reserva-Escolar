@@ -75,9 +75,9 @@
     /** Retorna 'YYYY-MM-DD' para hoje */
     function today() { return dateKey(new Date()); }
 
-    /** Retorna 'YYYY-MM-DD' para N dias a partir de hoje */
-    function dayOffset(n) {
-        const d = new Date();
+    /** Retorna 'YYYY-MM-DD' para N dias a partir de hoje (ou de baseDate) */
+    function dayOffset(n, baseDate = null) {
+        const d = baseDate ? new Date(baseDate) : new Date();
         d.setDate(d.getDate() + n);
         return dateKey(d);
     }
@@ -126,7 +126,8 @@
     async function seed() {
         const h = await hashPassword('123456');
 
-        if (load(KEYS.SEEDED)) {
+        const SEED_VERSION_KEY = 'ers_seeded_v4';
+        if (load(SEED_VERSION_KEY)) {
             // Se já semeado, garante que a lista de usuários existe e tem as contas demo
             const currentUsers = load(KEYS.USERS);
             if (!currentUsers || !currentUsers.length) {
@@ -170,27 +171,49 @@
             { id: 'nb3', marca: 'Acer',   total: 10, funcionando: 7,  defeito: 3 },
         ]);
 
-        // Reservas mock
-        const d0 = today();
-        const d1 = dayOffset(1);
-        const d2 = dayOffset(2);
-        const d3 = dayOffset(3);
+        // Reservas mock ancoradas na semana ativa (Segunda a Sábado)
+        const mon = getMonday(new Date());
+        const dSeg = dateKey(mon);
+        const dTer = dayOffset(1, mon);
+        const dQua = dayOffset(2, mon);
+        const dQui = dayOffset(3, mon);
+        const dSex = dayOffset(4, mon);
+        const dSab = dayOffset(5, mon);
 
-        save(KEYS.RESERVATIONS, [
-            { id: genId(), professorId: 'u1', professorNome: 'Prof. Marcelo',      data: d0, inicio: '07:00', fim: '07:50', sala: 'Aquário',         notebooks: 20, turma: '3A Info',  situacao: 'confirmada' },
-            { id: genId(), professorId: 'u1', professorNome: 'Prof. Marcelo',      data: d1, inicio: '08:40', fim: '09:30', sala: 'Sala de Leitura', notebooks: 15, turma: '2B Admin', situacao: 'confirmada' },
-            { id: genId(), professorId: 'u3', professorNome: 'Prof. Ana Souza',    data: d0, inicio: '07:50', fim: '08:40', sala: 'Sala de Vídeo',   notebooks: 10, turma: '1C Log',   situacao: 'confirmada' },
-            { id: genId(), professorId: 'u3', professorNome: 'Prof. Carlos Lima',  data: d1, inicio: '07:00', fim: '07:50', sala: 'Aquário',         notebooks: 25, turma: '3B Info',  situacao: 'confirmada' },
-            { id: genId(), professorId: 'u3', professorNome: 'Prof. Maria Santos', data: d2, inicio: '13:00', fim: '13:50', sala: 'Sala de Leitura', notebooks: 15, turma: '2A Admin', situacao: 'confirmada' },
-            { id: genId(), professorId: 'u3', professorNome: 'Prof. Ricardo Neves',data: d3, inicio: '09:30', fim: '10:20', sala: 'Aquário',         notebooks: 30, turma: '3C Info',  situacao: 'confirmada' },
-        ]);
+        // Preserva reservas criadas manualmente pelo usuário
+        const existingRes = (load(KEYS.RESERVATIONS) || []).filter(r =>
+            r.id && !r.id.startsWith('mock-res-')
+        );
 
-        // Bloqueio mock
+        const mockReservations = [
+            // Segunda
+            { id: 'mock-res-1', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dSeg, inicio: '07:00', fim: '07:50', sala: 'Aquário',         notebooks: 20, turma: '3A Info',  situacao: 'confirmada' },
+            { id: 'mock-res-2', professorId: 'u3', professorNome: 'Prof. Carlos Lima',  data: dSeg, inicio: '07:50', fim: '08:40', sala: 'Aquário',         notebooks: 25, turma: '3B Info',  situacao: 'confirmada' },
+            // Terça
+            { id: 'mock-res-3', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dTer, inicio: '08:40', fim: '09:30', sala: 'Sala de Leitura', notebooks: 15, turma: '2B Admin', situacao: 'confirmada' },
+            { id: 'mock-res-4', professorId: 'u3', professorNome: 'Prof. Ricardo Neves',data: dTer, inicio: '09:30', fim: '10:20', sala: 'Aquário',         notebooks: 30, turma: '3C Info',  situacao: 'confirmada' },
+            // Quarta
+            { id: 'mock-res-5', professorId: 'u3', professorNome: 'Prof. Ana Souza',    data: dQua, inicio: '07:50', fim: '08:40', sala: 'Sala de Vídeo',   notebooks: 10, turma: '1C Log',   situacao: 'confirmada' },
+            { id: 'mock-res-6', professorId: 'u3', professorNome: 'Prof. Maria Santos', data: dQua, inicio: '13:00', fim: '13:50', sala: 'Sala de Leitura', notebooks: 15, turma: '2A Admin', situacao: 'confirmada' },
+            // Quinta
+            { id: 'mock-res-7', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dQui, inicio: '13:50', fim: '14:40', sala: 'Aquário',         notebooks: 20, turma: '1A Admin', situacao: 'confirmada' },
+            { id: 'mock-res-8', professorId: 'u3', professorNome: 'Prof. Carlos Lima',  data: dQui, inicio: '14:40', fim: '15:30', sala: 'Sala de Vídeo',   notebooks: 15, turma: '2C Log',   situacao: 'confirmada' },
+            // Sexta
+            { id: 'mock-res-9', professorId: 'u3', professorNome: 'Prof. Ana Souza',    data: dSex, inicio: '10:35', fim: '11:25', sala: 'Sala de Leitura', notebooks: 12, turma: '1B Info',  situacao: 'confirmada' },
+            // Sábado
+            { id: 'mock-res-10', professorId: 'u1', professorNome: 'Prof. Marcelo',     data: dSab, inicio: '08:40', fim: '09:30', sala: 'Aquário',         notebooks: 15, turma: 'Plantão',  situacao: 'confirmada' },
+        ];
+
+        save(KEYS.RESERVATIONS, [...existingRes, ...mockReservations]);
+
+        // Bloqueios mock na semana ativa
         save(KEYS.BLOCKS, [
-            { id: genId(), data: d2, inicio: '07:00', fim: '09:30', motivo: 'Manutenção preventiva nos equipamentos', criadoPor: 'Dra. Sandra Lima', criadoEm: new Date().toISOString() },
+            { id: 'mock-blk-1', data: dSeg, inicio: '10:35', fim: '12:15', motivo: 'Manutenção preventiva nos equipamentos', criadoPor: 'Dra. Sandra Lima', criadoEm: new Date().toISOString() },
+            { id: 'mock-blk-2', data: dSex, inicio: '13:00', fim: '14:40', motivo: 'Conselho de Classe e Avaliação Pedagógica', criadoPor: 'Dra. Sandra Lima', criadoEm: new Date().toISOString() },
         ]);
 
         save(KEYS.SEEDED, true);
+        save(SEED_VERSION_KEY, true);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -604,14 +627,14 @@
         const d = new Date(date);
         d.setHours(12, 0, 0, 0); // evita bug de timezone
         const day = d.getDay();
-        const diff = day === 0 ? -6 : 1 - day;
+        const diff = day === 0 ? 1 : 1 - day;
         d.setDate(d.getDate() + diff);
         return d;
     }
 
-    /** Retorna array de 5 datas (Seg→Sex) de uma semana, dado a segunda-feira */
+    /** Retorna array de 6 datas (Seg→Sáb) de uma semana, dado a segunda-feira */
     function getWeekDays(monday) {
-        return Array.from({ length: 5 }, (_, i) => {
+        return Array.from({ length: 6 }, (_, i) => {
             const d = new Date(monday);
             d.setDate(d.getDate() + i);
             return d;

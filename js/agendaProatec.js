@@ -207,7 +207,7 @@ window.AgendaProatecModule = (function() {
         const slots = SHIFT_SLOTS[currentShift] || SHIFT_SLOTS['manha'];
 
         const first = weekDays[0];
-        const last = weekDays[4];
+        const last = weekDays[weekDays.length - 1];
         weekLabelEl.textContent =
             `${first.getDate()} ${ERS.MESES[first.getMonth()]} — ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
 

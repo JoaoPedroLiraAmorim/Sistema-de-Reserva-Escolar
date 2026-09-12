@@ -85,8 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnOpenNewReservation').addEventListener('click', () => {
         const dInput = document.getElementById('res-date');
         dInput.min = ERS.today();
-        if (!dInput.value || dInput.value < ERS.today()) {
-            dInput.value = ERS.today();
+        const todayStr = ERS.today();
+        const mondayStr = ERS.dateKey(currentWeekMonday);
+        if (!dInput.value || dInput.value < todayStr) {
+            dInput.value = mondayStr >= todayStr ? mondayStr : todayStr;
         }
         document.getElementById('res-error').style.display = 'none';
         populateTimeSlots(currentShift);
@@ -174,7 +176,7 @@ function renderCalendar() {
     const slots = SHIFT_SLOTS[currentShift];
 
     const first = weekDays[0];
-    const last = weekDays[4];
+    const last = weekDays[weekDays.length - 1];
     document.getElementById('weekLabel').textContent =
         `${first.getDate()} ${ERS.MESES[first.getMonth()]} — ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
 
@@ -221,7 +223,7 @@ function renderCalendar() {
 
             let html = '';
 
-            if (blocks.length > 0) {
+            if (blocks.length > 0 || slotReservations.length > 0) {
                 html += `<div class="calendar-events-container">`;
                 blocks.forEach(b => {
                     html += `<div class="calendar-event-card event-block" title="${b.motivo}">
@@ -230,11 +232,6 @@ function renderCalendar() {
                         <span class="event-room"><span class="material-symbols-outlined">block</span> ${b.inicio}–${b.fim}</span>
                     </div>`;
                 });
-                html += `</div>`;
-            }
-
-            if (slotReservations.length > 0) {
-                html += `<div class="calendar-events-container">`;
                 slotReservations.forEach(r => {
                     const isMine = r.professorId === currentSession.userId;
                     const colorClass = isMine ? 'primary' : 'tertiary';
@@ -423,6 +420,17 @@ function handleCreateReservation(e) {
     closeModal('new-reservation-modal');
     document.getElementById('new-reservation-form').reset();
     ERS.showToast('Reserva criada com sucesso!', 'success');
+
+    // Navega automaticamente o calendário para a semana e turno da reserva
+    currentWeekMonday = ERS.getMonday(data);
+    const isTarde = (inicio >= '13:00' && inicio < '18:15');
+    const isNoite = (inicio >= '19:00');
+    currentShift = isNoite ? 'noite' : isTarde ? 'tarde' : 'manha';
+
+    document.querySelectorAll('.shift-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.shift === currentShift);
+    });
+
     renderCalendar();
     renderMyReservations();
     renderActiveChip();
