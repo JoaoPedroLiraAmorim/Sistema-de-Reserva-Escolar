@@ -50,12 +50,24 @@
                         <p>Registro de uso de equipamentos por professor e turma.</p>
                     </div>
 
-                    <!-- Filtro por data -->
+                    <!-- Filtros de exibição -->
                     <div class="reports-filter-group">
-                        <input type="date" id="report-date" class="form-control report-date-input">
-                        <div class="reports-date-badge">
+                        <div class="filter-pills" role="group" aria-label="Filtro de período">
+                            <button type="button" class="btn-filter-pill active" id="btn-filter-all" onclick="RelatorioModule.setFilterMode('all')">
+                                <span class="material-symbols-outlined">list_alt</span>
+                                Todas as Reservas
+                            </button>
+                            <button type="button" class="btn-filter-pill" id="btn-filter-today" onclick="RelatorioModule.setFilterMode('today')">
+                                <span class="material-symbols-outlined">today</span>
+                                Hoje
+                            </button>
+                        </div>
+                        <div class="filter-date-wrapper">
+                            <input type="date" id="report-date" class="form-control report-date-input" title="Filtrar por data específica">
+                        </div>
+                        <div class="reports-date-badge" id="reports-date-badge">
                             <span class="material-symbols-outlined">calendar_month</span>
-                            <span id="date-label">Hoje</span>
+                            <span id="date-label">Todas as Reservas</span>
                         </div>
                     </div>
                 </header>
@@ -66,6 +78,38 @@
                 <!-- Lista de Relatórios -->
                 <section class="reports-list" id="reports-list"></section>
             </main>
+        </div>
+    </div>
+
+    <!-- Modal: Registros de Notebooks e Alunos da Reserva -->
+    <div class="modal-backdrop hidden" id="records-modal" role="dialog" aria-modal="true" aria-labelledby="records-modal-title">
+        <div class="modal modal-records">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge">
+                        <span class="material-symbols-outlined">assignment</span>
+                    </div>
+                    <div>
+                        <h3 id="records-modal-title">Registros da Reserva</h3>
+                        <p id="records-modal-subtitle">Equipamentos e alunos vinculados pelo professor</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" onclick="RelatorioModule.closeRecordsModal()" aria-label="Fechar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Informações Resumidas da Reserva -->
+                <div class="records-res-info" id="records-res-info"></div>
+
+                <!-- Tabela de Registros -->
+                <div class="records-table-container" id="records-table-container"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="RelatorioModule.closeRecordsModal()">Fechar</button>
+            </div>
         </div>
     </div>
 

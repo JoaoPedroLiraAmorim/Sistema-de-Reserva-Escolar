@@ -32,10 +32,51 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Filtros rápidos por pill (Todas / Hoje) */
+.filter-pills {
+    display: inline-flex;
+    background-color: var(--color-surface-container, #f1f5f9);
+    padding: 3px;
+    border-radius: var(--radius-lg, 10px);
+    gap: 4px;
+    border: 1px solid var(--color-border-light, #e2e8f0);
+}
+
+.btn-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary, #64748b);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md, 8px);
+    cursor: pointer;
+    transition: all var(--transition-fast, 0.2s);
+}
+
+.btn-filter-pill .material-symbols-outlined {
+    font-size: 17px;
+}
+
+.btn-filter-pill:hover {
+    color: var(--color-text-primary, #0f172a);
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-filter-pill.active {
+    background-color: var(--color-bg-white, #ffffff);
+    color: var(--color-primary, #1a73e8);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.06));
 }
 
 .report-date-input {
-    max-width: 180px;
+    max-width: 160px;
     font-family: inherit;
     font-size: 13px;
 }
@@ -54,7 +95,6 @@
     box-shadow: var(--shadow-sm);
 }
 
-
 .reports-date-badge .material-symbols-outlined {
     font-size: 18px;
     color: var(--color-primary);
@@ -65,7 +105,7 @@
    --------------------------------------------------------- */
 .report-stats-grid {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     margin-bottom: 24px;
     flex-wrap: wrap;
 }
@@ -75,7 +115,7 @@
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     padding: 14px 20px;
-    min-width: 120px;
+    min-width: 140px;
     box-shadow: var(--shadow-sm);
 }
 
@@ -96,7 +136,8 @@
 }
 
 .stat-value.primary { color: var(--color-primary); }
-.stat-value.danger  { color: var(--color-error); }
+.stat-value.success { color: var(--color-success, #10b981); }
+.stat-value.danger  { color: var(--color-error, #ef4444); }
 
 .empty-state-report {
     text-align: center;
@@ -117,10 +158,9 @@
 .reports-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     padding-bottom: 40px;
 }
-
 
 .report-card {
     background-color: var(--color-bg-white);
@@ -135,20 +175,20 @@
     box-shadow: var(--shadow-md);
 }
 
+.report-card.report-card-canceled,
 .report-card.upcoming {
-    opacity: 0.85;
+    opacity: 0.88;
+    background-color: #fdfdfd;
 }
 
 /* Topo do Cartão de Relatório */
 .report-card-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--color-border-light);
+    padding: 18px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 16px;
-    background-color: var(--color-bg-white);
 }
 
 .report-lead {
@@ -158,8 +198,8 @@
 }
 
 .report-icon-box {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
@@ -200,7 +240,7 @@
 }
 
 .report-teacher-name {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--color-text-primary);
 }
@@ -214,7 +254,7 @@
 .report-meta-row {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     flex-wrap: wrap;
     font-size: 13px;
     color: var(--color-text-muted);
@@ -223,7 +263,7 @@
 .report-meta-item {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .report-meta-item .material-symbols-outlined {
@@ -231,93 +271,263 @@
     color: var(--color-text-placeholder);
 }
 
-.btn-view-more {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
-    background-color: transparent;
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    color: var(--color-primary);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn-view-more:hover {
-    background-color: var(--color-primary-light);
-    border-color: var(--color-primary-focus);
-}
-
-/* Corpo do Cartão: Listagem Aluno/Equipamento */
-.report-card-body {
-    padding: 20px 24px;
-    background-color: #fafbfd;
-}
-
-.report-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--color-text-muted);
-    margin-bottom: 14px;
-    display: block;
-}
-
-.student-items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-}
-
-.student-item {
+/* Botão "Ver registros" */
+.report-card-actions {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
-    background-color: var(--color-bg-white);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-    transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
-.student-item:hover {
-    border-color: var(--color-primary-ring);
+.btn-view-records {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--color-primary-light, #e8f0fe);
+    border: 1px solid var(--color-primary, #1a73e8);
+    border-radius: var(--radius-lg, 10px);
+    color: var(--color-primary, #1a73e8);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast, 0.2s);
+    white-space: nowrap;
+}
+
+.btn-view-records .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-view-records:hover {
+    background-color: var(--color-primary, #1a73e8);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(26, 115, 232, 0.25);
     transform: translateY(-1px);
 }
 
-.student-item-number {
-    font-size: 15px;
+.records-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary, #1a73e8);
+    color: #ffffff;
+    font-size: 11px;
     font-weight: 700;
-    color: var(--color-primary);
-    min-width: 24px;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    padding: 0 6px;
+    transition: background-color var(--transition-fast, 0.2s);
+}
+
+.btn-view-records:hover .records-count-badge {
+    background-color: #ffffff;
+    color: var(--color-primary, #1a73e8);
+}
+
+/* ---------------------------------------------------------
+   4. Modal de Registros de Notebooks e Alunos
+   --------------------------------------------------------- */
+.modal-records {
+    max-width: 640px;
+    width: 95%;
+}
+
+.modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-icon-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg, 10px);
+    background-color: var(--color-primary-light, #e8f0fe);
+    color: var(--color-primary, #1a73e8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-icon-badge .material-symbols-outlined {
+    font-size: 22px;
+}
+
+/* Grade Resumo da Reserva */
+.record-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 14px 16px;
+    background-color: #f8fafc;
+    border: 1px solid var(--color-border-light, #e2e8f0);
+    border-radius: var(--radius-lg, 10px);
+}
+
+.record-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.record-info-item .info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary, #64748b);
+    font-weight: 600;
+}
+
+.record-info-item .info-val {
+    font-size: 13.5px;
+    color: var(--color-text-primary, #0f172a);
+    font-weight: 500;
+}
+
+/* Tabela de Registros */
+.records-table-container {
+    margin-top: 4px;
+}
+
+.records-table-wrapper {
+    max-height: 340px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border-light, #e2e8f0);
+    border-radius: var(--radius-lg, 10px);
+}
+
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+}
+
+.records-table thead {
+    background-color: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.records-table th {
+    padding: 10px 14px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary, #64748b);
+    border-bottom: 1px solid var(--color-border-light, #e2e8f0);
+}
+
+.records-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border-light, #f1f5f9);
+    color: var(--color-text-primary, #0f172a);
+}
+
+.records-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.records-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.records-table .col-num {
+    width: 44px;
+    font-weight: 700;
+    color: var(--color-text-muted, #94a3b8);
     text-align: center;
 }
 
-.student-item-number.secondary {
-    color: var(--color-text-secondary);
+.records-table .col-tag {
+    width: 210px;
 }
 
-.student-item-divider {
-    width: 1px;
-    height: 18px;
-    background-color: var(--color-border-light);
-}
-
-.student-item-name {
+.record-tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius-md, 6px);
     font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #1d4ed8;
+    font-weight: 600;
 }
 
-/* Responsividade */
+.record-tag-badge .material-symbols-outlined {
+    font-size: 16px;
+    color: #2563eb;
+}
+
+.student-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.student-cell .student-icon {
+    font-size: 18px;
+    color: var(--color-text-muted, #94a3b8);
+}
+
+.records-table-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--radius-md, 8px);
+    color: #166534;
+    font-size: 13px;
+}
+
+.records-table-summary .material-symbols-outlined {
+    font-size: 18px;
+    color: #16a34a;
+}
+
+.records-empty-state {
+    text-align: center;
+    padding: 36px 20px;
+    background-color: #f8fafc;
+    border: 1px dashed var(--color-border-light, #cbd5e1);
+    border-radius: var(--radius-xl, 12px);
+}
+
+.records-empty-state .material-symbols-outlined {
+    font-size: 44px;
+    color: var(--color-text-muted, #94a3b8);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.records-empty-state h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary, #0f172a);
+    margin-bottom: 6px;
+}
+
+.records-empty-state p {
+    font-size: 13.5px;
+    color: var(--color-text-secondary, #64748b);
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.4;
+}
+
+/* ---------------------------------------------------------
+   5. Responsividade
+   --------------------------------------------------------- */
 @media (max-width: 768px) {
     .reports-page-header {
         flex-direction: column;
@@ -329,12 +539,22 @@
         align-items: flex-start;
     }
 
-    .btn-view-more {
+    .report-card-actions {
+        width: 100%;
+    }
+
+    .btn-view-records {
         width: 100%;
         justify-content: center;
     }
 
-    .student-items-grid {
+    .record-info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .record-info-grid {
         grid-template-columns: 1fr;
     }
 }

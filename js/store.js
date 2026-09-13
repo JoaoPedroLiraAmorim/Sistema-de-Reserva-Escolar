@@ -147,6 +147,43 @@
                     { id: 'nb3', marca: 'Acer',   total: 10, funcionando: 7,  defeito: 3 },
                 ]);
             }
+
+            // Garante que reservas mock tenham registros de demonstração de notebooks/alunos
+            const currentRes = load(KEYS.RESERVATIONS);
+            if (currentRes && currentRes.length) {
+                let resUpdated = false;
+                const r1 = currentRes.find(r => r.id === 'mock-res-1');
+                if (r1 && (!r1.alunosNotebooks || r1.alunosNotebooks.length === 0)) {
+                    r1.retiradaConfirmada = true;
+                    r1.alunosRegistrados = true;
+                    r1.alunosNotebooks = [
+                        { etiqueta: 'NT-01', aluno: 'Lucas Silva' },
+                        { etiqueta: 'NT-02', aluno: 'Beatriz Santos' },
+                        { etiqueta: 'NT-03', aluno: 'Carlos Eduardo' },
+                        { etiqueta: 'NT-04', aluno: 'Mariana Oliveira' },
+                        { etiqueta: 'NT-05', aluno: 'Gabriel Ferreira' },
+                        { etiqueta: 'NT-06', aluno: 'Julia Costa' },
+                        { etiqueta: 'NT-07', aluno: 'Rafael Souza' },
+                        { etiqueta: 'NT-08', aluno: 'Fernanda Lima' }
+                    ];
+                    resUpdated = true;
+                }
+                const r2 = currentRes.find(r => r.id === 'mock-res-2');
+                if (r2 && (!r2.alunosNotebooks || r2.alunosNotebooks.length === 0)) {
+                    r2.retiradaConfirmada = true;
+                    r2.alunosRegistrados = true;
+                    r2.alunosNotebooks = [
+                        { etiqueta: 'NT-09', aluno: 'Pedro Henrique' },
+                        { etiqueta: 'NT-10', aluno: 'Larissa Manoela' },
+                        { etiqueta: 'NT-11', aluno: 'Gustavo Martins' },
+                        { etiqueta: 'NT-12', aluno: 'Camila Rodrigues' }
+                    ];
+                    resUpdated = true;
+                }
+                if (resUpdated) {
+                    save(KEYS.RESERVATIONS, currentRes);
+                }
+            }
             return;
         }
 
@@ -187,8 +224,50 @@
 
         const mockReservations = [
             // Segunda
-            { id: 'mock-res-1', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dSeg, inicio: '07:00', fim: '07:50', sala: 'Aquário',         notebooks: 20, turma: '3A Info',  situacao: 'confirmada' },
-            { id: 'mock-res-2', professorId: 'u3', professorNome: 'Prof. Carlos Lima',  data: dSeg, inicio: '07:50', fim: '08:40', sala: 'Aquário',         notebooks: 25, turma: '3B Info',  situacao: 'confirmada' },
+            {
+                id: 'mock-res-1',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dSeg,
+                inicio: '07:00',
+                fim: '07:50',
+                sala: 'Aquário',
+                notebooks: 20,
+                turma: '3A Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: true,
+                alunosRegistrados: true,
+                alunosNotebooks: [
+                    { etiqueta: 'NT-01', aluno: 'Lucas Silva' },
+                    { etiqueta: 'NT-02', aluno: 'Beatriz Santos' },
+                    { etiqueta: 'NT-03', aluno: 'Carlos Eduardo' },
+                    { etiqueta: 'NT-04', aluno: 'Mariana Oliveira' },
+                    { etiqueta: 'NT-05', aluno: 'Gabriel Ferreira' },
+                    { etiqueta: 'NT-06', aluno: 'Julia Costa' },
+                    { etiqueta: 'NT-07', aluno: 'Rafael Souza' },
+                    { etiqueta: 'NT-08', aluno: 'Fernanda Lima' }
+                ]
+            },
+            {
+                id: 'mock-res-2',
+                professorId: 'u3',
+                professorNome: 'Prof. Carlos Lima',
+                data: dSeg,
+                inicio: '07:50',
+                fim: '08:40',
+                sala: 'Aquário',
+                notebooks: 25,
+                turma: '3B Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: true,
+                alunosRegistrados: true,
+                alunosNotebooks: [
+                    { etiqueta: 'NT-09', aluno: 'Pedro Henrique' },
+                    { etiqueta: 'NT-10', aluno: 'Larissa Manoela' },
+                    { etiqueta: 'NT-11', aluno: 'Gustavo Martins' },
+                    { etiqueta: 'NT-12', aluno: 'Camila Rodrigues' }
+                ]
+            },
             // Terça
             { id: 'mock-res-3', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dTer, inicio: '08:40', fim: '09:30', sala: 'Sala de Leitura', notebooks: 15, turma: '2B Admin', situacao: 'confirmada' },
             { id: 'mock-res-4', professorId: 'u3', professorNome: 'Prof. Ricardo Neves',data: dTer, inicio: '09:30', fim: '10:20', sala: 'Aquário',         notebooks: 30, turma: '3C Info',  situacao: 'confirmada' },
