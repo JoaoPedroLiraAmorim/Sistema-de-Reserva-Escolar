@@ -226,3 +226,129 @@ function closeModal(modalId) {
         modal.classList.add('hidden');
     }
 }
+
+/**
+ * Exibe um modal de confirmação padronizado substituindo os antigos confirm()/alert() nativos.
+ * Retorna uma Promise<boolean> que resolve true se o usuário confirmou e false se cancelou/fechou.
+ *
+ * @param {Object} options
+ * @param {string} options.title - Título do modal
+ * @param {string} options.message - Mensagem descritiva (suporta HTML)
+ * @param {string} [options.icon] - Ícone Material Symbols ('event_busy', 'inventory_2', 'lock_open', 'warning', etc)
+ * @param {string} [options.type] - 'danger' | 'warning' | 'success' | 'primary'
+ * @param {string} [options.confirmText] - Texto do botão confirmar
+ * @param {string} [options.cancelText] - Texto do botão cancelar
+ * @returns {Promise<boolean>}
+ */
+function showConfirmModal(options = {}) {
+    return new Promise((resolve) => {
+        const {
+            title = 'Confirmar Ação',
+            message = 'Tem certeza de que deseja prosseguir com esta ação?',
+            icon = 'help',
+            type = 'primary',
+            confirmText = 'Confirmar',
+            cancelText = 'Cancelar'
+        } = options;
+
+        let modalEl = document.getElementById('system-confirm-modal');
+        if (!modalEl) {
+            modalEl = document.createElement('div');
+            modalEl.id = 'system-confirm-modal';
+            modalEl.className = 'modal-backdrop hidden';
+            modalEl.innerHTML = `
+                <div class="modal modal-confirm" role="dialog" aria-modal="true" aria-labelledby="sys-confirm-title">
+                    <div class="modal-confirm-body">
+                        <div class="modal-confirm-icon-wrapper" id="sys-confirm-icon-wrapper">
+                            <span class="material-symbols-outlined" id="sys-confirm-icon">help</span>
+                        </div>
+                        <h3 class="modal-confirm-title" id="sys-confirm-title"></h3>
+                        <p class="modal-confirm-message" id="sys-confirm-msg"></p>
+                    </div>
+                    <div class="modal-confirm-footer">
+                        <button type="button" class="btn-secondary" id="sys-confirm-btn-cancel">Cancelar</button>
+                        <button type="button" class="btn-primary" id="sys-confirm-btn-ok">Confirmar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalEl);
+        }
+
+        const iconWrapper = modalEl.querySelector('#sys-confirm-icon-wrapper');
+        const iconEl      = modalEl.querySelector('#sys-confirm-icon');
+        const titleEl     = modalEl.querySelector('#sys-confirm-title');
+        const msgEl       = modalEl.querySelector('#sys-confirm-msg');
+        const btnCancel   = modalEl.querySelector('#sys-confirm-btn-cancel');
+        const btnOk       = modalEl.querySelector('#sys-confirm-btn-ok');
+
+        iconWrapper.className = `modal-confirm-icon-wrapper ${type}`;
+        iconEl.textContent = icon;
+
+        titleEl.textContent = title;
+        msgEl.innerHTML = message;
+
+        btnCancel.textContent = cancelText;
+        btnOk.textContent = confirmText;
+
+        if (type === 'danger') {
+            btnOk.className = 'btn-danger';
+            btnOk.style.background = '';
+            btnOk.style.borderColor = '';
+        } else if (type === 'success') {
+            btnOk.className = 'btn-primary';
+            btnOk.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            btnOk.style.borderColor = '#059669';
+        } else {
+            btnOk.className = 'btn-primary';
+            btnOk.style.background = '';
+            btnOk.style.borderColor = '';
+        }
+
+        const cleanup = () => {
+            modalEl.classList.add('hidden');
+            document.removeEventListener('keydown', handleKeyDown);
+            modalEl.removeEventListener('click', handleBackdropClick);
+            btnCancel.onclick = null;
+            btnOk.onclick = null;
+        };
+
+        const handleConfirm = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        const handleCancel = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                handleCancel();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                handleConfirm();
+            }
+        };
+
+        const handleBackdropClick = (e) => {
+            if (e.target === modalEl) {
+                handleCancel();
+            }
+        };
+
+        btnOk.onclick = handleConfirm;
+        btnCancel.onclick = handleCancel;
+        modalEl.addEventListener('click', handleBackdropClick);
+        document.addEventListener('keydown', handleKeyDown);
+
+        modalEl.classList.remove('hidden');
+        btnOk.focus();
+    });
+}
+
+window.showConfirmModal = showConfirmModal;
+if (window.ERS) {
+    window.ERS.confirmModal = showConfirmModal;
+}

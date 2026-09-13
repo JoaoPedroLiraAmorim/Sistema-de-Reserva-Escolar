@@ -86,8 +86,17 @@ window.BloqueiosModule = (function() {
         `).join('');
     }
 
-    function deleteBlock(id) {
-        if (!confirm('Remover este bloqueio? Reservas neste período voltarão a ser permitidas.')) return;
+    async function deleteBlock(id) {
+        const ok = await showConfirmModal({
+            title: 'Remover Bloqueio',
+            message: 'Deseja realmente remover este bloqueio? As reservas neste período voltarão a ser permitidas.',
+            icon: 'lock_open',
+            type: 'danger',
+            confirmText: 'Remover Bloqueio',
+            cancelText: 'Cancelar'
+        });
+        if (!ok) return;
+
         ERS.deleteBlock(id);
         renderBlocks();
         ERS.showToast('Bloqueio removido com sucesso.', 'success');

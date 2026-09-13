@@ -509,8 +509,17 @@ window.AgendaProatecModule = (function() {
         openModal('res-detail-modal');
     }
 
-    function cancelRes(id) {
-        if (!confirm('Tem certeza que deseja cancelar esta reserva? Os recursos ficarão disponíveis novamente.')) return;
+    async function cancelRes(id) {
+        const ok = await showConfirmModal({
+            title: 'Cancelar Reserva',
+            message: 'Tem certeza de que deseja cancelar esta reserva? Os recursos ficarão disponíveis novamente.',
+            icon: 'event_busy',
+            type: 'danger',
+            confirmText: 'Sim, Cancelar Reserva',
+            cancelText: 'Voltar'
+        });
+        if (!ok) return;
+
         const result = ERS.cancelReservation(id);
         if (result.ok) {
             closeModal('res-detail-modal');

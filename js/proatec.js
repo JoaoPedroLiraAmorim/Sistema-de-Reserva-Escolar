@@ -265,12 +265,19 @@ window.ProatecModule = (function() {
         }).join('');
     }
 
-    function confirmPickupFromModal(id) {
+    async function confirmPickupFromModal(id) {
         const r = ERS.getReservations().find(x => x.id === id);
         if (!r) return;
 
-        const confirmMsg = `Confirmar a entrega de ${r.notebooks} notebook(s) para ${r.professorNome} (${r.turma || 'Turma geral'})?\n\nIsso liberará imediatamente o botão de registrar alunos na tela deste professor.`;
-        if (!confirm(confirmMsg)) return;
+        const ok = await showConfirmModal({
+            title: 'Confirmar Entrega de Notebooks',
+            message: `Deseja confirmar a entrega de <strong>${r.notebooks} notebook(s)</strong> para <strong>${ERS.escapeHtml(r.professorNome)}</strong> (${ERS.escapeHtml(r.turma || 'Turma geral')})?<br><br>Isso liberará imediatamente o botão de registrar alunos na tela deste professor.`,
+            icon: 'inventory_2',
+            type: 'success',
+            confirmText: 'Confirmar Entrega',
+            cancelText: 'Cancelar'
+        });
+        if (!ok) return;
 
         const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
         if (result.ok) {
@@ -282,7 +289,7 @@ window.ProatecModule = (function() {
         }
     }
 
-    function handleConfirmPickup(id) {
+    async function handleConfirmPickup(id) {
         const r = ERS.getReservations().find(x => x.id === id);
         if (!r) return;
 
@@ -291,8 +298,15 @@ window.ProatecModule = (function() {
             return;
         }
 
-        const confirmMsg = `Confirmar a entrega de ${r.notebooks} notebook(s) para ${r.professorNome}?\n\nIsso liberará imediatamente o botão de registro de alunos na tela do professor.`;
-        if (!confirm(confirmMsg)) return;
+        const ok = await showConfirmModal({
+            title: 'Confirmar Entrega de Notebooks',
+            message: `Deseja confirmar a entrega de <strong>${r.notebooks} notebook(s)</strong> para <strong>${ERS.escapeHtml(r.professorNome)}</strong>?<br><br>Isso liberará imediatamente o botão de registro de alunos na tela do professor.`,
+            icon: 'inventory_2',
+            type: 'success',
+            confirmText: 'Confirmar Entrega',
+            cancelText: 'Cancelar'
+        });
+        if (!ok) return;
 
         const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
         if (result.ok) {
