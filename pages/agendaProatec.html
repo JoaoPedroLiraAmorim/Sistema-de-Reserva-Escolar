@@ -53,8 +53,8 @@
                     </div>
 
                     <div class="agenda-header-right">
-                        <!-- Botão de bloqueio (apenas Coordenação) -->
-                        <button type="button" class="btn-new-res coordenacao-only" id="btnOpenBlock" style="display: none;">
+                        <!-- Botão de bloqueio -->
+                        <button type="button" class="btn-block-action" id="btnOpenBlock">
                             <span class="material-symbols-outlined">block</span>
                             <span>Criar bloqueio</span>
                         </button>
@@ -292,6 +292,29 @@
                     <button type="submit" class="btn-primary btn-danger">Criar bloqueio</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Detalhes do Bloqueio -->
+    <div class="modal-backdrop hidden" id="block-detail-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3>Detalhes do Bloqueio</h3>
+                    <p>Visualize ou remova este bloqueio de horário.</p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Fechar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="block-detail-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
+                <button type="button" class="btn-primary btn-danger" id="btn-delete-blk">
+                    <span class="material-symbols-outlined">delete</span>
+                    Remover Bloqueio
+                </button>
+            </div>
         </div>
     </div>
 

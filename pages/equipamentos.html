@@ -47,11 +47,17 @@
                         <h1 class="eq-page-title">Equipamentos</h1>
                         <p class="eq-page-desc">Gerencie os notebooks disponíveis na escola.</p>
                     </div>
-                    <!-- Ação Principal -->
-                    <button type="button" class="btn-primary btn-add-equipment" id="btnAddEquipment">
-                        <span class="material-symbols-outlined">add</span>
-                        <span>Adicionar equipamentos</span>
-                    </button>
+                    <!-- Ações Principais -->
+                    <div class="eq-header-actions">
+                        <button type="button" class="btn-secondary btn-availability-action" id="btnOpenAvailabilityTop">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            <span>Registrar disponibilidade</span>
+                        </button>
+                        <button type="button" class="btn-primary btn-add-equipment" id="btnAddEquipment">
+                            <span class="material-symbols-outlined">add</span>
+                            <span>Adicionar equipamentos</span>
+                        </button>
+                    </div>
                 </section>
 
                 <!-- 2. Cards de Resumo (Exatamente 3 cards) -->
@@ -107,9 +113,13 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
-                <button type="button" class="btn-primary btn-defect-action" id="btnOpenRegisterDefect">
+                <button type="button" class="btn-outline-danger btn-defect-action" id="btnOpenRegisterDefect">
                     <span class="material-symbols-outlined">build</span>
                     <span>Registrar defeito</span>
+                </button>
+                <button type="button" class="btn-primary btn-avail-action" id="btnOpenRegisterAvailFromDetail">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>Registrar disponibilidade</span>
                 </button>
             </div>
         </div>
@@ -222,6 +232,82 @@
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary" id="btnConfirmDefect">
+                        <span>Confirmar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         MODAL 4: Registrar Disponibilidade (Equipamentos Arrumados)
+         ============================================================== -->
+    <div class="modal-backdrop hidden" id="register-availability-modal" role="dialog" aria-modal="true" aria-labelledby="register-availability-title">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <div>
+                    <h3 id="register-availability-title">Registrar disponibilidade</h3>
+                    <p>Registre o retorno de notebooks arrumados ao estoque em funcionamento.</p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Fechar modal">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="register-availability-form" novalidate>
+                <input type="hidden" id="avail-brand-id">
+                <div class="modal-body">
+                    <!-- Seleção de Marca (visível se aberto pelo topo) -->
+                    <div class="form-group" id="avail-brand-select-group">
+                        <label for="avail-brand-select">Marca do equipamento</label>
+                        <div class="select-wrapper">
+                            <select id="avail-brand-select" class="form-control" required>
+                                <option value="">Selecione uma marca...</option>
+                            </select>
+                            <span class="material-symbols-outlined select-icon">expand_more</span>
+                        </div>
+                    </div>
+
+                    <!-- Banner de marca e defeitos atuais -->
+                    <div class="defect-brand-banner avail-banner" id="avail-brand-banner">
+                        <div class="defect-brand-info">
+                            <span class="defect-brand-label">Marca</span>
+                            <span class="defect-brand-name" id="avail-brand-display">—</span>
+                        </div>
+                        <div class="defect-stock-badge avail-defect-badge">
+                            <span class="defect-stock-label" style="color: #b45309;">Com defeito atualmente:</span>
+                            <span class="defect-stock-value" id="avail-defect-current" style="color: #9a3412;">0</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avail-qty">Quantidade arrumada / consertada</label>
+                        <input type="number" id="avail-qty" class="form-control" min="1" step="1" placeholder="Ex: 2" required>
+                    </div>
+
+                    <!-- Prévia calculada após alteração -->
+                    <div class="defect-preview-card avail-preview-card" id="avail-preview-card">
+                        <div class="preview-header" style="color: #15803d;">
+                            <span class="material-symbols-outlined">published_with_changes</span>
+                            <span>Prévia após retorno</span>
+                        </div>
+                        <div class="preview-grid">
+                            <div class="preview-item">
+                                <span class="preview-label">Disponíveis após conserto:</span>
+                                <span class="preview-number available" id="preview-avail-disponiveis">—</span>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-label">Restante com defeito:</span>
+                                <span class="preview-number defect" id="preview-avail-defeito">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="register-availability-error" class="login-error-msg" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn-primary btn-avail-submit" id="btnConfirmAvailability">
+                        <span class="material-symbols-outlined">check</span>
                         <span>Confirmar</span>
                     </button>
                 </div>

@@ -470,6 +470,37 @@
         return { ok: true, notebook: nb };
     }
 
+    function registerNotebookAvailability(idOrBrand, quantidade) {
+        const notebooks = getNotebooks();
+        const target = (idOrBrand || '').toString().trim().toLowerCase();
+        const nb = notebooks.find(n => n.id === idOrBrand || n.marca.toLowerCase() === target);
+        if (!nb) return { ok: false, message: 'Equipamento ou marca não encontrado.' };
+
+        const qtd = parseInt(quantidade, 10);
+        if (isNaN(qtd) || qtd <= 0) {
+            return { ok: false, message: 'Informe uma quantidade válida arrumada (maior que zero).' };
+        }
+
+        const defeitoAtual = nb.defeito || 0;
+        if (defeitoAtual <= 0) {
+            return { ok: false, message: `Não há equipamentos com defeito registrados para a marca ${nb.marca}.` };
+        }
+
+        if (qtd > defeitoAtual) {
+            return {
+                ok: false,
+                message: `A quantidade informada (${qtd}) excede os equipamentos com defeito (${defeitoAtual}).`
+            };
+        }
+
+        nb.defeito = defeitoAtual - qtd;
+        nb.funcionando = (nb.funcionando || 0) + qtd;
+        nb.total = nb.funcionando + nb.defeito;
+
+        save(KEYS.NOTEBOOKS, notebooks);
+        return { ok: true, notebook: nb };
+    }
+
     function updateNotebookBrandCounts(id, { funcionando, defeito, quebrado }) {
         const notebooks = getNotebooks();
         const nb = notebooks.find(n => n.id === id);
@@ -794,7 +825,7 @@
         getRooms, getActiveRooms, toggleRoom, addRoom,
         // Notebooks
         getNotebooks, getTotalEquipamentos, getTotalDisponivel, getTotalDefeito, getBrands, getDisponivelByBrand,
-        addNotebooks, registerNotebookDefect, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
+        addNotebooks, registerNotebookDefect, registerNotebookAvailability, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts,

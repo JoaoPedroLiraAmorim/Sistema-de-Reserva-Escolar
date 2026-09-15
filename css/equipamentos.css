@@ -36,6 +36,45 @@
     font-weight: 400;
 }
 
+.eq-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-availability-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    width: auto;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btn-availability-action:hover {
+    background-color: #dcfce7;
+    color: #166534;
+    border-color: #86efac;
+    transform: translateY(-1px);
+}
+
+.btn-availability-action:active {
+    transform: scale(0.98);
+}
+
+.btn-availability-action .material-symbols-outlined {
+    font-size: 18px;
+}
+
 .btn-add-equipment {
     display: inline-flex;
     align-items: center;
@@ -433,6 +472,72 @@
     padding: 10px 20px;
 }
 
+.btn-avail-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    padding: 10px 20px;
+    background-color: #16a34a;
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-avail-action:hover:not(:disabled) {
+    background-color: #15803d;
+    transform: translateY(-1px);
+}
+
+.btn-avail-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.btn-outline-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+    color: var(--color-text-muted);
+    border-color: var(--color-border-light);
+}
+
+.btn-avail-submit {
+    background-color: #16a34a;
+}
+
+.btn-avail-submit:hover:not(:disabled) {
+    background-color: #15803d;
+}
+
 /* ─────────────────────────────────────────────────────────────
    6. MODAL 2 & 3: FORMULÁRIOS E PRÉVIA
    ───────────────────────────────────────────────────────────── */
@@ -522,6 +627,16 @@
     gap: 10px;
 }
 
+.defect-preview-card.avail-preview-card {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.avail-defect-badge {
+    background-color: #fffbeb !important;
+    border-color: #fef3c7 !important;
+}
+
 .preview-header {
     display: flex;
     align-items: center;
@@ -587,6 +702,12 @@
         align-items: flex-start;
     }
 
+    .eq-header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn-availability-action,
     .btn-add-equipment {
         width: 100%;
         justify-content: center;

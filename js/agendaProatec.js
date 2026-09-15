@@ -45,7 +45,9 @@ window.AgendaProatecModule = (function() {
         currentSession = session || AUTH.getSession();
         if (!currentSession) return;
 
-        // Mostrar botão de bloqueio apenas para Coordenação
+        // Mostrar botão de bloqueio para Coordenação e PROATEC
+        const btnBlock = document.getElementById('btnOpenBlock');
+        if (btnBlock) btnBlock.style.display = 'inline-flex';
         if (currentSession.role === 'coordenacao') {
             document.querySelectorAll('.coordenacao-only').forEach(el => el.style.display = '');
         }
@@ -142,9 +144,10 @@ window.AgendaProatecModule = (function() {
             document.getElementById('res-end')?.addEventListener('change', updateAvailInfo);
             document.getElementById('res-date')?.addEventListener('change', updateAvailInfo);
 
-            // Submissão dos Formulários
+            // Submissão dos Formulários e Ações de Bloqueio
             document.getElementById('new-reservation-form')?.addEventListener('submit', handleCreateReservation);
             document.getElementById('block-form')?.addEventListener('submit', handleCreateBlock);
+            document.getElementById('btn-delete-blk')?.addEventListener('click', handleDeleteBlock);
         }
 
         populateTimeSlots(currentShift);
@@ -255,9 +258,10 @@ window.AgendaProatecModule = (function() {
                 if (blocks.length > 0) {
                     html += `<div class="calendar-events-container">`;
                     blocks.forEach(b => {
-                        html += `<div class="calendar-event-card event-block" title="${b.motivo}">
+                        html += `<div class="calendar-event-card event-block" title="${ERS.escapeHtml(b.motivo)} (Clique para detalhes)"
+                            data-blk-id="${b.id}" onclick="openBlockDetail('${b.id}')">
                             <span class="event-teacher">🔒 Bloqueado</span>
-                            <span class="event-desc">${b.motivo}</span>
+                            <span class="event-desc">${ERS.escapeHtml(b.motivo)}</span>
                             <span class="event-room"><span class="material-symbols-outlined">block</span> ${b.inicio}–${b.fim}</span>
                         </div>`;
                     });
@@ -425,7 +429,7 @@ window.AgendaProatecModule = (function() {
             return;
         }
 
-        const creator = currentSession ? currentSession.nome : 'Coordenação';
+        const creator = currentSession ? currentSession.nome : (currentSession?.role === 'coordenacao' ? 'Coordenação' : 'PROATEC');
         const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
@@ -531,6 +535,57 @@ window.AgendaProatecModule = (function() {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    //  DETALHES / REMOVER BLOQUEIO
+    // ─────────────────────────────────────────────────────────────
+    let selectedBlockId = null;
+
+    function openBlockDetail(id) {
+        const b = ERS.getBlocks().find(b => b.id === id);
+        if (!b) return;
+
+        selectedBlockId = id;
+
+        const body = document.getElementById('block-detail-body');
+        if (body) {
+            body.innerHTML = `
+                <div class="detail-list">
+                    <div><strong>Data:</strong> ${ERS.formatDate(b.data)}</div>
+                    <div><strong>Horário:</strong> ${b.inicio} às ${b.fim}</div>
+                    <div><strong>Motivo:</strong> ${ERS.escapeHtml(b.motivo)}</div>
+                    <div><strong>Criado por:</strong> ${ERS.escapeHtml(b.criadoPor || 'Sistema')}</div>
+                    ${b.criadoEm ? `<div><strong>Registrado em:</strong> ${new Date(b.criadoEm).toLocaleString('pt-BR')}</div>` : ''}
+                </div>
+            `;
+        }
+
+        openModal('block-detail-modal');
+    }
+
+    async function handleDeleteBlock() {
+        if (!selectedBlockId) return;
+
+        const b = ERS.getBlocks().find(b => b.id === selectedBlockId);
+        const ok = await showConfirmModal({
+            title: 'Remover Bloqueio',
+            message: b 
+                ? `Deseja realmente remover o bloqueio de <strong>${ERS.escapeHtml(b.motivo)}</strong> no dia <strong>${ERS.formatDate(b.data)}</strong> (${b.inicio} às ${b.fim})? Os horários voltarão a ficar disponíveis para reserva.`
+                : 'Deseja realmente remover este bloqueio? Os horários voltarão a ficar disponíveis.',
+            icon: 'lock_open',
+            type: 'danger',
+            confirmText: 'Sim, Remover Bloqueio',
+            cancelText: 'Cancelar'
+        });
+        if (!ok) return;
+
+        ERS.deleteBlock(selectedBlockId);
+        closeModal('block-detail-modal');
+        selectedBlockId = null;
+        ERS.showToast('Bloqueio removido com sucesso!', 'success');
+        renderCalendar();
+        if (window.BloqueiosModule?.render) window.BloqueiosModule.render();
+    }
+
     // Fallback para carregamento isolado da página
     if (!window.isSpaMode) {
         document.addEventListener('DOMContentLoaded', () => {
@@ -548,6 +603,7 @@ window.AgendaProatecModule = (function() {
         init,
         render: renderCalendar,
         openReservationDetail,
+        openBlockDetail,
         cancelRes,
         updateAvailInfo,
         populateBrandSelect,
@@ -559,6 +615,9 @@ window.AgendaProatecModule = (function() {
 // Exporta funções chamadas inline no HTML / onclick
 window.openReservationDetail = function(id) {
     window.AgendaProatecModule?.openReservationDetail(id);
+};
+window.openBlockDetail = function(id) {
+    window.AgendaProatecModule?.openBlockDetail(id);
 };
 window.cancelRes = function(id) {
     window.AgendaProatecModule?.cancelRes(id);

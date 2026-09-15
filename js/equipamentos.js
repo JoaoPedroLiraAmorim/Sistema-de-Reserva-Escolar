@@ -59,16 +59,53 @@ window.EquipamentosModule = (function () {
             });
         }
 
-        // 5. Input de quantidade com defeito (Cálculo da prévia em tempo real)
+        // 5. Ação no Modal de Detalhes: "Registrar disponibilidade"
+        const btnOpenAvailDetail = document.getElementById('btnOpenRegisterAvailFromDetail');
+        if (btnOpenAvailDetail) {
+            btnOpenAvailDetail.addEventListener('click', () => {
+                if (selectedBrandId) {
+                    closeModal('brand-detail-modal');
+                    openRegisterAvailabilityModal(selectedBrandId);
+                }
+            });
+        }
+
+        // 6. Botão Cabeçalho: "Registrar disponibilidade"
+        const btnOpenAvailTop = document.getElementById('btnOpenAvailabilityTop');
+        if (btnOpenAvailTop) {
+            btnOpenAvailTop.addEventListener('click', () => {
+                openRegisterAvailabilityModal(null);
+            });
+        }
+
+        // 7. Input de quantidade com defeito (Cálculo da prévia em tempo real)
         const defectQtyInput = document.getElementById('defect-qty');
         if (defectQtyInput) {
             defectQtyInput.addEventListener('input', updateDefectPreview);
         }
 
-        // 6. Submissão do Formulário de Registrar Defeito
+        // 8. Submissão do Formulário de Registrar Defeito
         const defectForm = document.getElementById('register-defect-form');
         if (defectForm) {
             defectForm.addEventListener('submit', handleRegisterDefectSubmit);
+        }
+
+        // 9. Seletor de marca no modal de disponibilidade
+        const availBrandSelect = document.getElementById('avail-brand-select');
+        if (availBrandSelect) {
+            availBrandSelect.addEventListener('change', handleAvailBrandSelectChange);
+        }
+
+        // 10. Input de quantidade arrumada (Cálculo da prévia em tempo real)
+        const availQtyInput = document.getElementById('avail-qty');
+        if (availQtyInput) {
+            availQtyInput.addEventListener('input', updateAvailabilityPreview);
+        }
+
+        // 11. Submissão do Formulário de Registrar Disponibilidade
+        const availForm = document.getElementById('register-availability-form');
+        if (availForm) {
+            availForm.addEventListener('submit', handleRegisterAvailabilitySubmit);
         }
     }
 
@@ -224,6 +261,18 @@ window.EquipamentosModule = (function () {
         if (totalEl) totalEl.textContent = nb.total;
         if (availEl) availEl.textContent = nb.funcionando;
         if (defectEl) defectEl.textContent = nb.defeito;
+
+        const btnAvail = document.getElementById('btnOpenRegisterAvailFromDetail');
+        if (btnAvail) {
+            btnAvail.disabled = (nb.defeito || 0) === 0;
+            btnAvail.title = (nb.defeito || 0) === 0 ? 'Não há equipamentos com defeito desta marca.' : 'Registrar retorno de computadores arrumados';
+        }
+
+        const btnDefect = document.getElementById('btnOpenRegisterDefect');
+        if (btnDefect) {
+            btnDefect.disabled = (nb.funcionando || 0) === 0;
+            btnDefect.title = (nb.funcionando || 0) === 0 ? 'Não há equipamentos disponíveis para registrar defeito.' : 'Registrar defeito nesta marca';
+        }
 
         openModal('brand-detail-modal');
     }
@@ -471,6 +520,226 @@ window.EquipamentosModule = (function () {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    //  MODAL 4: REGISTRAR DISPONIBILIDADE (COMPUTADORES ARRUMADOS)
+    // ─────────────────────────────────────────────────────────────
+    function openRegisterAvailabilityModal(brandId = null) {
+        const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
+        if (notebooks.length === 0) {
+            ERS.showToast('Nenhum equipamento cadastrado.', 'warning');
+            return;
+        }
+
+        const form = document.getElementById('register-availability-form');
+        if (form) form.reset();
+
+        const errEl = document.getElementById('register-availability-error');
+        if (errEl) {
+            errEl.textContent = '';
+            errEl.style.display = 'none';
+        }
+
+        const brandSelectGroup = document.getElementById('avail-brand-select-group');
+        const brandSelect = document.getElementById('avail-brand-select');
+        const brandBanner = document.getElementById('avail-brand-banner');
+        const brandDisplay = document.getElementById('avail-brand-display');
+        const defectCurrent = document.getElementById('avail-defect-current');
+        const idInput = document.getElementById('avail-brand-id');
+
+        if (brandId) {
+            const nb = notebooks.find(n => n.id === brandId);
+            if (!nb) return;
+
+            selectedBrandId = nb.id;
+            if (idInput) idInput.value = nb.id;
+            if (brandSelectGroup) brandSelectGroup.classList.add('hidden');
+            if (brandBanner) brandBanner.style.display = 'flex';
+            if (brandDisplay) brandDisplay.textContent = nb.marca;
+            if (defectCurrent) defectCurrent.textContent = nb.defeito || 0;
+
+            const qtyInput = document.getElementById('avail-qty');
+            if (qtyInput) {
+                qtyInput.max = nb.defeito || 0;
+            }
+        } else {
+            if (brandSelectGroup) brandSelectGroup.classList.remove('hidden');
+            if (brandSelect) {
+                brandSelect.innerHTML = '<option value="">Selecione uma marca...</option>' +
+                    notebooks.map(n => {
+                        const def = n.defeito || 0;
+                        const label = def > 0 ? `${n.marca} (${def} com defeito)` : `${n.marca} (nenhum defeito)`;
+                        return `<option value="${n.id}">${label}</option>`;
+                    }).join('');
+
+                const firstWithDefect = notebooks.find(n => (n.defeito || 0) > 0);
+                if (firstWithDefect) {
+                    brandSelect.value = firstWithDefect.id;
+                    selectedBrandId = firstWithDefect.id;
+                    if (idInput) idInput.value = firstWithDefect.id;
+                    if (brandBanner) brandBanner.style.display = 'flex';
+                    if (brandDisplay) brandDisplay.textContent = firstWithDefect.marca;
+                    if (defectCurrent) defectCurrent.textContent = firstWithDefect.defeito || 0;
+                } else {
+                    selectedBrandId = null;
+                    if (idInput) idInput.value = '';
+                    if (brandBanner) brandBanner.style.display = 'none';
+                }
+            }
+        }
+
+        updateAvailabilityPreview();
+        openModal('register-availability-modal');
+
+        const qtyInput = document.getElementById('avail-qty');
+        if (qtyInput) qtyInput.focus();
+    }
+
+    function handleAvailBrandSelectChange() {
+        const sel = document.getElementById('avail-brand-select');
+        const idInput = document.getElementById('avail-brand-id');
+        const brandBanner = document.getElementById('avail-brand-banner');
+        const brandDisplay = document.getElementById('avail-brand-display');
+        const defectCurrent = document.getElementById('avail-defect-current');
+        const qtyInput = document.getElementById('avail-qty');
+        const errEl = document.getElementById('register-availability-error');
+
+        if (errEl) errEl.style.display = 'none';
+
+        const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
+        const nb = notebooks.find(n => n.id === sel?.value);
+
+        if (nb) {
+            selectedBrandId = nb.id;
+            if (idInput) idInput.value = nb.id;
+            if (brandBanner) brandBanner.style.display = 'flex';
+            if (brandDisplay) brandDisplay.textContent = nb.marca;
+            if (defectCurrent) defectCurrent.textContent = nb.defeito || 0;
+            if (qtyInput) qtyInput.max = nb.defeito || 0;
+        } else {
+            selectedBrandId = null;
+            if (idInput) idInput.value = '';
+            if (brandBanner) brandBanner.style.display = 'none';
+        }
+
+        updateAvailabilityPreview();
+    }
+
+    function updateAvailabilityPreview() {
+        const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
+        const idInput = document.getElementById('avail-brand-id');
+        const brandId = idInput?.value || selectedBrandId;
+        const nb = notebooks.find(n => n.id === brandId);
+
+        const previewDisp = document.getElementById('preview-avail-disponiveis');
+        const previewDef = document.getElementById('preview-avail-defeito');
+        const errEl = document.getElementById('register-availability-error');
+        const qtyVal = document.getElementById('avail-qty')?.value.trim();
+
+        if (!nb) {
+            if (previewDisp) previewDisp.textContent = '—';
+            if (previewDef) previewDef.textContent = '—';
+            return;
+        }
+
+        const defeitoAtual = nb.defeito || 0;
+
+        if (!qtyVal) {
+            if (previewDisp) previewDisp.textContent = '—';
+            if (previewDef) previewDef.textContent = '—';
+            if (errEl) errEl.style.display = 'none';
+            return;
+        }
+
+        const qtd = parseInt(qtyVal, 10);
+
+        if (isNaN(qtd) || qtd <= 0) {
+            if (previewDisp) previewDisp.textContent = '—';
+            if (previewDef) previewDef.textContent = '—';
+            showFormError(errEl, 'A quantidade arrumada deve ser maior que zero.');
+            return;
+        }
+
+        if (defeitoAtual === 0) {
+            if (previewDisp) previewDisp.textContent = '—';
+            if (previewDef) previewDef.textContent = '—';
+            showFormError(errEl, `A marca ${nb.marca} não possui computadores com defeito.`);
+            return;
+        }
+
+        if (qtd > defeitoAtual) {
+            const newDisp = nb.funcionando + defeitoAtual;
+            const newDef = 0;
+            if (previewDisp) previewDisp.textContent = newDisp;
+            if (previewDef) previewDef.textContent = newDef;
+            showFormError(errEl, `A quantidade informada (${qtd}) excede os computadores com defeito (${defeitoAtual}).`);
+            return;
+        }
+
+        if (errEl) errEl.style.display = 'none';
+        const newDisp = nb.funcionando + qtd;
+        const newDef = defeitoAtual - qtd;
+        if (previewDisp) previewDisp.textContent = newDisp;
+        if (previewDef) previewDef.textContent = newDef;
+    }
+
+    function handleRegisterAvailabilitySubmit(e) {
+        e.preventDefault();
+
+        const errEl = document.getElementById('register-availability-error');
+        if (errEl) errEl.style.display = 'none';
+
+        const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
+        const idInput = document.getElementById('avail-brand-id');
+        const brandId = idInput?.value || selectedBrandId;
+        const nb = notebooks.find(n => n.id === brandId);
+
+        if (!nb) {
+            showFormError(errEl, 'Selecione a marca do equipamento.');
+            return;
+        }
+
+        const defeitoAtual = nb.defeito || 0;
+        if (defeitoAtual <= 0) {
+            showFormError(errEl, `Não há computadores com defeito registrados para a marca ${nb.marca}.`);
+            return;
+        }
+
+        const qtyInput = document.getElementById('avail-qty');
+        const qtd = parseInt(qtyInput?.value, 10);
+
+        if (isNaN(qtd) || qtd <= 0) {
+            showFormError(errEl, 'A quantidade deve ser um número inteiro maior que zero.');
+            qtyInput?.focus();
+            return;
+        }
+
+        if (qtd > defeitoAtual) {
+            showFormError(errEl, `A quantidade informada (${qtd}) excede os computadores com defeito (${defeitoAtual}).`);
+            qtyInput?.focus();
+            return;
+        }
+
+        const btnConfirm = document.getElementById('btnConfirmAvailability');
+        if (btnConfirm) btnConfirm.disabled = true;
+
+        try {
+            const result = ERS.registerNotebookAvailability(nb.id, qtd);
+            if (!result.ok) {
+                showFormError(errEl, result.message || 'Erro ao registrar disponibilidade.');
+                return;
+            }
+
+            closeModal('register-availability-modal');
+            document.getElementById('register-availability-form')?.reset();
+            renderEquipmentView();
+
+            ERS.showToast(`${qtd} notebook(s) ${nb.marca} retornaram à disponibilidade com sucesso!`, 'success');
+            if (window.ProatecModule?.renderBrandGrid) window.ProatecModule.renderBrandGrid();
+        } finally {
+            if (btnConfirm) btnConfirm.disabled = false;
+        }
+    }
+
     function showFormError(element, message) {
         if (!element) return;
         element.textContent = message;
@@ -497,6 +766,7 @@ window.EquipamentosModule = (function () {
         render: renderEquipmentView,
         openBrandDetailModal,
         openAddEquipmentModal,
-        openRegisterDefectModal
+        openRegisterDefectModal,
+        openRegisterAvailabilityModal
     };
 })();
