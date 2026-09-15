@@ -123,89 +123,40 @@
     // ─────────────────────────────────────────────────────────────
     //  SEED INICIAL
     // ─────────────────────────────────────────────────────────────
-    async function seed() {
+    async function seed(force = false) {
         const h = await hashPassword('123456');
 
-        const SEED_VERSION_KEY = 'ers_seeded_v4';
-        if (load(SEED_VERSION_KEY)) {
-            // Se já semeado, garante que a lista de usuários existe e tem as contas demo
-            const currentUsers = load(KEYS.USERS);
-            if (!currentUsers || !currentUsers.length) {
-                save(KEYS.USERS, [
-                    { id: 'u1', email: 'professor@demo.com',   password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
-                    { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'proatec',     nome: 'João Almeida',     avatarLetter: 'J' },
-                    { id: 'u3', email: 'coordenacao@demo.com', password: '123456', passwordHash: h, role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
-                ]);
-            }
-
-            // Normaliza seed de notebooks caso possua a estrutura anterior com campo 'quebrado'
-            const currentNotebooks = load(KEYS.NOTEBOOKS);
-            if (currentNotebooks && currentNotebooks.some(n => n.quebrado !== undefined || n.marca === 'Positivo')) {
-                save(KEYS.NOTEBOOKS, [
-                    { id: 'nb1', marca: 'Dell',   total: 8,  funcionando: 7,  defeito: 1 },
-                    { id: 'nb2', marca: 'Lenovo', total: 12, funcionando: 10, defeito: 2 },
-                    { id: 'nb3', marca: 'Acer',   total: 10, funcionando: 7,  defeito: 3 },
-                ]);
-            }
-
-            // Garante que reservas mock tenham registros de demonstração de notebooks/alunos
-            const currentRes = load(KEYS.RESERVATIONS);
-            if (currentRes && currentRes.length) {
-                let resUpdated = false;
-                const r1 = currentRes.find(r => r.id === 'mock-res-1');
-                if (r1 && (!r1.alunosNotebooks || r1.alunosNotebooks.length === 0)) {
-                    r1.retiradaConfirmada = true;
-                    r1.alunosRegistrados = true;
-                    r1.alunosNotebooks = [
-                        { etiqueta: 'NT-01', aluno: 'Lucas Silva' },
-                        { etiqueta: 'NT-02', aluno: 'Beatriz Santos' },
-                        { etiqueta: 'NT-03', aluno: 'Carlos Eduardo' },
-                        { etiqueta: 'NT-04', aluno: 'Mariana Oliveira' },
-                        { etiqueta: 'NT-05', aluno: 'Gabriel Ferreira' },
-                        { etiqueta: 'NT-06', aluno: 'Julia Costa' },
-                        { etiqueta: 'NT-07', aluno: 'Rafael Souza' },
-                        { etiqueta: 'NT-08', aluno: 'Fernanda Lima' }
-                    ];
-                    resUpdated = true;
-                }
-                const r2 = currentRes.find(r => r.id === 'mock-res-2');
-                if (r2 && (!r2.alunosNotebooks || r2.alunosNotebooks.length === 0)) {
-                    r2.retiradaConfirmada = true;
-                    r2.alunosRegistrados = true;
-                    r2.alunosNotebooks = [
-                        { etiqueta: 'NT-09', aluno: 'Pedro Henrique' },
-                        { etiqueta: 'NT-10', aluno: 'Larissa Manoela' },
-                        { etiqueta: 'NT-11', aluno: 'Gustavo Martins' },
-                        { etiqueta: 'NT-12', aluno: 'Camila Rodrigues' }
-                    ];
-                    resUpdated = true;
-                }
-                if (resUpdated) {
-                    save(KEYS.RESERVATIONS, currentRes);
-                }
-            }
+        const SEED_VERSION_KEY = 'ers_seeded_v6';
+        if (!force && load(SEED_VERSION_KEY)) {
             return;
         }
 
-        // Usuários
+        // Usuários do sistema
         save(KEYS.USERS, [
             { id: 'u1', email: 'professor@demo.com',   password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
             { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'proatec',     nome: 'João Almeida',     avatarLetter: 'J' },
             { id: 'u3', email: 'coordenacao@demo.com', password: '123456', passwordHash: h, role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
+            { id: 'u4', email: 'ana.souza@demo.com',    password: '123456', passwordHash: h, role: 'professor',   nome: 'Profª. Ana Souza', avatarLetter: 'A' },
+            { id: 'u5', email: 'carlos.lima@demo.com',  password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Carlos Lima',avatarLetter: 'C' },
+            { id: 'u6', email: 'maria.santos@demo.com', password: '123456', passwordHash: h, role: 'professor',   nome: 'Profª. Maria Santos', avatarLetter: 'M' },
+            { id: 'u7', email: 'ricardo.neves@demo.com',password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Ricardo Neves', avatarLetter: 'R' },
+            { id: 'u8', email: 'camila.rodrigues@demo.com', password: '123456', passwordHash: h, role: 'professor', nome: 'Profª. Camila Rodrigues', avatarLetter: 'C' },
         ]);
 
-        // Salas
+        // Salas ativas
         save(KEYS.ROOMS, [
             { id: 'r1', nome: 'Aquário',         ativa: true },
             { id: 'r2', nome: 'Sala de Leitura', ativa: true },
             { id: 'r3', nome: 'Sala de Vídeo',   ativa: true },
+            { id: 'r4', nome: 'Espaço Maker',    ativa: true },
         ]);
 
-        // Notebooks (por marca)
+        // Notebooks (por marca com unidades disponíveis e defeitos para demonstração)
         save(KEYS.NOTEBOOKS, [
-            { id: 'nb1', marca: 'Dell',   total: 8,  funcionando: 7,  defeito: 1 },
-            { id: 'nb2', marca: 'Lenovo', total: 12, funcionando: 10, defeito: 2 },
-            { id: 'nb3', marca: 'Acer',   total: 10, funcionando: 7,  defeito: 3 },
+            { id: 'nb1', marca: 'Dell',    total: 18, funcionando: 16, defeito: 2 },
+            { id: 'nb2', marca: 'Lenovo',  total: 20, funcionando: 17, defeito: 3 },
+            { id: 'nb3', marca: 'Acer',    total: 14, funcionando: 12, defeito: 2 },
+            { id: 'nb4', marca: 'Samsung', total: 10, funcionando: 9,  defeito: 1 },
         ]);
 
         // Reservas mock ancoradas na semana ativa (Segunda a Sábado)
@@ -217,13 +168,13 @@
         const dSex = dayOffset(4, mon);
         const dSab = dayOffset(5, mon);
 
-        // Preserva reservas criadas manualmente pelo usuário
+        // Preserva reservas manuais criadas pelo usuário
         const existingRes = (load(KEYS.RESERVATIONS) || []).filter(r =>
             r.id && !r.id.startsWith('mock-res-')
         );
 
         const mockReservations = [
-            // Segunda
+            // Segunda-feira
             {
                 id: 'mock-res-1',
                 professorId: 'u1',
@@ -232,10 +183,12 @@
                 inicio: '07:00',
                 fim: '07:50',
                 sala: 'Aquário',
+                marca: 'Dell',
                 notebooks: 20,
                 turma: '3A Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
+                retiradaConfirmadaPor: 'João Almeida (PROATEC)',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-01', aluno: 'Lucas Silva' },
@@ -250,16 +203,18 @@
             },
             {
                 id: 'mock-res-2',
-                professorId: 'u3',
+                professorId: 'u5',
                 professorNome: 'Prof. Carlos Lima',
                 data: dSeg,
                 inicio: '07:50',
                 fim: '08:40',
                 sala: 'Aquário',
-                notebooks: 25,
+                marca: 'Lenovo',
+                notebooks: 20,
                 turma: '3B Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
+                retiradaConfirmadaPor: 'João Almeida (PROATEC)',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-09', aluno: 'Pedro Henrique' },
@@ -268,31 +223,371 @@
                     { etiqueta: 'NT-12', aluno: 'Camila Rodrigues' }
                 ]
             },
-            // Terça
-            { id: 'mock-res-3', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dTer, inicio: '08:40', fim: '09:30', sala: 'Sala de Leitura', notebooks: 15, turma: '2B Admin', situacao: 'confirmada' },
-            { id: 'mock-res-4', professorId: 'u3', professorNome: 'Prof. Ricardo Neves',data: dTer, inicio: '09:30', fim: '10:20', sala: 'Aquário',         notebooks: 30, turma: '3C Info',  situacao: 'confirmada' },
-            // Quarta
-            { id: 'mock-res-5', professorId: 'u3', professorNome: 'Prof. Ana Souza',    data: dQua, inicio: '07:50', fim: '08:40', sala: 'Sala de Vídeo',   notebooks: 10, turma: '1C Log',   situacao: 'confirmada' },
-            { id: 'mock-res-6', professorId: 'u3', professorNome: 'Prof. Maria Santos', data: dQua, inicio: '13:00', fim: '13:50', sala: 'Sala de Leitura', notebooks: 15, turma: '2A Admin', situacao: 'confirmada' },
-            // Quinta
-            { id: 'mock-res-7', professorId: 'u1', professorNome: 'Prof. Marcelo',      data: dQui, inicio: '13:50', fim: '14:40', sala: 'Aquário',         notebooks: 20, turma: '1A Admin', situacao: 'confirmada' },
-            { id: 'mock-res-8', professorId: 'u3', professorNome: 'Prof. Carlos Lima',  data: dQui, inicio: '14:40', fim: '15:30', sala: 'Sala de Vídeo',   notebooks: 15, turma: '2C Log',   situacao: 'confirmada' },
-            // Sexta
-            { id: 'mock-res-9', professorId: 'u3', professorNome: 'Prof. Ana Souza',    data: dSex, inicio: '10:35', fim: '11:25', sala: 'Sala de Leitura', notebooks: 12, turma: '1B Info',  situacao: 'confirmada' },
+            {
+                id: 'mock-res-3',
+                professorId: 'u4',
+                professorNome: 'Profª. Ana Souza',
+                data: dSeg,
+                inicio: '09:30',
+                fim: '10:20',
+                sala: 'Sala de Leitura',
+                marca: 'Acer',
+                notebooks: 15,
+                turma: '1C Log',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-4',
+                professorId: 'u6',
+                professorNome: 'Profª. Maria Santos',
+                data: dSeg,
+                inicio: '13:00',
+                fim: '13:50',
+                sala: 'Sala de Leitura',
+                marca: 'Lenovo',
+                notebooks: 15,
+                turma: '2A Admin',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-5',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dSeg,
+                inicio: '13:50',
+                fim: '14:40',
+                sala: 'Sala de Vídeo',
+                marca: 'Dell',
+                notebooks: 18,
+                turma: '2B Admin',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+
+            // Terça-feira (Dia da apresentação)
+            {
+                id: 'mock-res-6',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dTer,
+                inicio: '07:50',
+                fim: '08:40',
+                sala: 'Aquário',
+                marca: 'Dell',
+                notebooks: 20,
+                turma: '2B Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-7',
+                professorId: 'u7',
+                professorNome: 'Prof. Ricardo Neves',
+                data: dTer,
+                inicio: '08:40',
+                fim: '09:30',
+                sala: 'Sala de Leitura',
+                marca: 'Lenovo',
+                notebooks: 15,
+                turma: '1B Admin',
+                situacao: 'confirmada',
+                retiradaConfirmada: true,
+                retiradaConfirmadaPor: 'João Almeida (PROATEC)',
+                alunosRegistrados: true,
+                alunosNotebooks: [
+                    { etiqueta: 'NT-13', aluno: 'Bruno Henrique' },
+                    { etiqueta: 'NT-14', aluno: 'Carla Dias' },
+                    { etiqueta: 'NT-15', aluno: 'Daniel Alves' },
+                    { etiqueta: 'NT-16', aluno: 'Evelyn Castro' }
+                ]
+            },
+            {
+                id: 'mock-res-8',
+                professorId: 'u8',
+                professorNome: 'Profª. Camila Rodrigues',
+                data: dTer,
+                inicio: '10:35',
+                fim: '11:25',
+                sala: 'Espaço Maker',
+                marca: 'Acer',
+                notebooks: 14,
+                turma: '3C Eletro',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-9',
+                professorId: 'u6',
+                professorNome: 'Profª. Maria Santos',
+                data: dTer,
+                inicio: '13:00',
+                fim: '13:50',
+                sala: 'Sala de Vídeo',
+                marca: 'Samsung',
+                notebooks: 10,
+                turma: '1A Log',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-10',
+                professorId: 'u5',
+                professorNome: 'Prof. Carlos Lima',
+                data: dTer,
+                inicio: '14:40',
+                fim: '15:30',
+                sala: 'Aquário',
+                marca: 'Lenovo',
+                notebooks: 20,
+                turma: '2C Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-11',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dTer,
+                inicio: '19:00',
+                fim: '19:50',
+                sala: 'Aquário',
+                marca: 'Dell',
+                notebooks: 16,
+                turma: '3º Noturno Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+
+            // Quarta-feira
+            {
+                id: 'mock-res-12',
+                professorId: 'u4',
+                professorNome: 'Profª. Ana Souza',
+                data: dQua,
+                inicio: '07:50',
+                fim: '08:40',
+                sala: 'Sala de Vídeo',
+                marca: 'Acer',
+                notebooks: 10,
+                turma: '1C Log',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-13',
+                professorId: 'u7',
+                professorNome: 'Prof. Ricardo Neves',
+                data: dQua,
+                inicio: '09:30',
+                fim: '10:20',
+                sala: 'Espaço Maker',
+                marca: 'Lenovo',
+                notebooks: 18,
+                turma: '2A Robótica',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-14',
+                professorId: 'u6',
+                professorNome: 'Profª. Maria Santos',
+                data: dQua,
+                inicio: '13:00',
+                fim: '13:50',
+                sala: 'Sala de Leitura',
+                marca: 'Dell',
+                notebooks: 15,
+                turma: '2A Admin',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-15',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dQua,
+                inicio: '15:30',
+                fim: '16:20',
+                sala: 'Aquário',
+                marca: 'Dell',
+                notebooks: 18,
+                turma: '1B Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+
+            // Quinta-feira
+            {
+                id: 'mock-res-16',
+                professorId: 'u8',
+                professorNome: 'Profª. Camila Rodrigues',
+                data: dQui,
+                inicio: '08:40',
+                fim: '09:30',
+                sala: 'Sala de Leitura',
+                marca: 'Acer',
+                notebooks: 14,
+                turma: '2B Log',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-17',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dQui,
+                inicio: '13:50',
+                fim: '14:40',
+                sala: 'Aquário',
+                marca: 'Dell',
+                notebooks: 20,
+                turma: '1A Admin',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-18',
+                professorId: 'u5',
+                professorNome: 'Prof. Carlos Lima',
+                data: dQui,
+                inicio: '14:40',
+                fim: '15:30',
+                sala: 'Sala de Vídeo',
+                marca: 'Lenovo',
+                notebooks: 15,
+                turma: '2C Log',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-19',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dQui,
+                inicio: '19:50',
+                fim: '20:40',
+                sala: 'Aquário',
+                marca: 'Samsung',
+                notebooks: 10,
+                turma: '2º Noturno Admin',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+
+            // Sexta-feira
+            {
+                id: 'mock-res-20',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dSex,
+                inicio: '07:00',
+                fim: '07:50',
+                sala: 'Aquário',
+                marca: 'Dell',
+                notebooks: 18,
+                turma: '3A Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-21',
+                professorId: 'u4',
+                professorNome: 'Profª. Ana Souza',
+                data: dSex,
+                inicio: '10:35',
+                fim: '11:25',
+                sala: 'Sala de Leitura',
+                marca: 'Acer',
+                notebooks: 12,
+                turma: '1B Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+            {
+                id: 'mock-res-22',
+                professorId: 'u6',
+                professorNome: 'Profª. Maria Santos',
+                data: dSex,
+                inicio: '15:30',
+                fim: '16:20',
+                sala: 'Espaço Maker',
+                marca: 'Lenovo',
+                notebooks: 18,
+                turma: '1A Info',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            },
+
             // Sábado
-            { id: 'mock-res-10', professorId: 'u1', professorNome: 'Prof. Marcelo',     data: dSab, inicio: '08:40', fim: '09:30', sala: 'Aquário',         notebooks: 15, turma: 'Plantão',  situacao: 'confirmada' },
+            {
+                id: 'mock-res-23',
+                professorId: 'u1',
+                professorNome: 'Prof. Marcelo',
+                data: dSab,
+                inicio: '08:40',
+                fim: '09:30',
+                sala: 'Aquário',
+                marca: 'Dell',
+                notebooks: 15,
+                turma: 'Plantão Pré-Vestibular',
+                situacao: 'confirmada',
+                retiradaConfirmada: false
+            }
         ];
 
         save(KEYS.RESERVATIONS, [...existingRes, ...mockReservations]);
 
-        // Bloqueios mock na semana ativa
+        // Bloqueios mock na semana ativa (PROATEC e Coordenação)
         save(KEYS.BLOCKS, [
-            { id: 'mock-blk-1', data: dSeg, inicio: '10:35', fim: '12:15', motivo: 'Manutenção preventiva nos equipamentos', criadoPor: 'Dra. Sandra Lima', criadoEm: new Date().toISOString() },
-            { id: 'mock-blk-2', data: dSex, inicio: '13:00', fim: '14:40', motivo: 'Conselho de Classe e Avaliação Pedagógica', criadoPor: 'Dra. Sandra Lima', criadoEm: new Date().toISOString() },
+            {
+                id: 'mock-blk-1',
+                data: dSeg,
+                inicio: '10:35',
+                fim: '12:15',
+                motivo: 'Manutenção preventiva de rede e cabeamento',
+                criadoPor: 'João Almeida (PROATEC)',
+                criadoEm: new Date().toISOString()
+            },
+            {
+                id: 'mock-blk-2',
+                data: dQua,
+                inicio: '11:25',
+                fim: '12:15',
+                motivo: 'Higienização e conferência técnica dos notebooks',
+                criadoPor: 'João Almeida (PROATEC)',
+                criadoEm: new Date().toISOString()
+            },
+            {
+                id: 'mock-blk-3',
+                data: dSex,
+                inicio: '13:00',
+                fim: '14:40',
+                motivo: 'Conselho de Classe Bimestral e Planejamento',
+                criadoPor: 'Dra. Sandra Lima (Coordenação)',
+                criadoEm: new Date().toISOString()
+            }
         ]);
 
         save(KEYS.SEEDED, true);
         save(SEED_VERSION_KEY, true);
+    }
+
+    async function resetDemoData() {
+        localStorage.removeItem(KEYS.SEEDED);
+        localStorage.removeItem('ers_seeded_v4');
+        localStorage.removeItem('ers_seeded_v5');
+        localStorage.removeItem('ers_seeded_v6');
+        localStorage.removeItem(KEYS.NOTEBOOKS);
+        localStorage.removeItem(KEYS.RESERVATIONS);
+        localStorage.removeItem(KEYS.BLOCKS);
+        localStorage.removeItem(KEYS.ROOMS);
+        localStorage.removeItem(KEYS.USERS);
+        await seed(true);
+        if (typeof window !== 'undefined' && window.location) {
+            window.location.reload();
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -835,6 +1130,7 @@
         // Utils
         showToast, formatDate, dateKey, today, dayOffset, escapeHtml,
         getMonday, getWeekDays, timesOverlap, getCurrentTime, isPickupTimeReady,
+        resetDemoData,
         DIAS_SEMANA, DIAS_SEMANA_FULL, MESES, MESES_FULL,
         TIME_SLOTS, SHIFT_SLOTS,
     };
