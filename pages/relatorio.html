@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios - PROATEC</title>
+    <title>Relatórios - Coordenação</title>
     <meta name="description" content="Relatório e registro de uso de equipamentos e salas por professor e turma.">
 
     <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
@@ -22,7 +18,7 @@
         (function() {
             try {
                 var saved = localStorage.getItem('escola_sidebar_collapsed');
-                var isCollapsed = saved !== null ? saved === 'true' : true;
+                var isCollapsed = saved !== null ? saved === 'true' : false;
                 if (!isCollapsed && window.innerWidth > 768) {
                     document.documentElement.classList.add('sidebar-expanded');
                 } else {
@@ -32,6 +28,8 @@
         })();
     </script>
     <script src="../js/sidebar.js"></script>
+<link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body data-page="relatorio">
     <div class="app-container">
@@ -45,9 +43,9 @@
                 <header class="reports-page-header">
                     <div class="reports-title-group">
                         <div class="header-top-row">
-                            <h2>Relatórios de Reservas</h2>
+                            <h2>Reservas e registros de uso</h2>
                         </div>
-                        <p>Registro de uso de equipamentos por professor e turma.</p>
+                        <p>Acompanhe as reservas ativas. Reservas e registros são excluídos ao término.</p>
                     </div>
 
                     <!-- Filtros de exibição -->
@@ -55,7 +53,7 @@
                         <div class="filter-pills" role="group" aria-label="Filtro de período">
                             <button type="button" class="btn-filter-pill active" id="btn-filter-all" onclick="RelatorioModule.setFilterMode('all')">
                                 <span class="material-symbols-outlined">list_alt</span>
-                                Todas as Reservas
+                                Reservas ativas
                             </button>
                             <button type="button" class="btn-filter-pill" id="btn-filter-today" onclick="RelatorioModule.setFilterMode('today')">
                                 <span class="material-symbols-outlined">today</span>
@@ -121,5 +119,6 @@
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/relatorio.js"></script>
+<script src="../js/refinamento.js"></script>
 </body>
 </html>

@@ -53,7 +53,7 @@
 
         const roleLabels = {
             professor:   'Docente',
-            proatec:     'Coordenador PROATEC',
+            proatec:     'Coordenação',
             coordenacao: 'Coordenação',
         };
 
@@ -70,7 +70,7 @@
         const teacherAvatar = document.querySelector('.teacher-avatar');
         if (teacherAvatar) teacherAvatar.textContent = session.avatarLetter;
 
-        // Sidebar PROATEC (user-*)
+        // Sidebar Coordenação (user-*)
         const userName = document.querySelector('.user-name');
         if (userName) userName.textContent = session.nome;
 
@@ -87,7 +87,8 @@
         // h2 de saudação em proatec.html
         const h2Ola = document.querySelector('.dashboard-content h2');
         if (h2Ola && h2Ola.textContent.startsWith('Olá')) {
-            h2Ola.textContent = `Olá, ${session.nome.split(' ')[0]}`;
+            const firstName = session.nome.replace(/^(Dra?\.|Prof[ªa]?\.?|Professor[a]?)\s*/i, '').split(' ')[0];
+            h2Ola.textContent = `Olá, ${firstName}.`;
         }
 
         // Data badge
@@ -115,9 +116,9 @@
     }
 
     /**
-     * Adapta a sidebar PROATEC de acordo com o role:
+     * Adapta a sidebar Coordenação de acordo com o role:
      * - Coordenação vê link "Bloqueios" extra
-     * - Professor não deveria ver a sidebar do PROATEC (não chega aqui normalmente)
+     * - Professor não deveria ver a sidebar da Coordenação (não chega aqui normalmente)
      */
     function adaptSidebarByRole(session) {
         if (!session) return;

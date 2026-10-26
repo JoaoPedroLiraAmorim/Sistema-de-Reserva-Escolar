@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROATEC - Gestão de Laboratório</title>
-    <meta name="description" content="Dashboard do PROATEC para gestão de reservas, equipamentos e salas.">
+    <title>Coordenação - Gestão de Laboratório</title>
+    <meta name="description" content="Dashboard da Coordenação para gestão de reservas, equipamentos e salas.">
 
     <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
@@ -22,7 +18,7 @@
         (function() {
             try {
                 var saved = localStorage.getItem('escola_sidebar_collapsed');
-                var isCollapsed = saved !== null ? saved === 'true' : true;
+                var isCollapsed = saved !== null ? saved === 'true' : false;
                 if (!isCollapsed && window.innerWidth > 768) {
                     document.documentElement.classList.add('sidebar-expanded');
                 } else {
@@ -32,6 +28,8 @@
         })();
     </script>
     <script src="../js/sidebar.js"></script>
+<link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body data-page="proatec">
     <div class="app-container">
@@ -48,7 +46,7 @@
                             <p class="date-badge">—</p>
                         </div>
                         <h2>Olá, <span class="user-first-name"></span></h2>
-                        <p>Aqui está o panorama do PROATEC para hoje.</p>
+                        <p>Acompanhe as reservas e prepare os recursos para hoje.</p>
                     </div>
                 </section>
 
@@ -145,7 +143,7 @@
             <div class="modal-header">
                 <div>
                     <h3>Cadastrar Equipamento</h3>
-                    <p>Adicione novos notebooks ao inventário do PROATEC</p>
+                    <p>Adicione novos notebooks ao inventário da Coordenação</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
@@ -196,7 +194,7 @@
                         <h3 style="margin: 0; font-size: 17px;">Confirmar Retirada de Notebooks</h3>
                     </div>
                     <p id="pickup-modal-subtitle" style="margin: 0; font-size: 13px; color: var(--color-text-secondary);">
-                        Selecione a turma correspondente conforme os alunos ou professor forem chegando ao PROATEC.
+                        Selecione a turma correspondente conforme os alunos ou professor forem chegando ao Coordenação.
                     </p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar">
@@ -224,5 +222,6 @@
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/proatec.js"></script>
+<script src="../js/refinamento.js"></script>
 </body>
 </html>

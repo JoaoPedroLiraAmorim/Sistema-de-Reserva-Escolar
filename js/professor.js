@@ -10,30 +10,7 @@ let currentWeekMonday = ERS.getMonday(new Date());
 let currentShift = 'manha';
 let selectedResId = null;
 
-const SHIFT_SLOTS = {
-    manha: [
-        { start: '07:00', end: '07:50' },
-        { start: '07:50', end: '08:40' },
-        { start: '08:40', end: '09:30' },
-        { start: '09:30', end: '10:20' },
-        { start: '10:35', end: '11:25' },
-        { start: '11:25', end: '12:15' },
-    ],
-    tarde: [
-        { start: '13:00', end: '13:50' },
-        { start: '13:50', end: '14:40' },
-        { start: '14:40', end: '15:30' },
-        { start: '15:30', end: '16:20' },
-        { start: '16:35', end: '17:25' },
-        { start: '17:25', end: '18:15' },
-    ],
-    noite: [
-        { start: '19:00', end: '19:50' },
-        { start: '19:50', end: '20:40' },
-        { start: '20:50', end: '21:40' },
-        { start: '21:40', end: '22:30' },
-    ],
-};
+const SHIFT_SLOTS = ERS.SHIFT_SLOTS;
 
 // ─────────────────────────────────────────────────────────────
 //  INICIALIZAÇÃO
@@ -78,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
         };
         dateInput.addEventListener('click', openCalendar);
-        dateInput.addEventListener('focus', openCalendar);
+        // Avoid reopening the native picker when restoring dialog focus.
     }
 
     // Nova reserva
@@ -104,11 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('btnOpenNewReservation').click();
     });
 
-    document.getElementById('mobileMyResBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('my-reservations-section')?.scrollIntoView({ behavior: 'smooth' });
-    });
-
     // Atualização de disponibilidade em tempo real
     document.getElementById('res-quantity')?.addEventListener('input', updateAvailInfo);
     document.getElementById('res-brand')?.addEventListener('change', updateAvailInfo);
@@ -123,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnAddStudentRow')?.addEventListener('click', () => addStudentRow());
     document.getElementById('register-students-form')?.addEventListener('submit', handleSaveStudentRegistration);
 
-    // Sincronização em tempo real quando o PROATEC confirmar em outra aba
+    // Sincronização em tempo real quando o Coordenação confirmar em outra aba
     window.addEventListener('storage', (e) => {
         if (e.key === 'ers_reservations') {
             renderActiveChip();
@@ -136,6 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
     renderMyReservations();
     renderActiveChip();
+    // Atualiza a tela aberta quando uma reserva chega ao término.
+    setInterval(() => {
+        if (!document.hidden) {
+            renderMyReservations();
+            renderActiveChip();
+            renderCalendar();
+        }
+    }, 60000);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) { renderMyReservations(); renderActiveChip(); renderCalendar(); }
+    });
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -201,7 +184,7 @@ function renderCalendar() {
         ${weekDays.map(d => {
             const dk = ERS.dateKey(d);
             const isToday = dk === todayStr;
-            return `<th${isToday ? ' class="today-col"' : ''}>
+            return `<th data-date="${dk}"${isToday ? ' class="today-col"' : ''}>
                 <div class="day-header-tag">${ERS.DIAS_SEMANA_FULL[d.getDay()]}</div>
                 <div class="day-header-number">${d.getDate()}</div>
             </th>`;
@@ -224,6 +207,7 @@ function renderCalendar() {
             const isToday = dk === todayStr;
             const td = document.createElement('td');
             if (isToday) td.className = 'today-cell';
+            td.dataset.date = dk; td.dataset.start = slot.start; td.dataset.end = slot.end;
 
             const dayReservations = ERS.getReservationsByDate(dk);
             const slotReservations = dayReservations.filter(r =>
@@ -245,7 +229,7 @@ function renderCalendar() {
                         <span class="event-room"><span class="material-symbols-outlined">block</span> ${b.inicio}–${b.fim}</span>
                     </div>`;
                 });
-                slotReservations.forEach(r => {
+                (blocks.length ? [] : slotReservations).forEach(r => {
                     const isMine = r.professorId === currentSession.userId;
                     const colorClass = isMine ? 'primary' : 'tertiary';
                     
@@ -289,25 +273,32 @@ function renderMyReservations() {
     if (!list || !currentSession) return;
 
     const myRes = ERS.getReservationsByUser(currentSession.userId)
-        .sort((a, b) => a.data.localeCompare(b.data));
+        .filter(r => r.situacao !== 'cancelada' &&
+            (r.data > ERS.today() || (r.data === ERS.today() && r.fim > ERS.getCurrentTime())))
+        .sort((a, b) => a.data.localeCompare(b.data) || a.inicio.localeCompare(b.inicio));
+
+    const count = document.getElementById('upcoming-count');
+    if (count) count.textContent = myRes.length;
 
     if (myRes.length === 0) {
-        list.innerHTML = `<p class="empty-msg">Você ainda não tem reservas.</p>`;
+        list.innerHTML = `<div class="reservation-empty"><span class="material-symbols-outlined">calendar_today</span><h4>Sua próxima aula começa aqui.</h4><p>Você ainda não tem próximas reservas.</p><button type="button" class="btn-primary" onclick="document.getElementById('btnOpenNewReservation').click()">Fazer uma reserva</button></div>`;
         return;
     }
 
     list.innerHTML = myRes.map(r => {
+        const blocked = ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim));
         const nbText = r.notebooks ? `${r.notebooks} notebooks${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}` : '';
         const infoDetail = [r.sala, nbText].filter(Boolean).join(' • ');
         return `
-        <div class="my-res-item">
+        <div class="my-res-item${blocked ? ' reservation-blocked' : ''}">
             <div class="res-date">${ERS.formatDate(r.data)}</div>
             <div class="res-info">
                 <strong>${r.inicio}–${r.fim}</strong>
                 <p>${infoDetail || 'Reserva de recursos'}</p>
             </div>
             <div class="res-actions">
-                <span class="badge-situacao badge-${r.situacao}">${r.situacao === 'confirmada' ? 'Confirmada' : 'Cancelada'}</span>
+                <span class="badge-situacao ${blocked ? 'badge-blocked' : 'badge-confirmada'}">${blocked ? 'Indisponível por bloqueio' : 'Confirmada'}</span>
+                ${!blocked && r.notebooks > 0 ? `<button type="button" class="btn-secondary" onclick="openReservationDetail('${r.id}')">Ver reserva</button>` : ''}
                 ${r.situacao === 'confirmada' ? `<button class="btn-res-cancel" onclick="cancelRes('${r.id}')">Cancelar</button>` : ''}
             </div>
         </div>
@@ -325,7 +316,9 @@ function renderActiveChip() {
 
     // Busca reserva ativa de hoje do professor que contenha notebooks
     const todayNotebookRes = ERS.getReservationsByDate(ERS.today())
-        .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && (r.notebooks > 0));
+        .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && r.fim > ERS.getCurrentTime() && (r.notebooks > 0) &&
+            !ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim)))
+        .sort((a, b) => a.inicio.localeCompare(b.inicio));
 
     const statusLabel = document.getElementById('active-chip-status');
     const textLabel = document.getElementById('active-chip-text');
@@ -340,11 +333,11 @@ function renderActiveChip() {
         }
 
         // REGRA DE NEGÓCIO CRÍTICA:
-        // O botão de registrar só aparece se o PROATEC tiver confirmado a retirada!
+        // O botão de registrar só aparece se o Coordenação tiver confirmado a retirada!
         if (r.retiradaConfirmada) {
             chip.classList.add('chip-ready');
             if (statusLabel) {
-                statusLabel.textContent = r.alunosRegistrados ? 'Notebooks entregues • Alunos registrados' : 'Notebooks entregues pelo PROATEC';
+                statusLabel.textContent = r.alunosRegistrados ? 'Notebooks entregues • Alunos registrados' : 'Notebooks entregues pela Coordenação';
             }
             if (btnRegister) {
                 btnRegister.style.display = 'inline-flex';
@@ -358,7 +351,7 @@ function renderActiveChip() {
         } else {
             chip.classList.remove('chip-ready');
             if (statusLabel) {
-                statusLabel.textContent = 'Aguardando liberação do PROATEC';
+                statusLabel.textContent = 'Aguardando liberação da Coordenação';
             }
             if (btnRegister) {
                 btnRegister.style.display = 'none';
@@ -367,7 +360,8 @@ function renderActiveChip() {
     } else {
         // Verifica se há reserva hoje apenas de sala (sem notebooks)
         const todayRoomOnly = ERS.getReservationsByDate(ERS.today())
-            .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada');
+            .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && r.fim > ERS.getCurrentTime() &&
+                !ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim)));
 
         if (todayRoomOnly.length > 0) {
             const r = todayRoomOnly[0];
@@ -676,7 +670,7 @@ function openReservationDetail(id) {
             ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}</div>` : ''}
             <div><strong>Professor:</strong> ${r.professorNome}</div>
             <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
-            ${r.retiradaConfirmada ? `<div><strong>Entrega:</strong> <span class="badge badge-success">Retirada confirmada pelo PROATEC</span></div>` : (r.notebooks ? `<div><strong>Entrega:</strong> <span class="badge badge-warning">Aguardando confirmação do PROATEC</span></div>` : '')}
+            ${r.retiradaConfirmada ? `<div><strong>Entrega:</strong> <span class="badge badge-success">Retirada confirmada pela Coordenação</span></div>` : (r.notebooks ? `<div><strong>Entrega:</strong> <span class="badge badge-warning">Aguardando confirmação da Coordenação</span></div>` : '')}
             ${studentsHtml}
         </div>
     `;

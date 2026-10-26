@@ -134,7 +134,7 @@
         // Usuários do sistema
         save(KEYS.USERS, [
             { id: 'u1', email: 'professor@demo.com',   password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
-            { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'proatec',     nome: 'João Almeida',     avatarLetter: 'J' },
+            { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'coordenacao',     nome: 'João Almeida',     avatarLetter: 'J' },
             { id: 'u3', email: 'coordenacao@demo.com', password: '123456', passwordHash: h, role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
             { id: 'u4', email: 'ana.souza@demo.com',    password: '123456', passwordHash: h, role: 'professor',   nome: 'Profª. Ana Souza', avatarLetter: 'A' },
             { id: 'u5', email: 'carlos.lima@demo.com',  password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Carlos Lima',avatarLetter: 'C' },
@@ -188,7 +188,7 @@
                 turma: '3A Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
-                retiradaConfirmadaPor: 'João Almeida (PROATEC)',
+                retiradaConfirmadaPor: 'João Almeida (Coordenação)',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-01', aluno: 'Lucas Silva' },
@@ -214,7 +214,7 @@
                 turma: '3B Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
-                retiradaConfirmadaPor: 'João Almeida (PROATEC)',
+                retiradaConfirmadaPor: 'João Almeida (Coordenação)',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-09', aluno: 'Pedro Henrique' },
@@ -294,7 +294,7 @@
                 turma: '1B Admin',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
-                retiradaConfirmadaPor: 'João Almeida (PROATEC)',
+                retiradaConfirmadaPor: 'João Almeida (Coordenação)',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-13', aluno: 'Bruno Henrique' },
@@ -539,7 +539,7 @@
 
         save(KEYS.RESERVATIONS, [...existingRes, ...mockReservations]);
 
-        // Bloqueios mock na semana ativa (PROATEC e Coordenação)
+        // Bloqueios mock na semana ativa (Coordenação)
         save(KEYS.BLOCKS, [
             {
                 id: 'mock-blk-1',
@@ -547,7 +547,7 @@
                 inicio: '10:35',
                 fim: '12:15',
                 motivo: 'Manutenção preventiva de rede e cabeamento',
-                criadoPor: 'João Almeida (PROATEC)',
+                criadoPor: 'João Almeida (Coordenação)',
                 criadoEm: new Date().toISOString()
             },
             {
@@ -556,7 +556,7 @@
                 inicio: '11:25',
                 fim: '12:15',
                 motivo: 'Higienização e conferência técnica dos notebooks',
-                criadoPor: 'João Almeida (PROATEC)',
+                criadoPor: 'João Almeida (Coordenação)',
                 criadoEm: new Date().toISOString()
             },
             {
@@ -623,7 +623,7 @@
         if (!user && cleanPassword === '123456') {
             const demoMap = {
                 'professor@demo.com':   { id: 'u1', role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
-                'proatec@demo.com':     { id: 'u2', role: 'proatec',     nome: 'João Almeida',     avatarLetter: 'J' },
+                'proatec@demo.com':     { id: 'u2', role: 'coordenacao',     nome: 'João Almeida',     avatarLetter: 'J' },
                 'coordenacao@demo.com': { id: 'u3', role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
             };
             if (demoMap[cleanEmail]) {
@@ -634,7 +634,7 @@
         }
 
         if (!user) return { ok: false, message: 'E-mail ou senha incorretos. Selecione um perfil acima.' };
-        const session = { userId: user.id, role: user.role, nome: user.nome, avatarLetter: user.avatarLetter, email: user.email };
+        const session = { userId: user.id, role: user.role === 'proatec' ? 'coordenacao' : user.role, nome: user.nome, avatarLetter: user.avatarLetter, email: user.email };
         save(KEYS.SESSION, session);
         return { ok: true, user: session };
     }
@@ -644,7 +644,18 @@
     }
 
     function getSession() {
-        return load(KEYS.SESSION);
+        const session = load(KEYS.SESSION);
+        // Migra sessões anteriores para o perfil único de gestão.
+        if (session?.role === 'proatec') {
+            session.role = 'coordenacao';
+            save(KEYS.SESSION, session);
+        }
+        return session;
+    }
+
+    function getProfessors() {
+        return (load(KEYS.USERS) || []).filter(user => user.role === 'professor')
+            .map(({ id, nome }) => ({ id, nome }));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -834,7 +845,16 @@
     // ─────────────────────────────────────────────────────────────
     //  RESERVAS
     // ─────────────────────────────────────────────────────────────
-    function getReservations() { return load(KEYS.RESERVATIONS) || []; }
+    function getReservations() {
+        const reservations = load(KEYS.RESERVATIONS) || [];
+        const currentDate = today();
+        const currentTime = getCurrentTime();
+        const active = reservations.filter(r => r.data > currentDate ||
+            (r.data === currentDate && r.fim > currentTime));
+        // Exclusão ao término autorizada: os registros de uso pertencem à reserva.
+        if (active.length !== reservations.length) save(KEYS.RESERVATIONS, active);
+        return active;
+    }
 
     function getReservationsByDate(date) {
         const dk = dateKey(date);
@@ -845,14 +865,23 @@
         return getReservations().filter(r => r.professorId === userId);
     }
 
-    function notebooksReservadosNoPeriodo(data, inicio, fim, excludeId = null) {
-        const resDia = getReservationsByDate(data);
-        return resDia
-            .filter(r => r.id !== excludeId && timesOverlap(inicio, fim, r.inicio, r.fim))
-            .reduce((acc, r) => acc + (r.notebooks || 0), 0);
+    function getAvailability({ data, inicio, fim, marca = '', excludeId = null }) {
+        const reservations = getReservationsByDate(data).filter(r =>
+            r.id !== excludeId && timesOverlap(inicio, fim, r.inicio, r.fim));
+        const brand = marca && marca !== 'Qualquer marca' ? marca : '';
+        const checkpoints = [inicio, ...reservations.map(r => r.inicio).filter(t => t > inicio && t < fim)];
+        let available = getTotalDisponivel();
+        for (const time of checkpoints) {
+            const concurrent = reservations.filter(r => r.inicio <= time && r.fim > time);
+            const totalFree = getTotalDisponivel() - concurrent.reduce((n, r) => n + (r.notebooks || 0), 0);
+            const brandFree = brand ? getDisponivelByBrand(brand) - concurrent
+                .filter(r => r.marca === brand).reduce((n, r) => n + (r.notebooks || 0), 0) : totalFree;
+            available = Math.min(available, totalFree, brandFree);
+        }
+        return Math.max(0, available);
     }
 
-    function checkConflicts({ data, inicio, fim, sala, notebooks, excludeId = null }) {
+    function checkConflicts({ data, inicio, fim, sala, notebooks, marca = '', excludeId = null }) {
         const dk = dateKey(data);
 
         // 1. Verificar bloqueios
@@ -875,9 +904,7 @@
 
         // 3. Verificar disponibilidade de notebooks
         if (notebooks && notebooks > 0) {
-            const totalDisp = getTotalDisponivel();
-            const jaReservados = notebooksReservadosNoPeriodo(dk, inicio, fim, excludeId);
-            const disponivel = totalDisp - jaReservados;
+            const disponivel = getAvailability({ data: dk, inicio, fim, marca, excludeId });
             if (notebooks > disponivel) {
                 return { ok: false, message: `Notebooks insuficientes: ${disponivel} disponíveis para esse horário, mas você solicitou ${notebooks}.` };
             }
@@ -886,14 +913,20 @@
         return { ok: true };
     }
 
-    function createReservation({ professorId, professorNome, data, inicio, fim, sala, notebooks, turma }) {
+    function createReservation({ professorId, professorNome, data, inicio, fim, sala, notebooks, marca = '', turma }) {
+        if (!data || data < today() || (data === today() && inicio <= getCurrentTime())) {
+            return { ok: false, message: 'Escolha uma data e um horário futuros.' };
+        }
         if (!inicio || !fim) return { ok: false, message: 'Informe o horário de início e fim.' };
         if (inicio >= fim)   return { ok: false, message: 'O horário de início deve ser anterior ao fim.' };
+        if (!Number.isInteger(notebooks || 0) || notebooks < 0) {
+            return { ok: false, message: 'Informe uma quantidade inteira de notebooks.' };
+        }
         if (!sala && (!notebooks || notebooks <= 0)) {
             return { ok: false, message: 'Selecione ao menos uma sala ou uma quantidade de notebooks.' };
         }
 
-        const conflict = checkConflicts({ data, inicio, fim, sala: sala || null, notebooks: notebooks || 0 });
+        const conflict = checkConflicts({ data, inicio, fim, sala: sala || null, notebooks: notebooks || 0, marca });
         if (!conflict.ok) return conflict;
 
         const reservation = {
@@ -902,6 +935,7 @@
             data: dateKey(data),
             inicio, fim,
             sala: sala || null,
+            marca: marca || 'Qualquer marca',
             notebooks: notebooks || 0,
             turma: turma || '',
             situacao: 'confirmada',
@@ -931,7 +965,7 @@
         const dados = { ...r, ...updates };
         const conflict = checkConflicts({
             data: dados.data, inicio: dados.inicio, fim: dados.fim,
-            sala: dados.sala, notebooks: dados.notebooks, excludeId: id,
+            sala: dados.sala, notebooks: dados.notebooks, marca: dados.marca, excludeId: id,
         });
         if (!conflict.ok) return conflict;
 
@@ -955,17 +989,21 @@
     function isPickupTimeReady(res) {
         if (!res || !res.data || !res.inicio) return false;
         if (res.data !== today()) return false;
+        if (res.fim <= getCurrentTime() || getBlocks().some(b => b.data === res.data && timesOverlap(b.inicio, b.fim, res.inicio, res.fim))) return false;
         const curTime = getCurrentTime();
         return curTime >= res.inicio;
     }
 
-    function confirmPickup(id, proatecNome = 'PROATEC') {
+    function confirmPickup(id, proatecNome = 'Coordenação') {
         const list = getReservations();
         const r = list.find(r => r.id === id);
         if (!r) return { ok: false, message: 'Reserva não encontrada.' };
         if (r.situacao === 'cancelada') return { ok: false, message: 'Não é possível confirmar a retirada de uma reserva cancelada.' };
+        if (getBlocks().some(b => b.data === r.data && timesOverlap(b.inicio, b.fim, r.inicio, r.fim))) {
+            return { ok: false, message: 'Esta reserva está indisponível por bloqueio da coordenação.' };
+        }
 
-        // Regra de Negócio: O PROATEC só pode confirmar quando der o horário da reserva, nunca antes!
+        // Regra de Negócio: A Coordenação só pode confirmar quando der o horário da reserva, nunca antes!
         if (!isPickupTimeReady(r)) {
             const curTime = getCurrentTime();
             return {
@@ -985,6 +1023,9 @@
         const list = getReservations();
         const r = list.find(r => r.id === id);
         if (!r) return { ok: false, message: 'Reserva não encontrada.' };
+        if (getBlocks().some(b => b.data === r.data && timesOverlap(b.inicio, b.fim, r.inicio, r.fim))) {
+            return { ok: false, message: 'Esta reserva está indisponível por bloqueio da coordenação.' };
+        }
 
         r.alunosNotebooks = Array.isArray(assignments) ? assignments : [];
         r.alunosRegistrados = r.alunosNotebooks.length > 0;
@@ -1082,7 +1123,7 @@
 
     /** Retorna a segunda-feira da semana que contém a data dada */
     function getMonday(date) {
-        const d = new Date(date);
+        const d = new Date(typeof date === 'string' ? date + 'T12:00:00' : date);
         d.setHours(12, 0, 0, 0); // evita bug de timezone
         const day = d.getDay();
         const diff = day === 0 ? 1 : 1 - day;
@@ -1115,7 +1156,7 @@
     // ─────────────────────────────────────────────────────────────
     window.ERS = {
         // Auth (login agora é async)
-        login, logout, getSession,
+        login, logout, getSession, getProfessors,
         // Salas
         getRooms, getActiveRooms, toggleRoom, addRoom,
         // Notebooks
@@ -1123,7 +1164,7 @@
         addNotebooks, registerNotebookDefect, registerNotebookAvailability, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
-        createReservation, cancelReservation, updateReservation, checkConflicts,
+        createReservation, cancelReservation, updateReservation, checkConflicts, getAvailability,
         confirmPickup, saveStudentAssignments,
         // Bloqueios
         getBlocks, createBlock, deleteBlock,
@@ -1138,6 +1179,19 @@
     // ─────────────────────────────────────────────────────────────
     //  INICIALIZAÇÃO
     // ─────────────────────────────────────────────────────────────
-    seed();
+    seed().then(() => getReservations());
+    setInterval(() => {
+        const before = localStorage.getItem(KEYS.RESERVATIONS);
+        getReservations();
+        if (before !== localStorage.getItem(KEYS.RESERVATIONS)) {
+            window.dispatchEvent(new Event('ers:reservations-updated'));
+        }
+    }, 15000);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            getReservations();
+            window.dispatchEvent(new Event('ers:reservations-updated'));
+        }
+    });
 
 })();

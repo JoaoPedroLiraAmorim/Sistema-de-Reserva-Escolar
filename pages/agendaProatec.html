@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda de Reservas - PROATEC</title>
-    <meta name="description" content="Agenda semanal de reservas de notebooks e salas do PROATEC e Coordenação.">
+    <title>Agenda de Reservas - Coordenação</title>
+    <meta name="description" content="Agenda semanal de reservas de notebooks e salas da Coordenação.">
 
     <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
@@ -22,7 +18,7 @@
         (function() {
             try {
                 var saved = localStorage.getItem('escola_sidebar_collapsed');
-                var isCollapsed = saved !== null ? saved === 'true' : true;
+                var isCollapsed = saved !== null ? saved === 'true' : false;
                 if (!isCollapsed && window.innerWidth > 768) {
                     document.documentElement.classList.add('sidebar-expanded');
                 } else {
@@ -32,6 +28,8 @@
         })();
     </script>
     <script src="../js/sidebar.js"></script>
+<link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body data-page="agenda">
     <div class="app-container">
@@ -121,7 +119,7 @@
                     <!-- Professor -->
                     <div class="form-group">
                         <label for="res-professor">Professor / Solicitante</label>
-                        <input type="text" id="res-professor" class="form-control" placeholder="Nome do professor ou solicitante" required>
+                        <select id="res-professor" class="form-control" required><option value="">Selecione um professor</option></select>
                     </div>
 
                     <!-- Horários Dinâmicos por Turno -->
@@ -156,8 +154,7 @@
                             <span class="material-symbols-outlined select-icon">expand_more</span>
                         </div>
                     </div>
-
-                    <!-- Marca e Quantidade de Notebooks -->
+<!-- Marca e Quantidade de Notebooks -->
                     <div class="form-row">
                         <div class="form-col form-group">
                             <label for="res-brand">Marca do notebook</label>
@@ -326,5 +323,6 @@
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/agendaProatec.js"></script>
+<script src="../js/refinamento.js"></script>
 </body>
 </html>

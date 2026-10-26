@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salas - PROATEC</title>
+    <title>Salas - Coordenação</title>
     <meta name="description" content="Gestão e disponibilidade de salas reserváveis da escola.">
 
     <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
@@ -22,7 +18,7 @@
         (function() {
             try {
                 var saved = localStorage.getItem('escola_sidebar_collapsed');
-                var isCollapsed = saved !== null ? saved === 'true' : true;
+                var isCollapsed = saved !== null ? saved === 'true' : false;
                 if (!isCollapsed && window.innerWidth > 768) {
                     document.documentElement.classList.add('sidebar-expanded');
                 } else {
@@ -32,6 +28,8 @@
         })();
     </script>
     <script src="../js/sidebar.js"></script>
+<link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body data-page="salas">
     <div class="app-container">
@@ -97,5 +95,6 @@
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/salas.js"></script>
+<script src="../js/refinamento.js"></script>
 </body>
 </html>

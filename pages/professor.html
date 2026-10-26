@@ -7,18 +7,16 @@
     <meta name="description" content="Portal do professor para visualizar e gerenciar reservas de laboratório e notebooks.">
 
     <!-- Fontes do Google -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/professor.css">
     <link rel="stylesheet" href="../css/professor-extra.css">
+<link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/responsividade.css">
 </head>
-<body>
+<body class="teacher-page">
     <div class="teacher-app">
         <!-- Barra Superior -->
         <header class="teacher-header">
@@ -52,8 +50,9 @@
             <!-- Cabeçalho da Agenda -->
             <section class="agenda-action-header">
                 <div class="agenda-action-title">
-                    <h1>Agenda de Reservas</h1>
-                    <p>Visualize e gerencie os equipamentos disponíveis.</p>
+                    <span class="page-eyebrow">RECURSOS PARA A SUA AULA</span>
+                    <h1>Planeje sua próxima aula.</h1>
+                    <p>Encontre um horário e reserve notebooks ou uma sala.</p>
                 </div>
                 <div class="agenda-header-right">
                     <!-- Chip de reserva ativa -->
@@ -76,6 +75,11 @@
                 </div>
             </section>
 
+            <div class="teacher-view-tabs" role="tablist" aria-label="Reservas do professor">
+                <button type="button" id="tab-agenda" role="tab" aria-selected="true" aria-controls="teacher-agenda-panel" data-teacher-view="agenda">Agenda de recursos</button>
+                <button type="button" id="tab-reservas" role="tab" aria-selected="false" aria-controls="my-reservations-section" tabindex="-1" data-teacher-view="reservas">Próximas reservas <span id="upcoming-count">0</span></button>
+            </div>
+            <div id="teacher-agenda-panel" role="tabpanel" aria-labelledby="tab-agenda">
             <!-- Controles do Calendário -->
             <section class="calendar-controls-bar">
                 <div class="week-selector">
@@ -105,17 +109,18 @@
                 </div>
             </section>
 
-            <!-- Minhas Reservas -->
-            <section id="my-reservations-section">
-                <h3>Minhas Reservas</h3>
-                <p>Histórico e reservas futuras.</p>
+            </div>
+            <!-- Somente reservas futuras e em andamento. -->
+            <section id="my-reservations-section" role="tabpanel" aria-labelledby="tab-reservas" hidden>
+                <h3>Suas próximas reservas</h3>
+                <p>Confira o que está preparado para as próximas aulas.</p>
                 <div class="my-res-list" id="myResList"></div>
             </section>
         </main>
 
         <!-- Navegação Mobile -->
         <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
-            <a href="professor.html" class="mobile-bottom-item active">
+            <a href="#teacher-agenda-panel" class="mobile-bottom-item active" id="mobileAgendaBtn">
                 <span class="material-symbols-outlined">calendar_month</span>
                 <span>Agenda</span>
             </a>
@@ -125,7 +130,7 @@
             </a>
             <a href="#" class="mobile-bottom-item" id="mobileMyResBtn">
                 <span class="material-symbols-outlined">history_edu</span>
-                <span>Reservas</span>
+                <span>Próximas</span>
             </a>
         </nav>
     </div>
@@ -136,7 +141,7 @@
             <div class="modal-header">
                 <div>
                     <h3>Criar nova reserva</h3>
-                    <p>Selecione a data, equipamentos, marca e o horário desejado.</p>
+                    <p>Escolha quando e quais recursos você precisa.</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar modal">
                     <span class="material-symbols-outlined">close</span>
@@ -172,8 +177,7 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Sala -->
+<!-- Sala -->
                     <div class="form-group">
                         <label for="res-room">Reservar sala (opcional)</label>
                         <div class="select-wrapper">
@@ -328,5 +332,6 @@
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/professor.js"></script>
+<script src="../js/refinamento.js"></script>
 </body>
 </html>

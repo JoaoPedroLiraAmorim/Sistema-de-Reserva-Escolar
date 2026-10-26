@@ -1,5 +1,5 @@
 /**
- * proatec.js — Lógica do dashboard PROATEC
+ * proatec.js — Lógica do dashboard Coordenação
  * Depende de: store.js, auth.js, main.js
  */
 
@@ -69,7 +69,10 @@ window.ProatecModule = (function() {
         // 1. Lista cronológica (apenas indicativo de status — confirmação exclusiva no card)
         list.innerHTML = todayRes.map((r, i) => {
             let statusBadge = '';
-            if (r.notebooks > 0) {
+            const blocked = ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim));
+            if (blocked) {
+                statusBadge = '<span class="badge badge-blocked">Bloqueada</span>';
+            } else if (r.notebooks > 0) {
                 if (r.retiradaConfirmada) {
                     statusBadge = `<span class="badge badge-success" title="Retirada já confirmada"><span class="material-symbols-outlined" style="font-size:13px;vertical-align:-1px;">verified</span> Entregue</span>`;
                 } else if (ERS.isPickupTimeReady(r)) {
@@ -96,7 +99,8 @@ window.ProatecModule = (function() {
         }).join('');
 
         // 2. Card de Retirada (Regra de Negócio: só pode confirmar quando der o horário, nunca antes!)
-        const nbReservations = todayRes.filter(r => r.notebooks > 0 && r.situacao !== 'cancelada');
+        const nbReservations = todayRes.filter(r => r.notebooks > 0 && r.situacao !== 'cancelada' &&
+            !ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim)));
         const readyReservations = nbReservations.filter(r => !r.retiradaConfirmada && ERS.isPickupTimeReady(r));
 
         if (readyReservations.length > 1) {
@@ -251,7 +255,7 @@ window.ProatecModule = (function() {
                             ${isDone
                                 ? `<div class="turma-confirmed-badge">
                                        <span class="material-symbols-outlined" style="font-size:14px;">verified</span>
-                                       <span>Entregue ${timeStr ? 'às ' + timeStr : ''} por ${ERS.escapeHtml(r.retiradaConfirmadaPor || 'PROATEC')}</span>
+                                       <span>Entregue ${timeStr ? 'às ' + timeStr : ''} por ${ERS.escapeHtml(r.retiradaConfirmadaPor || 'Coordenação')}</span>
                                    </div>`
                                 : `<button type="button" class="btn-confirm-turma" onclick="ProatecModule.confirmPickupFromModal('${r.id}')">
                                        <span class="material-symbols-outlined">check_circle</span>
@@ -279,7 +283,7 @@ window.ProatecModule = (function() {
         });
         if (!ok) return;
 
-        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
+        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'Coordenação');
         if (result.ok) {
             ERS.showToast(`Retirada de notebooks confirmada para ${r.professorNome}!`, 'success');
             renderPickupCardsInModal();
@@ -308,7 +312,7 @@ window.ProatecModule = (function() {
         });
         if (!ok) return;
 
-        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'PROATEC');
+        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'Coordenação');
         if (result.ok) {
             ERS.showToast(`Retirada de notebooks confirmada para ${r.professorNome}! O professor já pode registrar os alunos.`, 'success');
             render();

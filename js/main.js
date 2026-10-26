@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.innerWidth > 768) {
                 const savedState = localStorage.getItem(SIDEBAR_STORAGE_KEY);
                 // Se não houver preferência salva, inicia recolhido (ícones visíveis)
-                const isCollapsed = savedState !== null ? savedState === 'true' : true;
+                const isCollapsed = savedState !== null ? savedState === 'true' : false;
                 setSidebarCollapsed(isCollapsed);
             } else {
                 sidebar.classList.remove('collapsed');
                 document.body.classList.remove('sidebar-collapsed');
+                document.documentElement.classList.remove('sidebar-collapsed', 'sidebar-expanded');
             }
         };
 
@@ -68,10 +69,37 @@ document.addEventListener('DOMContentLoaded', () => {
         initSidebarState();
         setupTooltips();
 
+        // Reaplica o modo da sidebar ao cruzar o breakpoint sem recarregar a página.
+        // O estado recolhido/expandido continua persistido apenas para desktop.
+        let wasMobile = window.innerWidth <= 768;
+        window.addEventListener('resize', () => {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile === wasMobile) return;
+            wasMobile = isMobile;
+
+            if (isMobile) {
+                sidebar.classList.remove('collapsed');
+                document.body.classList.remove('sidebar-collapsed');
+                document.documentElement.classList.remove('sidebar-collapsed', 'sidebar-expanded');
+                sidebar.classList.remove('open');
+                document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.classList.remove('active'));
+            } else {
+                sidebar.classList.remove('open');
+                document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.classList.remove('active'));
+                const savedState = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+                setSidebarCollapsed(savedState === 'true');
+            }
+        });
+
         // Botão de recolher/expandir na própria sidebar
         if (sidebarToggleBtn) {
             sidebarToggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.classList.remove('active'));
+                    return;
+                }
                 toggleSidebar();
             });
         }
@@ -88,10 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Fechamento no Mobile via Backdrop
         if (sidebarBackdrop) {
-            sidebarBackdrop.addEventListener('click', () => {
+            document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.addEventListener('click', () => {
                 sidebar.classList.remove('open');
-                sidebarBackdrop.classList.remove('active');
-            });
+                document.querySelectorAll('.sidebar-backdrop').forEach(item => item.classList.remove('active'));
+            }));
         }
 
         // Fecha a sidebar ao clicar fora dela na página (desktop e mobile)
@@ -100,14 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (window.innerWidth > 768) {
                 // No desktop: se estiver expandida (não-collapsed), recolhe/fecha
-                if (!sidebar.classList.contains('collapsed')) {
-                    setSidebarCollapsed(true);
-                }
+                // A preferência de menu permanece estável durante o uso.
             } else {
                 // No mobile: se estiver aberta, fecha
                 if (sidebar.classList.contains('open')) {
                     sidebar.classList.remove('open');
-                    if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+                    document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.classList.remove('active'));
                 }
             }
         });
@@ -151,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.classList.remove('open');
                 if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
                 const savedState = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-                const isCollapsed = savedState !== null ? savedState === 'true' : true;
+                const isCollapsed = savedState !== null ? savedState === 'true' : false;
                 setSidebarCollapsed(isCollapsed);
             }
         });
@@ -326,9 +352,6 @@ function showConfirmModal(options = {}) {
             if (e.key === 'Escape') {
                 e.preventDefault();
                 handleCancel();
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                handleConfirm();
             }
         };
 

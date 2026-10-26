@@ -1,6 +1,6 @@
 /**
  * Sistema de Reserva Escolar - agenda.js
- * Comportamentos específicos para a tela de Agenda de Reservas (PROATEC)
+ * Comportamentos específicos para a tela de Agenda de Reservas (Coordenação)
  */
 
 document.addEventListener('DOMContentLoaded', () => {

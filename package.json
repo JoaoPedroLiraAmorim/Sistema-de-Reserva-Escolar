@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "test": "node --test tests/store.test.cjs",
+    "test:ui": "node tests/ui.cjs"
+  },
   "devDependencies": {
     "playwright": "^1.63.0"
   }

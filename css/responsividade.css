@@ -1,0 +1,1381 @@
+/* Componentes e adaptações comuns do EduLab Reserve. Carregar por último. */
+:root {
+  --responsive-gutter: clamp(12px, 2.2vw, 32px);
+  --responsive-touch-size: 44px;
+}
+
+.v2-day-nav { display: none; }
+.teacher-main-content .active-res-chip.hidden { display: none !important; }
+
+/* Reservas são registros comparáveis: linhas compactas em vez de tiles esticados. */
+.calendar-events-container { height: auto !important; gap: 5px !important; }
+.calendar-events-container > .calendar-event-card {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  padding: 8px !important;
+  gap: 3px !important;
+  border-radius: 7px !important;
+  box-shadow: none !important;
+}
+.calendar-events-container > .calendar-event-card:not(.event-block) {
+  display: grid !important; grid-template-columns: minmax(0, 1fr) auto;
+}
+.calendar-events-container .v2-event-time { grid-column: 1; grid-row: 1; font-size: 10px; }
+.calendar-events-container .event-mine-label { grid-column: 2; grid-row: 1; position: static !important; }
+.calendar-events-container .event-teacher { grid-column: 1 / -1; grid-row: 2; }
+.calendar-events-container .event-desc { grid-column: 1 / -1; grid-row: 3; }
+.calendar-events-container .event-room { grid-column: 1 / -1; grid-row: 4; margin: 0 !important; }
+.calendar-events-container .event-room .material-symbols-outlined { font-size: 12px; width: 12px; height: 12px; }
+.v2-no-room .event-room { display: none !important; }
+.calendar-events-container:not(.v2-expanded) > .v2-overflow-card { display: none !important; }
+.v2-more-events {
+  width: 100%; padding: 6px; border: 1px solid #dce5f0; border-radius: 6px;
+  background: #fff; color: #234a94; font-size: 11px; cursor: pointer;
+}
+.v2-list-items { display: flex !important; flex-direction: column; gap: 14px !important; }
+.v2-time-group { min-width: 0; border: 1px solid #dde5f0; border-radius: 9px; overflow: hidden; }
+.v2-time-heading {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 4px 12px; padding: 9px 12px; background: #f5f7fb; border-bottom: 1px solid #e6ebf3;
+}
+.v2-time-heading h4 { margin: 0; font-size: 13px; color: #263f64; }
+.v2-time-heading > span { font-size: 11px; color: #607189; }
+.v2-time-rows .calendar-event-card {
+  display: grid !important; grid-template-columns: minmax(0, 1fr) auto;
+  flex: none !important; min-height: 0 !important; margin: 0 !important;
+  padding: 10px 12px !important; gap: 4px 10px !important;
+  border: 0 !important; border-left: 3px solid #9aabc3 !important;
+  border-radius: 0 !important; box-shadow: none !important; background: white !important;
+}
+.v2-time-rows .calendar-event-card + .calendar-event-card { border-top: 1px solid #e6ebf3 !important; }
+.v2-time-rows .calendar-event-card.event-mine { border-left-color: #1142bc !important; background: #f7f9ff !important; }
+.v2-time-rows .calendar-event-card.event-block { border-left-color: #c35b4b !important; background: #fff8f6 !important; }
+.v2-time-rows .v2-event-time { display: none; }
+.v2-time-rows .event-teacher { grid-column: 1; grid-row: 1; font-size: 13px !important; white-space: normal; }
+.v2-time-rows .event-mine-label {
+  position: static !important; grid-column: 2; grid-row: 1; align-self: start;
+  font-size: 9px !important; letter-spacing: .3px; padding: 2px 5px; border-radius: 4px;
+  background: #e6edff; color: #1142bc;
+}
+.v2-time-rows .event-desc { grid-column: 1; grid-row: 2; font-size: 12px !important; white-space: normal; }
+.v2-time-rows .event-room { grid-column: 2; grid-row: 2; font-size: 11px !important; align-self: center; text-align: right; }
+.v2-time-rows .calendar-event-card:focus-visible { outline: 2px solid #1142bc; outline-offset: -3px; }
+.v2-time-rows .calendar-event-card:hover { background: #eef3ff !important; transform: none !important; }
+.my-res-item, .report-card { box-shadow: none !important; }
+.room-card, .eq-brand-card { padding: 18px !important; }
+@media (max-width: 480px) {
+  .v2-time-rows .calendar-event-card { padding: 10px !important; }
+  .v2-time-rows .event-room { max-width: 120px; overflow-wrap: anywhere; white-space: normal; }
+}
+
+@media (max-width: 768px) {
+  .v2-teacher-day .week-selector,
+  .v2-teacher-day .v2-agenda-tools .v2-segment { display: none !important; }
+
+  .v2-teacher-day .v2-day-nav {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .v2-day-nav button {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    border: 1px solid #dce3ee;
+    border-radius: 8px;
+    background: white;
+    color: #234a94;
+    cursor: pointer;
+  }
+
+  #v2-selected-day {
+    margin: 0;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #405574;
+  }
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body,
+.main-wrapper,
+.dashboard-content,
+.teacher-main-content,
+.login-split-container,
+.login-form-panel,
+.dashboard-grid,
+.card,
+.modal,
+.modal-body,
+main,
+section,
+article,
+form,
+fieldset {
+  min-width: 0;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+button,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-outline-danger,
+.btn-teacher-new-res,
+.btn-new-res,
+.btn-block-action,
+.btn-view-records,
+.btn-delete-block,
+.btn-add-room,
+#btnAddRoom,
+.nav-link,
+.mobile-bottom-item,
+.btn-week-nav,
+.btn-close {
+  min-height: var(--responsive-touch-size);
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  max-width: 100%;
+  min-height: var(--responsive-touch-size);
+}
+
+button,
+a,
+input,
+select,
+textarea,
+th,
+td,
+p,
+small,
+strong,
+span,
+label,
+.report-card,
+.reservation-item,
+.block-item,
+.room-card,
+.eq-brand-card,
+.action-card {
+  overflow-wrap: anywhere;
+}
+
+.main-wrapper {
+  width: auto;
+  max-width: 100%;
+}
+
+.dashboard-content,
+.teacher-main-content {
+  width: 100%;
+  max-width: 1600px;
+}
+
+/* Calendários semanais permanecem completos e usam rolagem dentro do próprio quadro. */
+.calendar-wrapper-card,
+.calendar-scroll-area,
+.student-registration-table-wrapper,
+.records-table-wrapper,
+.table-responsive {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.calendar-scroll-area,
+.student-registration-table-wrapper,
+.records-table-wrapper,
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Tabelas dentro de modal são controles roláveis próprios: não as deixe
+   encolher a zero quando o formulário inteiro precisa caber em landscape. */
+.student-registration-table-wrapper,
+.records-table-wrapper {
+  flex: 0 0 auto;
+  min-height: 120px;
+  max-height: min(380px, 42dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.calendar-table {
+  width: max(100%, 870px) !important;
+  min-width: 870px !important;
+}
+
+.student-registration-table,
+.records-table {
+  min-width: 520px;
+}
+
+.calendar-table th,
+.calendar-table td,
+.student-registration-table th,
+.student-registration-table td,
+.records-table th,
+.records-table td {
+  overflow-wrap: anywhere;
+}
+
+/* Formulários, listas e grades deixam os filhos encolherem antes de alargar a página. */
+.form-row,
+.form-options-row,
+.agenda-action-header,
+.agenda-header-right,
+.calendar-controls-bar,
+.v2-agenda-tools,
+.v2-tool-group,
+.report-page-header,
+.reports-page-header,
+.reports-filter-group,
+.eq-page-header,
+.eq-header-actions,
+.salas-page-header,
+.block-item,
+.report-card-header,
+.report-title-row,
+.report-meta-row,
+.my-res-item,
+.res-actions,
+.modal-footer {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.form-col,
+.agenda-action-title,
+.agenda-info,
+.report-details,
+.report-lead,
+.res-info,
+.block-body,
+.card-header > div,
+.modal-title-wrap {
+  min-width: 0;
+}
+
+.form-col {
+  flex: 1 1 220px;
+}
+
+.rooms-grid,
+.eq-brands-grid,
+.quick-actions-grid,
+.dashboard-grid,
+.brand-grid,
+.eq-summary-cards {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+/* Diálogos: rolagem fica no conteúdo e as ações continuam alcançáveis. */
+.modal-backdrop {
+  padding: clamp(8px, 2.5vw, 24px) !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  align-items: center;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 720px);
+  max-height: calc(100vh - 32px) !important;
+  max-height: calc(100dvh - 32px) !important;
+  overflow: hidden !important;
+}
+
+.modal-header,
+.modal-footer {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-footer {
+  flex-wrap: wrap;
+}
+
+.modal-footer > button,
+.modal-footer > .btn-primary,
+.modal-footer > .btn-secondary,
+.modal-footer > .btn-danger {
+  min-width: min(100%, 120px);
+}
+
+.v2-preview dl,
+.record-info-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+
+#access-help-dialog,
+.v2-reset-dialog {
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Navegação desktop e tablet: reservar largura do menu e reduzir gutters. */
+@media (min-width: 769px) {
+  .dashboard-content,
+  .teacher-main-content {
+    padding-inline: clamp(20px, 3vw, 45px) !important;
+  }
+
+  .calendar-scroll-area {
+    scrollbar-gutter: stable;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-content,
+  .teacher-main-content {
+    padding-inline: 24px !important;
+  }
+
+  .v2-topbar {
+    padding-inline: 20px;
+  }
+
+  .calendar-controls-bar {
+    align-items: stretch;
+  }
+
+  .agenda-header-right {
+    flex: 1 1 360px;
+  }
+
+  .active-res-chip {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .quick-actions-grid,
+  .dashboard-grid,
+  .brand-grid,
+  .eq-brands-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  }
+}
+
+/* Telefones e tablets em retrato: lista para agenda, grade semanal continua selecionável. */
+@media (max-width: 768px) {
+  .dashboard-content,
+  .teacher-main-content {
+    padding: 18px 16px calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .v2-topbar {
+    height: auto;
+    min-height: 60px;
+    padding: 8px 16px;
+  }
+
+  .v2-topbar-brand {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .v2-topbar-note {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .v2-topbar-note > span:not(.v2-demo-dot) {
+    display: none;
+  }
+
+  .v2-mobile-menu {
+    display: grid;
+    place-items: center;
+    width: var(--responsive-touch-size);
+    height: var(--responsive-touch-size);
+    flex: 0 0 var(--responsive-touch-size);
+  }
+
+  .sidebar {
+    width: min(300px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px);
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .sidebar-backdrop {
+    display: block;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-wrapper,
+  .sidebar.collapsed ~ .main-wrapper,
+  body.sidebar-collapsed .main-wrapper {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  .teacher-header {
+    height: auto;
+    min-height: 60px;
+    padding: 8px 16px;
+  }
+
+  .teacher-greeting,
+  .teacher-user-badge {
+    display: none;
+  }
+
+  .agenda-action-header {
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  /* A agenda PROATEC usa o cabeçalho dividido em desktop; em mobile, cada bloco ocupa a coluna inteira. */
+  .dashboard-content > .agenda-action-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .dashboard-content > .agenda-action-header > .agenda-action-title {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .dashboard-content > .agenda-action-header > .agenda-header-right {
+    display: flex;
+    flex: 0 1 auto !important;
+    flex-direction: column !important;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .dashboard-content > .agenda-action-header > .agenda-header-right > button {
+    flex: 0 1 auto !important;
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    justify-content: center;
+    white-space: normal;
+  }
+
+  .active-res-chip {
+    width: 100%;
+    max-width: 100%;
+    order: 2;
+    white-space: normal;
+  }
+
+  /* O cabeçalho do Professor tem chip de reserva e ação principal no mesmo grupo.
+     Neutraliza o flex-grow herdado para não transformar o botão em um bloco alto. */
+  .teacher-main-content > .agenda-action-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    gap: 12px;
+  }
+
+  .teacher-main-content > .agenda-action-header > .agenda-action-title {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .teacher-main-content > .agenda-action-header > .agenda-header-right {
+    display: flex;
+    flex: 0 0 auto !important;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .teacher-main-content > .agenda-action-header > .agenda-header-right > .btn-teacher-new-res {
+    display: inline-flex;
+    flex: 0 0 auto !important;
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    height: auto;
+    padding: 10px 16px;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .teacher-main-content > .agenda-action-header .active-res-chip:not(.hidden) {
+    display: grid !important;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: center;
+    gap: 6px 8px;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    padding: 9px 11px;
+    box-sizing: border-box;
+  }
+
+  .teacher-main-content > .agenda-action-header .active-res-chip .chip-icon {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    font-size: 18px;
+  }
+
+  .teacher-main-content > .agenda-action-header .active-res-chip .chip-body {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .teacher-main-content > .agenda-action-header .active-res-chip .chip-label,
+  .teacher-main-content > .agenda-action-header .active-res-chip .chip-text {
+    display: block;
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+  }
+
+  .teacher-main-content > .agenda-action-header .active-res-chip .btn-chip-action {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .calendar-controls-bar {
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .week-selector {
+    display: grid;
+    grid-template-columns: var(--responsive-touch-size) minmax(0, 1fr) var(--responsive-touch-size);
+    align-items: center;
+    width: 100%;
+  }
+
+  .week-label-text {
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .btn-week-nav {
+    width: var(--responsive-touch-size);
+    height: var(--responsive-touch-size);
+  }
+
+  .shift-segmented-control {
+    display: flex;
+    width: 100%;
+  }
+
+  .shift-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: var(--responsive-touch-size) !important;
+    padding-inline: 6px !important;
+  }
+
+  .v2-agenda-tools,
+  .v2-tool-group {
+    width: 100%;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .v2-tool-group label {
+    flex: 1 1 150px;
+    min-width: 0;
+  }
+
+  .v2-tool-group select {
+    flex: 1 1 140px;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--responsive-touch-size);
+  }
+
+  .v2-segment {
+    width: 100%;
+  }
+
+  .v2-segment button {
+    flex: 1 1 0;
+    min-height: var(--responsive-touch-size);
+  }
+
+  .calendar-wrapper-card[hidden],
+  .v2-day-list[hidden] {
+    display: none !important;
+  }
+
+  .calendar-scroll-area {
+    max-width: 100%;
+  }
+
+  .calendar-table {
+    min-width: 870px !important;
+  }
+
+  .v2-day-list {
+    width: 100%;
+  }
+
+  .v2-day-section {
+    min-width: 0;
+  }
+
+  .v2-list-items {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v2-list-items .calendar-event-card {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .v2-cell-action {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .mobile-bottom-nav {
+    min-height: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-bottom-item {
+    min-width: 0;
+    flex: 1 1 0;
+    min-height: 52px;
+    justify-content: center;
+    padding: 6px 4px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .mobile-bottom-item span:not(.material-symbols-outlined) {
+    overflow-wrap: anywhere;
+  }
+
+  .my-res-item {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .my-res-item .res-info {
+    flex: 1 1 170px;
+    min-width: 0;
+  }
+
+  .my-res-item .res-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .quick-actions-grid,
+  .dashboard-grid,
+  .brand-grid,
+  .eq-brands-grid,
+  .rooms-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .action-card,
+  .room-card,
+  .eq-brand-card,
+  .inventory-card,
+  .report-card,
+  .block-item,
+  .reservation-item {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .action-card p {
+    padding-left: 0;
+  }
+
+  .dashboard-header,
+  .eq-page-header,
+  .eq-header-info,
+  .salas-page-header,
+  .reports-page-header,
+  .report-page-header {
+    align-items: stretch;
+  }
+
+  .eq-header-actions,
+  .reports-filter-group {
+    width: 100%;
+  }
+
+  .eq-header-actions > button,
+  .reports-filter-group > button,
+  .reports-filter-group > input,
+  .reports-filter-group > select {
+    flex: 1 1 150px;
+  }
+
+  .eq-summary-cards {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .eq-summary-card,
+  .eq-kpi-card {
+    min-width: 0;
+    padding: 12px 8px !important;
+  }
+
+  .eq-summary-label,
+  .eq-kpi-title,
+  .stat-label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .brand-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .block-item {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .block-body {
+    flex: 1 1 calc(100% - 64px);
+  }
+
+  .btn-delete-block {
+    min-height: var(--responsive-touch-size);
+    margin-left: auto;
+  }
+
+  .reports-page-header,
+  .report-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-card-header {
+    align-items: flex-start;
+  }
+
+  .report-lead {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .report-details {
+    flex: 1 1 180px;
+  }
+
+  .report-card-actions,
+  .btn-view-records {
+    width: 100%;
+  }
+
+  .btn-view-records {
+    justify-content: center;
+    white-space: normal;
+  }
+
+  .report-meta-row {
+    align-items: flex-start;
+  }
+
+  .report-info-grid,
+  .record-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .record-info-item,
+  .info-val {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .student-registration-table-wrapper,
+  .records-table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .student-registration-table,
+  .records-table {
+    min-width: 520px;
+  }
+
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 16px !important;
+  }
+
+  .modal-header {
+    padding: 16px !important;
+    gap: 10px;
+  }
+
+  .modal-header h3 {
+    font-size: clamp(17px, 5vw, 21px) !important;
+    overflow-wrap: anywhere;
+  }
+
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  .modal-footer {
+    padding: 12px 16px max(12px, env(safe-area-inset-bottom)) !important;
+    justify-content: stretch;
+    gap: 8px;
+  }
+
+  .modal-footer > button {
+    flex: 1 1 140px;
+    min-width: 0;
+    width: auto;
+    min-height: var(--responsive-touch-size) !important;
+  }
+
+  .btn-close {
+    width: var(--responsive-touch-size) !important;
+    height: var(--responsive-touch-size) !important;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .form-col {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .form-control,
+  .form-group input,
+  .form-group select,
+  .input-container input {
+    min-height: var(--responsive-touch-size) !important;
+    font-size: 16px !important;
+  }
+
+  .record-info-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v2-preview dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px 8px;
+  }
+
+  .v2-preview dt {
+    margin-top: 6px;
+  }
+
+  .login-page .login-split-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .login-page .access-story,
+  .login-page .login-form-panel {
+    min-width: 0;
+    width: 100%;
+  }
+
+  #access-help-dialog,
+  .v2-reset-dialog {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-content,
+  .teacher-main-content {
+    padding-inline: 12px !important;
+  }
+
+  .v2-topbar {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .v2-topbar-brand {
+    font-size: 13px;
+    gap: 7px;
+  }
+
+  .v2-topbar-note a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--responsive-touch-size);
+    max-width: 96px;
+    text-align: right;
+  }
+
+  .teacher-header {
+    padding-inline: 12px;
+  }
+
+  .calendar-controls-bar,
+  .v2-tool-group {
+    padding-inline: 8px;
+  }
+
+  .v2-tool-group label {
+    width: 100%;
+    flex-basis: 100%;
+  }
+
+  .v2-tool-group select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .week-label-text {
+    font-size: 12px !important;
+  }
+
+  .agenda-action-title h1,
+  .eq-page-title,
+  .dashboard-header h2 {
+    font-size: clamp(22px, 7vw, 28px) !important;
+  }
+
+  .eq-summary-cards {
+    gap: 6px !important;
+  }
+
+  .eq-summary-card,
+  .eq-kpi-card {
+    padding: 10px 6px !important;
+  }
+
+  .eq-summary-value,
+  .eq-kpi-value {
+    font-size: clamp(20px, 7vw, 27px) !important;
+  }
+
+  .report-icon-box,
+  .room-icon {
+    flex: 0 0 auto;
+  }
+
+  .block-icon {
+    flex: 0 0 40px;
+  }
+
+  .btn-delete-block {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stat-card {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+
+  .filter-pills {
+    display: flex;
+    width: 100%;
+  }
+
+  .btn-filter-pill {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: var(--responsive-touch-size);
+    padding-inline: 8px;
+  }
+
+  .report-date-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .records-table-summary {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-content,
+  .teacher-main-content {
+    padding-inline: 10px !important;
+  }
+
+  .access-story {
+    padding-inline: 20px;
+  }
+
+  .role-segmented-control {
+    gap: 6px !important;
+  }
+
+  .role-tab-btn {
+    min-width: 0;
+    padding-inline: 2px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .calendar-controls-bar {
+    padding-inline: 6px;
+  }
+
+  .week-selector {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+
+  .v2-day-section {
+    padding: 12px !important;
+  }
+
+  .modal-footer > button,
+  .modal-confirm-footer > button {
+    flex-basis: 100%;
+  }
+
+  .modal-confirm-footer {
+    padding-inline: 16px;
+  }
+}
+
+/* Retrato/landscape baixo: o conteúdo pode rolar sem ocultar ações do diálogo. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .modal-backdrop {
+    align-items: flex-start;
+    padding: 8px !important;
+  }
+
+  .modal {
+    max-height: calc(100vh - 16px) !important;
+    max-height: calc(100dvh - 16px) !important;
+  }
+
+  .modal-header {
+    padding-block: 10px !important;
+  }
+
+  .modal-body {
+    padding-block: 10px !important;
+  }
+
+  .modal-footer {
+    padding-block: 8px !important;
+  }
+
+  .login-page .access-story {
+    padding-block: 18px;
+  }
+
+  .login-page .access-story-content {
+    padding-block: 18px;
+  }
+}
+
+/* Alguns diálogos agrupam corpo e rodapé dentro do formulário. */
+.modal > form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.modal-confirm-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-confirm-footer {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.modal-confirm-footer > button {
+  flex: 1 1 140px;
+  min-width: 0;
+  min-height: var(--responsive-touch-size);
+}
+
+/* Navegação e hierarquia: agenda e reservas são visões independentes. */
+.page-eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  color: #587095;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.teacher-view-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid #dbe3ef;
+  margin: 8px 0 24px;
+  scroll-margin-top: 20px;
+}
+.teacher-view-tabs button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 12px 2px 16px;
+  color: #53647c;
+  font-size: 14px;
+  cursor: pointer;
+}
+.teacher-view-tabs [aria-selected="true"] { color: #1142bc; }
+.teacher-view-tabs [aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: #1142bc;
+}
+#upcoming-count { background: #e7edfa; border-radius: 6px; padding: 2px 7px; font-size: 12px; }
+.teacher-main-content .agenda-action-header { margin-bottom: 28px; }
+.teacher-main-content { gap: 0; }
+.teacher-main-content #my-reservations-section { margin-top: 0; }
+.teacher-main-content #my-reservations-section > p { font-size: 14px; margin-bottom: 24px; }
+.teacher-main-content .my-res-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.teacher-main-content .my-res-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid #dfe6f0;
+  border-radius: 12px;
+}
+.teacher-main-content .my-res-item .res-date { font-size: 14px; color: #53647c; }
+.teacher-main-content .my-res-item .res-info strong { font-size: 19px; color: #18263f; }
+.teacher-main-content .my-res-item .res-info p { font-size: 14px; margin-top: 5px; }
+.teacher-main-content .my-res-item .res-actions { width: 100%; justify-content: flex-start; gap: 8px; margin-top: 4px; }
+.teacher-main-content .my-res-item .btn-res-cancel { margin-left: auto; font-size: 13px; }
+.reservation-blocked { border-left: 3px solid #c47152 !important; }
+.badge-blocked { color: #8a452d; background: #fff0e8; }
+.reservation-empty { grid-column: 1 / -1; padding: 48px 24px; text-align: center; border: 1px dashed #cdd8e8; border-radius: 12px; background: #fff; }
+.reservation-empty > .material-symbols-outlined { width: 48px; height: 48px; padding: 10px; border-radius: 12px; background: #edf2ff; color: #1142bc; margin-bottom: 14px; }
+.reservation-empty h4 { font-size: 20px; margin-bottom: 8px; }
+.reservation-empty p { font-size: 14px; color: #53647c; margin-bottom: 22px; }
+.btn-header-logout { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
+
+/* A visão diária também atende tablets e pode ser escolhida no desktop. */
+.v2-teacher-day .week-selector { display: none !important; }
+.v2-teacher-day .v2-day-nav {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 300px;
+}
+.v2-day-nav button { display: grid; place-items: center; width: 44px; min-height: 44px; border: 1px solid #dce3ee; border-radius: 8px; background: white; color: #234a94; cursor: pointer; }
+#v2-selected-day { text-align: center; color: #263d60; font-size: 15px; font-weight: 650; }
+.v2-teacher-day .v2-day-section > h3 { display: none; }
+.v2-teacher-day .v2-day-section { padding: 0 !important; overflow: hidden; }
+.v2-teacher-day .v2-list-items { gap: 0 !important; }
+.day-slot { display: grid; grid-template-columns: 100px minmax(0, 1fr) auto; gap: 12px 20px; align-items: center; padding: 20px 24px; background: #fff; }
+.day-slot + .day-slot { border-top: 1px solid #e5eaf2; }
+.day-slot-time { display: flex; flex-direction: column; gap: 4px; }
+.day-slot-time strong { font-size: 18px; line-height: 1.3; }
+.day-slot-time span { font-size: 13px; color: #63718a; }
+.slot-status { font-size: 14px; font-weight: 650; color: #285b4d; }
+.day-slot-info p { font-size: 13px; color: #52617a; margin-top: 4px; }
+.day-slot-blocked { background: #fff8f4; }
+.day-slot-blocked .slot-status { color: #97543d; }
+.day-slot-reservations { grid-column: 2 / -1; font-size: 13px; color: #52617a; }
+.day-slot-reservations summary { cursor: pointer; min-height: 32px; padding-top: 5px; }
+.day-reservation-link { display: block; width: 100%; text-align: left; padding: 10px; margin-top: 5px; border: 1px solid #e1e7ef; border-radius: 8px; background: #f7f9fd; color: #234a94; font-size: 13px; cursor: pointer; }
+.day-slot-book { padding: 10px 18px; color: #1142bc !important; }
+.v2-tool-group label { min-height: 44px; font-size: 13px; }
+.v2-tool-group select { font-size: 14px; min-height: 44px; }
+.v2-tool-group label:has(input[type="checkbox"]) { cursor: pointer; }
+.v2-tool-group input[type="checkbox"] { width: 18px; height: 18px; }
+.v2-segment button, .shift-btn { min-height: 44px; font-size: 14px !important; }
+.v2-calendar-legend { font-size: 12px; }
+.calendar-table .day-header-tag { font-size: 11px; letter-spacing: .04em; }
+.calendar-table .event-teacher { font-size: 13px !important; }
+.calendar-table .event-desc, .calendar-table .event-room { font-size: 12px !important; }
+.calendar-table .v2-cell-action { color: #4b6490; font-size: 12px; }
+@media (hover: hover) and (pointer: fine) {
+  .calendar-table .v2-cell-action { transition: background-color .15s, border-color .15s; }
+}
+
+/* Formulário de reserva: agrupamentos curtos e escolha explícita dos recursos. */
+#new-reservation-modal .modal { width: min(100%, 760px) !important; max-width: 760px; }
+.booking-section { padding: 0; margin: 0 0 24px; border: 0; }
+.booking-section legend { display: flex; align-items: center; gap: 10px; width: 100%; padding-bottom: 18px; font-size: 16px; font-weight: 650; color: #263d60; }
+.booking-section legend span { display: grid; place-items: center; width: 28px; height: 28px; background: #edf2ff; border-radius: 8px; color: #1142bc; font-size: 12px; }
+.booking-section .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.booking-section .form-col { width: 100%; }
+.booking-section .form-group { margin-bottom: 14px; }
+.booking-section .form-group label, .v2-shift-choice label { font-size: 14px !important; }
+.booking-section input, .booking-section select, .v2-shift-choice select { font-size: 16px !important; min-height: 46px !important; }
+.v2-shift-choice { margin-bottom: 14px; }
+.resource-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 20px; }
+.resource-choices label { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 8px; border: 1px solid #d7e0ed; border-radius: 9px; color: #52617a; cursor: pointer; font-size: 14px; }
+.resource-choices label:has(:checked) { border-color: #1142bc; background: #edf2ff; color: #1142bc; }
+.resource-choices input { width: 16px; min-height: 16px !important; height: 16px; accent-color: #1142bc; }
+#new-reservation-form > .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+#new-reservation-form > .modal-footer > button { flex: 0 1 auto; width: auto; min-width: 132px; }
+.v2-availability { font-size: 14px !important; padding: 14px 16px !important; }
+.v2-preview { padding: 20px; font-size: 15px; }
+.v2-preview h4 { font-size: 20px; margin-bottom: 16px; }
+.v2-preview dl { grid-template-columns: 110px minmax(0, 1fr); }
+.modal-header p { font-size: 14px !important; }
+.modal-footer .btn-primary, .modal-footer .btn-secondary { font-size: 14px !important; }
+
+/* Resumo operacional da coordenação. */
+.coord-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0 32px; }
+.coord-metric { position: relative; padding: 20px; background: #fff; border: 1px solid #dfe6ef; border-radius: 12px; }
+.coord-metric-icon { display: inline-flex; color: #1142bc; padding: 9px; border-radius: 10px; background: #edf2ff; margin-bottom: 16px; }
+.coord-metric p { font-size: 13px; font-weight: 600; color: #52617a; }
+.coord-metric strong { display: block; margin: 6px 0; color: #18263f; font-size: 30px; line-height: 1.2; }
+.coord-metric small { font-size: 12px; color: #63718a; }
+.dashboard-content .section-label { font-size: 12px !important; letter-spacing: .06em; }
+.sidebar .nav-link { font-size: 14px !important; min-height: 48px; }
+.sidebar .user-name { font-size: 14px; }
+.sidebar .user-role, .sidebar .sidebar-brand-text p { font-size: 12px; }
+.dashboard-content .card-header h3 { font-size: 17px !important; }
+.dashboard-content .card-header p, .dashboard-content .action-card p, .report-meta-item { font-size: 14px !important; }
+.login-page .role-segmented-control { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.login-page .role-tab-btn { font-size: 13px !important; }
+
+@media (max-width: 1100px) {
+  .coord-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v2-teacher-day .calendar-controls-bar { gap: 14px; }
+  .v2-teacher-day .v2-day-nav { width: 100%; flex-basis: 100%; }
+  .teacher-main-content .my-res-list { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 768px) {
+  .teacher-main-content .agenda-action-header { margin-bottom: 18px; }
+  .teacher-page .v2-agenda-tools { gap: 8px; padding: 14px 0; }
+  .teacher-page .v2-tool-group:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 0; gap: 10px; }
+  .teacher-page .v2-tool-group:first-child label { width: auto; min-width: 0; font-size: 12px; }
+  .teacher-page .v2-tool-group:first-child label:first-child { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+  .teacher-page .v2-tool-group:first-child select { min-width: 0; font-size: 13px; }
+  .teacher-page .v2-tool-group:last-child { justify-content: space-between; padding: 0; }
+  .teacher-view-tabs { gap: 10px; margin-bottom: 20px; }
+  .teacher-view-tabs button { flex: 1; font-size: 13px; gap: 6px; }
+  .page-eyebrow { font-size: 10px; margin-bottom: 8px; }
+  .day-slot { grid-template-columns: 76px minmax(0, 1fr) auto; gap: 10px; padding: 18px 14px; }
+  .day-slot-time strong { font-size: 17px; }
+  .day-slot-time span, .day-slot-info p { font-size: 12px; }
+  .day-slot-book { padding: 8px 10px; font-size: 13px !important; }
+  .day-slot-reservations { grid-column: 1 / -1; }
+  .coord-overview { gap: 10px; margin: 18px 0 24px; }
+  .coord-metric { padding: 14px; }
+  .coord-metric-icon { margin-bottom: 10px; }
+  .coord-metric p { font-size: 12px; }
+  .coord-metric small { display: none; }
+  .teacher-main-content .my-res-item { padding: 18px; }
+  #new-reservation-modal { padding: 0 !important; }
+  #new-reservation-modal .modal {
+    width: 100% !important; height: 100dvh; max-height: 100dvh !important;
+    border: 0 !important; border-radius: 0 !important;
+  }
+  #new-reservation-modal .modal-header { padding: 18px 16px !important; }
+  #new-reservation-form > .modal-body { padding: 20px 16px !important; }
+  #new-reservation-form > .modal-footer { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important; }
+  #new-reservation-form > .modal-footer > button { flex: 1 1 0; min-width: 0; }
+  .resource-choices label { font-size: 13px; padding: 8px 4px; gap: 5px; }
+}
+@media (max-width: 380px) {
+  .teacher-view-tabs button { flex-wrap: wrap; gap: 4px; }
+  .day-slot { grid-template-columns: 70px minmax(0, 1fr); }
+  .day-slot-book { grid-column: 2; width: 100%; }
+  .booking-section .form-row { gap: 10px; }
+  .resource-choices label { flex-direction: column; }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  #new-reservation-modal { padding: 0 !important; }
+  #new-reservation-modal .modal { width: min(100%, 900px) !important; height: 100dvh; max-height: 100dvh !important; border-radius: 0 !important; }
+  #new-reservation-modal .modal-header { padding: 10px 20px !important; }
+  #new-reservation-modal .modal-header p { display: none; }
+  #new-reservation-form > .modal-footer { padding: 8px 20px !important; }
+}

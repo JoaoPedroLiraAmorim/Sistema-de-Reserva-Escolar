@@ -1,5 +1,5 @@
 /**
- * agendaProatec.js — Lógica da agenda semanal do PROATEC e Coordenação
+ * agendaProatec.js — Lógica da agenda semanal da Coordenação
  * Espelha a funcionalidade e grade de horários da agenda do professor.
  * Depende de: store.js, auth.js, main.js
  */
@@ -13,30 +13,8 @@ window.AgendaProatecModule = (function() {
     let selectedResId = null;
     let isInitialized = false;
 
-    const SHIFT_SLOTS = {
-        manha: [
-            { start: '07:00', end: '07:50' },
-            { start: '07:50', end: '08:40' },
-            { start: '08:40', end: '09:30' },
-            { start: '09:30', end: '10:20' },
-            { start: '10:35', end: '11:25' },
-            { start: '11:25', end: '12:15' },
-        ],
-        tarde: [
-            { start: '13:00', end: '13:50' },
-            { start: '13:50', end: '14:40' },
-            { start: '14:40', end: '15:30' },
-            { start: '15:30', end: '16:20' },
-            { start: '16:35', end: '17:25' },
-            { start: '17:25', end: '18:15' },
-        ],
-        noite: [
-            { start: '19:00', end: '19:50' },
-            { start: '19:50', end: '20:40' },
-            { start: '20:50', end: '21:40' },
-            { start: '21:40', end: '22:30' },
-        ],
-    };
+
+    const SHIFT_SLOTS = ERS.SHIFT_SLOTS;
 
     // ─────────────────────────────────────────────────────────────
     //  INICIALIZAÇÃO
@@ -45,7 +23,7 @@ window.AgendaProatecModule = (function() {
         currentSession = session || AUTH.getSession();
         if (!currentSession) return;
 
-        // Mostrar botão de bloqueio para Coordenação e PROATEC
+        // Mostrar botão de bloqueio para Coordenação
         const btnBlock = document.getElementById('btnOpenBlock');
         if (btnBlock) btnBlock.style.display = 'inline-flex';
         if (currentSession.role === 'coordenacao') {
@@ -88,7 +66,7 @@ window.AgendaProatecModule = (function() {
                     } catch (e) {}
                 };
                 dateInput.addEventListener('click', openCalendar);
-                dateInput.addEventListener('focus', openCalendar);
+                // Avoid reopening the native picker when restoring dialog focus.
             }
 
             const blkDateInput = document.getElementById('blk-date');
@@ -119,6 +97,9 @@ window.AgendaProatecModule = (function() {
                 populateTimeSlots(currentShift);
                 populateRoomSelect();
                 populateBrandSelect();
+                const professorSelect = document.getElementById('res-professor');
+                if (professorSelect) professorSelect.innerHTML = '<option value="">Selecione um professor</option>' +
+                    ERS.getProfessors().map(p => `<option value="${p.id}">${ERS.escapeHtml(p.nome)}</option>`).join('');
                 updateAvailInfo();
                 openModal('new-reservation-modal');
             });
@@ -221,7 +202,7 @@ window.AgendaProatecModule = (function() {
             ${weekDays.map(d => {
                 const dk = ERS.dateKey(d);
                 const isToday = dk === todayStr;
-                return `<th${isToday ? ' class="today-col"' : ''}>
+                return `<th data-date="${dk}"${isToday ? ' class="today-col"' : ''}>
                     <div class="day-header-tag">${ERS.DIAS_SEMANA_FULL[d.getDay()]}</div>
                     <div class="day-header-number">${d.getDate()}</div>
                 </th>`;
@@ -243,6 +224,7 @@ window.AgendaProatecModule = (function() {
                 const isToday = dk === todayStr;
                 const td = document.createElement('td');
                 if (isToday) td.className = 'today-cell';
+            td.dataset.date = dk; td.dataset.start = slot.start; td.dataset.end = slot.end;
 
                 const dayReservations = ERS.getReservationsByDate(dk);
                 const slotReservations = dayReservations.filter(r =>
@@ -268,7 +250,7 @@ window.AgendaProatecModule = (function() {
                     html += `</div>`;
                 }
 
-                if (slotReservations.length > 0) {
+                if (slotReservations.length > 0 && !blocks.length) {
                     html += `<div class="calendar-events-container">`;
                     slotReservations.forEach(r => {
                         const isCancelled = r.situacao === 'cancelada';
@@ -345,7 +327,11 @@ window.AgendaProatecModule = (function() {
         const marca    = document.getElementById('res-brand')?.value || '';
         const qtd      = parseInt(document.getElementById('res-quantity')?.value) || 0;
         const profInput = document.getElementById('res-professor');
-        const profNome = profInput ? profInput.value.trim() : (currentSession ? currentSession.nome : 'Professor');
+        const professor = ERS.getProfessors().find(p => p.id === profInput?.value);
+        if (!professor) {
+            if (errEl) { errEl.textContent = 'Selecione o professor responsável pela reserva.'; errEl.style.display = 'block'; }
+            return;
+        }
 
         // 1. Validação de Data (apenas hoje para frente)
         if (!data) {
@@ -386,8 +372,8 @@ window.AgendaProatecModule = (function() {
         }
 
         const result = ERS.createReservation({
-            professorId:   currentSession ? currentSession.userId : 'user',
-            professorNome: profNome || (currentSession ? currentSession.nome : 'Professor'),
+            professorId: professor.id,
+            professorNome: professor.nome,
             data, inicio, fim,
             sala: sala || null,
             marca: marca || 'Qualquer marca',
@@ -429,7 +415,7 @@ window.AgendaProatecModule = (function() {
             return;
         }
 
-        const creator = currentSession ? currentSession.nome : (currentSession?.role === 'coordenacao' ? 'Coordenação' : 'PROATEC');
+        const creator = currentSession ? currentSession.nome : (currentSession?.role === 'coordenacao' ? 'Coordenação' : 'Coordenação');
         const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
@@ -461,7 +447,7 @@ window.AgendaProatecModule = (function() {
                         <div style="margin-top: 6px; padding: 8px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
                             <strong style="color: #065f46; display: flex; align-items: center; gap: 4px;">
                                 <span class="material-symbols-outlined" style="font-size: 16px;">verified</span>
-                                Retirada confirmada por ${r.retiradaConfirmadaPor || 'PROATEC'}
+                                Retirada confirmada por ${r.retiradaConfirmadaPor || 'Coordenação'}
                             </strong>
                             ${r.alunosRegistrados && r.alunosNotebooks && r.alunosNotebooks.length > 0 ? `
                                 <div style="margin-top: 8px; font-size: 12px;">

@@ -7,10 +7,6 @@
     <meta name="description" content="Gerencie os notebooks disponíveis na escola.">
 
     <!-- Fontes do Google -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
 
     <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
@@ -22,7 +18,7 @@
         (function() {
             try {
                 var saved = localStorage.getItem('escola_sidebar_collapsed');
-                var isCollapsed = saved !== null ? saved === 'true' : true;
+                var isCollapsed = saved !== null ? saved === 'true' : false;
                 if (!isCollapsed && window.innerWidth > 768) {
                     document.documentElement.classList.add('sidebar-expanded');
                 } else {
@@ -32,6 +28,8 @@
         })();
     </script>
     <script src="../js/sidebar.js"></script>
+<link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body data-page="equipamentos">
     <div class="app-container">
@@ -323,5 +321,6 @@
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/equipamentos.js"></script>
+<script src="../js/refinamento.js"></script>
 </body>
 </html>

@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
             togglePasswordBtn.innerHTML = isPassword ? svgEyeClosed : svgEyeOpen;
             togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Exibir senha');
+            togglePasswordBtn.setAttribute('aria-pressed', String(isPassword));
         });
     }
 
@@ -61,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const roleNameMap = {
         professor:   'Prof. Marcelo (Professor)',
-        proatec:     'João Almeida (PROATEC)',
+        proatec:     'João Almeida (Coordenação)',
         coordenacao: 'Dra. Sandra Lima (Coordenação)',
     };
 
@@ -72,12 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const pass = tab.dataset.pass;
 
             // Marca aba ativa
-            roleTabs.forEach(t => t.classList.remove('active'));
+            roleTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-pressed','false'); });
             tab.classList.add('active');
+            tab.setAttribute('aria-pressed','true');
 
             // Preenche os campos
             if (emailInput) emailInput.value = email;
             if (passwordInput) passwordInput.value = pass;
+            clearFieldErrors();
 
             // Limpa mensagem de erro se houver
             if (errorBox) {
@@ -108,8 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!email || !password) {
                 showError('Informe seu e-mail e sua senha.');
+                if (!email) emailInput.setAttribute('aria-invalid','true');
+                if (!password) passwordInput.setAttribute('aria-invalid','true');
+                (!email ? emailInput : passwordInput).focus();
                 return;
             }
+            if (!emailInput.validity.valid) {
+                showError('Confira o formato do e-mail. Exemplo: nome@escola.edu.br.');
+                emailInput.setAttribute('aria-invalid','true');
+                emailInput.focus();
+                return;
+            }
+            clearFieldErrors();
 
             // Feedback de carregamento no botão
             if (errorBox) errorBox.style.display = 'none';
@@ -151,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.location.href = targetUrl;
                     }, 200);
                 } else {
-                    showError(result.message || 'E-mail ou senha incorretos.');
+                    showError(result.message?.replace('Selecione um perfil acima.', 'Confira os dados e tente novamente.') || 'E-mail ou senha incorretos.');
                     resetButton();
                 }
             } catch (err) {
@@ -167,7 +180,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const msgSpan = errorBox.querySelector('.error-text') || errorBox;
         msgSpan.textContent = msg;
         errorBox.style.display = 'flex';
+        emailInput?.setAttribute('aria-describedby','login-error');
+        passwordInput?.setAttribute('aria-describedby','login-error caps-hint');
     }
+
+    function clearFieldErrors() {
+        emailInput?.removeAttribute('aria-invalid');
+        passwordInput?.removeAttribute('aria-invalid');
+        emailInput?.removeAttribute('aria-describedby');
+        passwordInput?.setAttribute('aria-describedby','caps-hint');
+    }
+    [emailInput,passwordInput].forEach(input=>input?.addEventListener('input',()=>{
+        clearFieldErrors();
+        if(errorBox)errorBox.style.display='none';
+        roleTabs.forEach(t=>{t.classList.remove('active');t.setAttribute('aria-pressed','false');});
+        if(feedbackPill)feedbackPill.style.display='none';
+    }));
+    passwordInput?.addEventListener('keyup',e=>{
+        const hint=document.getElementById('caps-hint');
+        if(hint)hint.hidden=!e.getModifierState('CapsLock');
+    });
+    const helpDialog=document.getElementById('access-help-dialog');
+    document.querySelectorAll('[data-access-help]').forEach(button=>button.addEventListener('click',()=>helpDialog?.showModal()));
 
     function resetButton() {
         if (!btnLogin) return;

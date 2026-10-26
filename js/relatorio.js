@@ -69,7 +69,7 @@ window.RelatorioModule = (function() {
         if (mode === 'all') {
             selectedDate = null;
             if (dateInput) dateInput.value = '';
-            if (dateLabel) dateLabel.textContent = 'Todas as Reservas';
+            if (dateLabel) dateLabel.textContent = 'Reservas ativas';
         } else if (mode === 'today') {
             selectedDate = ERS.today();
             if (dateInput) dateInput.value = selectedDate;

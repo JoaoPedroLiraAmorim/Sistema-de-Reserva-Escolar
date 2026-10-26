@@ -48,9 +48,9 @@
                         aria-label="Recolher ou expandir menu lateral" title="Alternar Menu Lateral">
                     <span class="material-symbols-outlined toggle-icon">chevron_left</span>
                 </button>
-                <div class="sidebar-brand-text" id="sidebarBrandWrapper" title="PROATEC - Gestão de Laboratório">
-                    <h1>PROATEC</h1>
-                    <p>Gestão de Laboratório</p>
+                <div class="sidebar-brand-text" id="sidebarBrandWrapper" title="Coordenação - Gestão de Laboratório">
+                    <h1>EduLab</h1>
+                    <p>Coordenação</p>
                 </div>
             </div>
 
@@ -69,11 +69,6 @@
                 </div>
 
                 <div class="sidebar-subnav">
-                    <a href="salas.html" class="nav-link${activePage === 'salas' ? ' active' : ''}"
-                       data-tooltip="Salas" data-page="salas">
-                        <span class="material-symbols-outlined">meeting_room</span>
-                        <span class="nav-text">Salas</span>
-                    </a>
                     <a href="../index.html" class="nav-link logout" data-tooltip="Sair">
                         <span class="material-symbols-outlined">logout</span>
                         <span class="nav-text">Sair</span>
@@ -94,6 +89,14 @@
 
         const activePage = document.body.getAttribute('data-page') || '';
         mount.outerHTML = buildSidebarHTML(activePage);
+
+        // Algumas páginas legadas ainda contêm um backdrop estático além do
+        // injetado pela sidebar. Mantém um único backdrop para evitar camadas
+        // duplicadas ao abrir o menu móvel.
+        const backdrops = document.querySelectorAll('.sidebar-backdrop');
+        backdrops.forEach((backdrop, index) => {
+            if (index > 0) backdrop.remove();
+        });
     }
 
     // Se o DOM já está pronto (script carregado depois), injeta agora
