@@ -5,6 +5,7 @@ const path = require('node:path');
 
 // Interceptação serve os arquivos locais, sem servidor ou dependência da rede.
 const root = path.resolve(__dirname, '..');
+const baseUrl = process.env.UI_BASE_URL || 'https://edulab.test';
 const artifacts = process.env.UI_ARTIFACT_DIR;
 const sizes = [[320, 740], [390, 844], [768, 1024], [820, 1180], [1024, 768], [1366, 768], [1920, 1080], [844, 390]];
 const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(f => fs.existsSync(f));
@@ -16,7 +17,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
         const page = await context.newPage();
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
-        await page.route('**/*', async route => {
+        if (!process.env.UI_BASE_URL) await page.route('**/*', async route => {
             const url = new URL(route.request().url());
             if (url.hostname !== 'edulab.test') return route.abort();
             const file = path.resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
@@ -25,7 +26,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
             try { await route.fulfill({ body: fs.readFileSync(file), contentType: type || 'application/octet-stream' }); }
             catch { await route.fulfill({ status: 404, body: '' }); }
         });
-        const visit = async file => { await page.goto('https://edulab.test/' + file); await page.waitForTimeout(80); };
+        const visit = async file => { await page.goto(new URL(file, baseUrl + '/').href); await page.waitForTimeout(80); };
         const login = async role => page.evaluate(role => ERS.login(role + '@demo.com', '123456'), role);
         const noOverflow = async label => {
             const d = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));

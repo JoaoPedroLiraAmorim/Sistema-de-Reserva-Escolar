@@ -1,9 +1,17 @@
 {
   "scripts": {
-    "test": "node --test tests/store.test.cjs",
+    "build": "node scripts/build.mjs",
+    "dev": "wrangler dev --local",
+    "db:migrate:local": "wrangler d1 migrations apply edulab-dev --local",
+    "db:seed:local": "wrangler d1 execute edulab-dev --local --file seeds/salas-demo.sql",
+    "db:salas:local": "wrangler d1 execute edulab-dev --local --command \"SELECT id, nome, ativa FROM salas ORDER BY nome;\"",
+    "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
+    "test:http": "node tests/http.cjs",
+    "test": "node --test tests/store.test.cjs tests/worker.test.cjs",
     "test:ui": "node tests/ui.cjs"
   },
   "devDependencies": {
-    "playwright": "^1.63.0"
+    "playwright": "^1.63.0",
+    "wrangler": "4.153.0"
   }
 }
