@@ -1,5 +1,5 @@
 /**
- * login-novo.js — Lógica da Nova Tela de Login (EduLab Reserve)
+ * login-novo.js — Lógica da Nova Tela de Login (Alceu Reservas)
  * Design Limpo e Centralizado
  * Depende de: store.js (ERS)
  */

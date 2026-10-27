@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "sistema-de-reserva-escolar",
+	"name": "app",
 	"main": "src/worker.mjs",
 	"compatibility_date": "2026-10-26",
 	// Banco de desenvolvimento criado na Cloudflare; dev continua usando a cópia local.

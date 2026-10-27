@@ -1,4 +1,4 @@
-# EduLab Reserve — Sistema de Reserva Escolar
+# Alceu Reservas — Sistema de Reserva Escolar
 
 Sistema do TCC para reservar salas e notebooks, com áreas de Professor e Coordenação.
 
@@ -191,7 +191,16 @@ os domínios digitados sozinhos não comprovam a identidade.
 ## Publicação pelo painel (ambiente de desenvolvimento)
 
 No Workers & Pages, a aplicação e o campo `name` do Wrangler devem usar
-`sistema-de-reserva-escolar`. Conecte este repositório e a branch `main`.
+`app`. O endereço esperado, após alinhar o painel e a configuração, é
+`https://app.reservas-alceu.workers.dev`. Conecte este repositório e a branch `main`.
+
+Workers não têm uma operação de renomeação direta. Crie uma nova aplicação `app` pelo
+painel, importando este repositório, e confira a integração de build. O código e os arquivos
+estáticos serão publicados juntos. Mantenha o Worker antigo até verificar o novo endereço,
+`/api/health` e `/api/salas`. A integração Git do Worker antigo deve ser desconectada para
+que ele não tente publicar a configuração destinada ao novo nome.
+A marca exibida ao usuário é **Alceu Reservas**. O banco continua com o nome `edulab-dev`;
+o nome interno do banco não aparece no endereço do site.
 
 | Campo do painel | Valor |
 | --- | --- |

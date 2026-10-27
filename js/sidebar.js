@@ -49,7 +49,7 @@
                     <span class="material-symbols-outlined toggle-icon">chevron_left</span>
                 </button>
                 <div class="sidebar-brand-text" id="sidebarBrandWrapper" title="Coordenação - Gestão de Laboratório">
-                    <h1>EduLab</h1>
+                    <h1>Alceu Reservas</h1>
                     <p>Coordenação</p>
                 </div>
             </div>

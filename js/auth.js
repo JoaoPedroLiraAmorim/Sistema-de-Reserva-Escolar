@@ -137,7 +137,7 @@
                 const brandText = sidebar.querySelector('.sidebar-brand-text p');
                 if (brandText) brandText.textContent = 'Coordenação';
                 const brandH1 = sidebar.querySelector('.sidebar-brand-text h1');
-                if (brandH1) brandH1.textContent = 'EduLab';
+                if (brandH1) brandH1.textContent = 'Alceu Reservas';
             }
             return;
         }
@@ -163,7 +163,7 @@
             const brandText = sidebar.querySelector('.sidebar-brand-text p');
             if (brandText) brandText.textContent = 'Coordenação';
             const brandH1 = sidebar.querySelector('.sidebar-brand-text h1');
-            if (brandH1) brandH1.textContent = 'EduLab';
+            if (brandH1) brandH1.textContent = 'Alceu Reservas';
         }
 
         // Corrige links # para páginas reais
