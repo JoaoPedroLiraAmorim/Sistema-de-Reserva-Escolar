@@ -50,8 +50,7 @@
             <!-- Cabeçalho da Agenda -->
             <section class="agenda-action-header">
                 <div class="agenda-action-title">
-                    <span class="page-eyebrow">RECURSOS PARA A SUA AULA</span>
-                    <h1>Planeje sua próxima aula.</h1>
+                    <h1>Agenda do professor</h1>
                     <p>Encontre um horário e reserve notebooks ou uma sala.</p>
                 </div>
                 <div class="agenda-header-right">
@@ -92,17 +91,17 @@
                     </button>
                 </div>
 
-                <div class="shift-segmented-control" id="shiftControl">
-                    <button type="button" class="shift-btn active" data-shift="manha">Manhã</button>
-                    <button type="button" class="shift-btn" data-shift="tarde">Tarde</button>
-                    <button type="button" class="shift-btn" data-shift="noite">Noite</button>
+                <div class="shift-segmented-control" id="shiftControl" role="group" aria-label="Turno">
+                    <button type="button" class="shift-btn active" data-shift="manha" aria-pressed="true">Manhã</button>
+                    <button type="button" class="shift-btn" data-shift="tarde" aria-pressed="false">Tarde</button>
+                    <button type="button" class="shift-btn" data-shift="noite" aria-pressed="false">Noite</button>
                 </div>
             </section>
 
             <!-- Grade de Horários -->
             <section class="calendar-wrapper-card">
                 <div class="calendar-scroll-area">
-                    <table class="calendar-table" id="calendarTable">
+                    <table class="calendar-table" id="calendarTable" aria-label="Grade de horários da agenda do professor">
                         <thead id="calendarHead"></thead>
                         <tbody id="calendarBody"></tbody>
                     </table>
@@ -128,7 +127,7 @@
                 <span class="material-symbols-outlined">add_circle</span>
                 <span>Nova reserva</span>
             </a>
-            <a href="#" class="mobile-bottom-item" id="mobileMyResBtn">
+            <a href="#my-reservations-section" class="mobile-bottom-item" id="mobileMyResBtn">
                 <span class="material-symbols-outlined">history_edu</span>
                 <span>Próximas</span>
             </a>

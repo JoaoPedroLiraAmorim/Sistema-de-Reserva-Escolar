@@ -37,6 +37,8 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
             fs.mkdirSync(artifacts, { recursive: true });
             await page.screenshot({ path: path.join(artifacts, name + '.png'), fullPage: true });
         };
+        const visibleDayColumns = () => page.locator('#calendarHead th[data-date]:visible');
+        const selectedDay = () => page.locator('#teacher-week-days [aria-pressed="true"]').getAttribute('data-date');
         await visit('index.html');
         assert.equal(await page.locator('[data-role]').count(), 2);
         for (const [width, height] of sizes) {
@@ -47,12 +49,29 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
             await noOverflow('professor ' + width);
             assert.equal(await page.locator('[data-res-tab]').count(), 0);
             assert.equal(await page.locator('#my-reservations-section').isVisible(), false);
-            if (width <= 1100) assert.equal(await page.locator('.day-slot').count(), 6);
+            assert.equal(await page.locator('#calendarTable').isVisible(), true);
+            assert.equal(await visibleDayColumns().count(), width <= 1100 ? 1 : 6);
+            if (width <= 768 || width === 844) {
+                assert.equal(await page.locator('[data-agenda-mode="grid"]').isVisible(), false);
+                const tableFits = await page.locator('.calendar-scroll-area').evaluate(el => el.scrollWidth <= el.clientWidth);
+                assert.equal(tableFits, true, 'a grade diária cabe no celular');
+                const newButton = await page.locator('#btnOpenNewReservation').boundingBox();
+                assert.ok(newButton.height >= 44 && newButton.height <= 48 && newButton.width < width / 2, `botão compacto em ${width}: ${JSON.stringify(newButton)}`);
+            }
             if (width === 1366) {
-                await page.locator('[data-agenda-mode="list"]').click();
-                assert.equal(await page.locator('.day-slot').count(), 6);
+                await page.locator('[data-agenda-mode="day"]').click();
+                assert.equal(await visibleDayColumns().count(), 1);
                 await page.locator('[data-agenda-mode="grid"]').click();
-                assert.equal(await page.locator('#calendarTable').isVisible(), true);
+                assert.equal(await visibleDayColumns().count(), 6);
+                await page.setViewportSize({ width: 390, height: 844 });
+                await page.locator('#teacher-week-days').waitFor({ state: 'visible' });
+                assert.equal(await visibleDayColumns().count(), 1, 'o celular usa a grade diária após redimensionar');
+                await page.setViewportSize({ width, height });
+                await page.locator('#teacher-week-days').waitFor({ state: 'hidden' });
+                assert.equal(await visibleDayColumns().count(), 6);
+                await page.locator('#tab-reservas').click();
+                await page.keyboard.press('ArrowLeft');
+                assert.equal(await page.locator('#tab-agenda').getAttribute('aria-selected'), 'true');
             }
             if ([390, 1366].includes(width)) await screenshot('professor-' + width);
             await page.locator('#btnOpenNewReservation').click(); await page.waitForTimeout(50);
@@ -65,7 +84,8 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
         await page.setViewportSize({ width: 390, height: 844 });
         await visit('pages/professor.html');
         await page.locator('#btnOpenNewReservation').click();
-        await page.locator('#res-date').fill(await page.evaluate(() => ERS.dayOffset(14)));
+        const futureSchoolDay = await page.evaluate(() => ERS.dateKey(ERS.getMonday(ERS.dayOffset(14))));
+        await page.locator('#res-date').fill(futureSchoolDay);
         await page.locator('#res-start').selectOption('07:00'); await page.locator('#res-end').selectOption('07:50');
         await page.locator('#res-brand').selectOption('Dell'); await page.locator('#res-quantity').fill('2');
         await screenshot('reserva-celular');
@@ -76,22 +96,56 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
         assert.equal(await page.locator('#new-reservation-modal').isVisible(), false);
         const saved = await page.evaluate(() => ERS.getReservations().find(r => !r.id.startsWith('mock-res-')));
         assert.equal(saved.marca, 'Dell'); assert.equal(saved.notebooks, 2);
-        await page.locator('#tab-reservas').click();
+        await page.locator('#mobileMyResBtn').click();
         assert.equal(await page.locator('#teacher-agenda-panel').isVisible(), false);
         assert.equal(await page.locator('#my-reservations-section').isVisible(), true);
         await screenshot('proximas-celular');
-        await page.locator('#tab-reservas').focus(); await page.keyboard.press('ArrowLeft');
-        assert.equal(await page.locator('#tab-agenda').getAttribute('aria-selected'), 'true');
+        await page.locator('#mobileAgendaBtn').click();
+        assert.equal(await page.locator('#mobileAgendaBtn').getAttribute('aria-current'), 'location');
+        assert.equal(await page.locator('#teacher-agenda-panel').isVisible(), true);
+        const saturday = await page.locator('#teacher-week-days button').last().getAttribute('data-date');
+        await page.locator('#teacher-week-days button').last().click();
+        assert.equal(await visibleDayColumns().getAttribute('data-date'), saturday);
+        await page.locator('#v2-next-day').click();
+        assert.equal(await selectedDay(), await page.evaluate(date => ERS.dayOffset(2, date + 'T12:00:00'), saturday));
+        await page.locator('#v2-prev-day').click();
+        assert.equal(await selectedDay(), saturday);
+        await page.getByRole('button', { name: 'Hoje', exact: true }).click();
+        assert.equal(await selectedDay(), await page.evaluate(() => new Date().getDay() === 0 ? ERS.dateKey(ERS.getMonday(new Date())) : ERS.today()));
+
+        for (let day = 0; day < 14 && await selectedDay() < saved.data; day++) {
+            await page.locator('#v2-next-day').click();
+        }
+        assert.equal(await selectedDay(), saved.data);
+        await page.locator('#v2-only-mine').check();
+        const savedEvent = page.locator(`#calendarTable [data-res-id="${saved.id}"]:visible`);
+        await savedEvent.click();
+        assert.equal(await page.locator('#res-detail-modal').isVisible(), true);
+        await page.keyboard.press('Escape');
+        await page.locator('#v2-only-mine').uncheck();
+        await page.locator('[data-shift="tarde"]').click();
+        assert.equal(await page.locator('#calendarBody .time-start').first().textContent(), '13:00');
+        assert.equal(await page.locator('[data-shift="tarde"]').getAttribute('aria-pressed'), 'true');
         await page.locator('#v2-room-filter').selectOption('Aquário');
-        await page.locator('.day-slot-book').first().click();
+        const firstSlot = page.locator('.teacher-slot-book').first();
+        const slotDate = await selectedDay();
+        const start = await firstSlot.locator('xpath=ancestor::td').getAttribute('data-start');
+        await firstSlot.click();
+        assert.equal(await page.locator('#res-date').inputValue(), slotDate);
+        assert.equal(await page.locator('#res-start').inputValue(), start);
         assert.equal(await page.locator('[name="resource-type"][value="sala"]').isChecked(), true);
         assert.equal(await page.locator('#res-room').inputValue(), 'Aquário');
         await page.keyboard.press('Escape');
-        await page.evaluate(() => {
-            ERS.createBlock({data:ERS.dayOffset(14),inicio:'07:00',fim:'07:50',motivo:'Bloqueio de teste',criadoPor:'Coordenação'});
+        await page.locator('#v2-room-filter').selectOption('');
+        await page.locator('[data-shift="manha"]').click();
+        await page.evaluate(date => {
+            ERS.createBlock({data:date,inicio:'07:00',fim:'07:50',motivo:'Bloqueio de teste',criadoPor:'Coordenação'});
             window.dispatchEvent(new Event('ers:reservations-updated'));
-        });
-        await page.locator('#tab-reservas').click();
+        }, saved.data);
+        const blockedSlot = page.locator('#calendarTable td[data-start="07:00"]:visible');
+        assert.equal(await blockedSlot.locator('.event-block').isVisible(), true);
+        assert.equal(await blockedSlot.locator('.teacher-slot-book').count(), 0);
+        await page.locator('#mobileMyResBtn').click();
         assert.equal(await page.locator('.my-res-item.reservation-blocked').count(), 1);
         assert.equal(await page.locator('.reservation-blocked .btn-secondary').count(), 0);
         await page.evaluate(() => {
@@ -135,6 +189,6 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
         assert.equal(await page.evaluate(() => ERS.getSession().role), 'coordenacao');
         await visit('pages/bloqueios.html'); assert.ok(page.url().endsWith('/bloqueios.html'));
         assert.deepEqual(errors, [], 'sem exceções JavaScript');
-        console.log('UI validada: 8 viewports, 6 telas de coordenação, formulário, conferência, abas, marca, vínculo do professor, expiração e perfil legado.');
+        console.log('UI validada: 8 viewports, 6 telas de coordenação, agenda diária e semanal, formulário, conferência, abas, marca, vínculo do professor, expiração e perfil legado.');
     } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

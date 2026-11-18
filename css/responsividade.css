@@ -1,10 +1,10 @@
-/* Componentes e adaptações comuns do EduLab Reserve. Carregar por último. */
+/* Componentes e adaptações comuns do Alceu Reservas. Carregar por último. */
 :root {
   --responsive-gutter: clamp(12px, 2.2vw, 32px);
   --responsive-touch-size: 44px;
 }
 
-.v2-day-nav { display: none; }
+.teacher-day-controls { display: none; }
 .teacher-main-content .active-res-chip.hidden { display: none !important; }
 
 /* Reservas são registros comparáveis: linhas compactas em vez de tiles esticados. */
@@ -68,37 +68,6 @@
   .v2-time-rows .event-room { max-width: 120px; overflow-wrap: anywhere; white-space: normal; }
 }
 
-@media (max-width: 768px) {
-  .v2-teacher-day .week-selector,
-  .v2-teacher-day .v2-agenda-tools .v2-segment { display: none !important; }
-
-  .v2-teacher-day .v2-day-nav {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .v2-day-nav button {
-    display: grid;
-    place-items: center;
-    min-width: 44px;
-    border: 1px solid #dce3ee;
-    border-radius: 8px;
-    background: white;
-    color: #234a94;
-    cursor: pointer;
-  }
-
-  #v2-selected-day {
-    margin: 0;
-    text-align: center;
-    font-size: 13px;
-    line-height: 1.5;
-    color: #405574;
-  }
-}
 
 html,
 body {
@@ -398,7 +367,7 @@ label,
   }
 }
 
-/* Telefones e tablets em retrato: lista para agenda, grade semanal continua selecionável. */
+/* Layout de telas estreitas. */
 @media (max-width: 768px) {
   .dashboard-content,
   .teacher-main-content {
@@ -489,10 +458,9 @@ label,
   .dashboard-content > .agenda-action-header > .agenda-header-right {
     display: flex;
     flex: 0 1 auto !important;
-    flex-direction: column !important;
-    align-items: stretch;
+    align-items: center;
     justify-content: flex-start;
-    width: 100% !important;
+    width: 100%;
     max-width: 100%;
     min-width: 0;
     gap: 10px;
@@ -500,10 +468,10 @@ label,
 
   .dashboard-content > .agenda-action-header > .agenda-header-right > button {
     flex: 0 1 auto !important;
-    width: 100% !important;
+    width: auto;
     max-width: 100%;
     min-width: 0;
-    box-sizing: border-box;
+    padding: 8px 12px;
     justify-content: center;
     white-space: normal;
   }
@@ -515,8 +483,7 @@ label,
     white-space: normal;
   }
 
-  /* O cabeçalho do Professor tem chip de reserva e ação principal no mesmo grupo.
-     Neutraliza o flex-grow herdado para não transformar o botão em um bloco alto. */
+  /* O chip ocupa a largura do cabeçalho quando existe uma reserva ativa. */
   .teacher-main-content > .agenda-action-header {
     display: flex;
     flex-direction: column;
@@ -540,19 +507,6 @@ label,
     width: 100%;
     min-width: 0;
     gap: 8px;
-  }
-
-  .teacher-main-content > .agenda-action-header > .agenda-header-right > .btn-teacher-new-res {
-    display: inline-flex;
-    flex: 0 0 auto !important;
-    align-self: stretch;
-    width: 100%;
-    min-width: 0;
-    min-height: 48px;
-    height: auto;
-    padding: 10px 16px;
-    justify-content: center;
-    box-sizing: border-box;
   }
 
   .teacher-main-content > .agenda-action-header .active-res-chip:not(.hidden) {
@@ -597,8 +551,8 @@ label,
   .teacher-main-content > .agenda-action-header .active-res-chip .btn-chip-action {
     grid-column: 1 / -1;
     grid-row: 2;
-    justify-content: center;
-    min-height: 44px;
+    justify-self: start;
+    min-height: var(--responsive-touch-size);
   }
 
   .calendar-controls-bar {
@@ -774,7 +728,11 @@ label,
   }
 
   .eq-header-actions > button,
-  .reports-filter-group > button,
+  .reports-filter-group > button {
+    flex: 0 1 auto;
+    padding: 8px 12px;
+  }
+
   .reports-filter-group > input,
   .reports-filter-group > select {
     flex: 1 1 150px;
@@ -837,12 +795,13 @@ label,
     flex: 1 1 180px;
   }
 
-  .report-card-actions,
-  .btn-view-records {
-    width: 100%;
+  .report-card .report-card-actions {
+    width: auto;
   }
 
   .btn-view-records {
+    width: auto;
+    padding: 8px 12px;
     justify-content: center;
     white-space: normal;
   }
@@ -1045,11 +1004,6 @@ label,
     flex: 0 0 40px;
   }
 
-  .btn-delete-block {
-    width: 100%;
-    justify-content: center;
-  }
-
   .stat-card {
     flex: 1 1 calc(50% - 8px);
     min-width: 0;
@@ -1245,33 +1199,124 @@ label,
 .reservation-empty p { font-size: 14px; color: #53647c; margin-bottom: 22px; }
 .btn-header-logout { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
 
-/* A visão diária também atende tablets e pode ser escolhida no desktop. */
-.v2-teacher-day .week-selector { display: none !important; }
-.v2-teacher-day .v2-day-nav {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 44px;
-  align-items: center;
-  gap: 12px;
-  flex: 1 1 300px;
+/* Calendário do professor: uma coluna de horários e uma coluna para o dia selecionado. */
+.v2-teacher-day .week-selector,
+.teacher-page .calendar-table [hidden],
+.v2-teacher-day .calendar-table .v2-cell-action {
+  display: none !important;
 }
-.v2-day-nav button { display: grid; place-items: center; width: 44px; min-height: 44px; border: 1px solid #dce3ee; border-radius: 8px; background: white; color: #234a94; cursor: pointer; }
-#v2-selected-day { text-align: center; color: #263d60; font-size: 15px; font-weight: 650; }
-.v2-teacher-day .v2-day-section > h3 { display: none; }
-.v2-teacher-day .v2-day-section { padding: 0 !important; overflow: hidden; }
-.v2-teacher-day .v2-list-items { gap: 0 !important; }
-.day-slot { display: grid; grid-template-columns: 100px minmax(0, 1fr) auto; gap: 12px 20px; align-items: center; padding: 20px 24px; background: #fff; }
-.day-slot + .day-slot { border-top: 1px solid #e5eaf2; }
-.day-slot-time { display: flex; flex-direction: column; gap: 4px; }
-.day-slot-time strong { font-size: 18px; line-height: 1.3; }
-.day-slot-time span { font-size: 13px; color: #63718a; }
-.slot-status { font-size: 14px; font-weight: 650; color: #285b4d; }
-.day-slot-info p { font-size: 13px; color: #52617a; margin-top: 4px; }
-.day-slot-blocked { background: #fff8f4; }
-.day-slot-blocked .slot-status { color: #97543d; }
-.day-slot-reservations { grid-column: 2 / -1; font-size: 13px; color: #52617a; }
-.day-slot-reservations summary { cursor: pointer; min-height: 32px; padding-top: 5px; }
-.day-reservation-link { display: block; width: 100%; text-align: left; padding: 10px; margin-top: 5px; border: 1px solid #e1e7ef; border-radius: 8px; background: #f7f9fd; color: #234a94; font-size: 13px; cursor: pointer; }
-.day-slot-book { padding: 10px 18px; color: #1142bc !important; }
+
+.v2-teacher-day .teacher-day-controls {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.teacher-day-controls .v2-day-nav {
+  display: grid;
+  grid-template-columns: var(--responsive-touch-size) minmax(0, 1fr) var(--responsive-touch-size);
+  align-items: center;
+  gap: 8px;
+}
+
+.teacher-day-controls button {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid #dce3ee;
+  border-radius: 8px;
+  background: #fff;
+  color: #234a94;
+  cursor: pointer;
+}
+
+#v2-selected-day {
+  text-align: center;
+  color: #263d60;
+  font-size: clamp(13px, 3.6vw, 16px);
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+#teacher-week-days {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+#teacher-week-days button { font-size: 11px; line-height: 1.15; }
+#teacher-week-days strong { font-size: 15px; }
+#teacher-week-days [aria-current="date"] { border-color: var(--color-primary); }
+#teacher-week-days [aria-pressed="true"] { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+.v2-teacher-day .calendar-table { width: 100% !important; min-width: 0 !important; }
+.v2-teacher-day .calendar-table .time-col-header { width: 62px !important; }
+.v2-teacher-day .calendar-table thead th { padding: 8px !important; }
+.teacher-page .day-header-resources { display: none; }
+.v2-teacher-day .calendar-table .day-header-tag,
+.v2-teacher-day .calendar-table .day-header-number { display: none; }
+.v2-teacher-day .day-header-resources { display: inline; color: #263d60; font-size: 13px; }
+.v2-teacher-day .calendar-table td[data-date] { height: 60px; padding: 8px 10px !important; border-right: 0; }
+.v2-teacher-day .calendar-table .time-col-cell { vertical-align: top; }
+.v2-teacher-day .calendar-table .time-start { font-size: 14px; }
+.v2-teacher-day .calendar-table .time-end { font-size: 12px; }
+.v2-teacher-day .calendar-events-container > .calendar-event-card { padding: 8px 10px !important; }
+.v2-teacher-day .calendar-events-container .event-teacher,
+.v2-teacher-day .calendar-events-container .event-desc,
+.v2-teacher-day .calendar-events-container .event-room { white-space: normal; overflow-wrap: anywhere; }
+.v2-teacher-day .calendar-events-container > .calendar-event-card:not(.event-block) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+}
+.v2-teacher-day .calendar-events-container .event-teacher { grid-row: 1; grid-column: 1; }
+.v2-teacher-day .calendar-events-container .event-desc { grid-row: 2; }
+.v2-teacher-day .calendar-events-container .event-room { grid-row: 3; }
+.v2-teacher-day .calendar-events-container .v2-event-time { grid-row: 1; grid-column: 2; align-self: center; }
+.v2-teacher-day .calendar-events-container .event-mine-label { grid-row: 2; justify-self: end; align-self: center; }
+.v2-teacher-day .calendar-events-container .event-mine .event-desc { grid-column: 1; }
+
+.teacher-slot-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px 8px;
+  min-height: 43px;
+  color: #50617b;
+  font-size: 12px;
+}
+
+.teacher-slot-info p { flex: 1 1 92px; }
+.teacher-slot-book {
+  padding: 4px 10px;
+  border: 1px solid #b6c9ee;
+  border-radius: 7px;
+  background: #edf3ff;
+  color: #1142bc;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.teacher-slot-book:hover { background: #e1ebff; }
+
+@media (max-width: 768px), (max-width: 900px) and (max-height: 560px) and (orientation: landscape) {
+  .teacher-page .v2-segment { display: none; }
+
+  .teacher-main-content > .agenda-action-header > .agenda-header-right > .btn-teacher-new-res {
+    display: inline-flex;
+    flex: 0 0 auto !important;
+    align-self: flex-start;
+    width: auto;
+    min-width: 0;
+    min-height: var(--responsive-touch-size);
+    height: auto;
+    padding: 8px 12px;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+
 .v2-tool-group label { min-height: 44px; font-size: 13px; }
 .v2-tool-group select { font-size: 14px; min-height: 44px; }
 .v2-tool-group label:has(input[type="checkbox"]) { cursor: pointer; }
@@ -1329,7 +1374,6 @@ label,
 @media (max-width: 1100px) {
   .coord-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .v2-teacher-day .calendar-controls-bar { gap: 14px; }
-  .v2-teacher-day .v2-day-nav { width: 100%; flex-basis: 100%; }
   .teacher-main-content .my-res-list { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 768px) {
@@ -1339,15 +1383,10 @@ label,
   .teacher-page .v2-tool-group:first-child label { width: auto; min-width: 0; font-size: 12px; }
   .teacher-page .v2-tool-group:first-child label:first-child { display: grid; grid-template-columns: auto minmax(0, 1fr); }
   .teacher-page .v2-tool-group:first-child select { min-width: 0; font-size: 13px; }
-  .teacher-page .v2-tool-group:last-child { justify-content: space-between; padding: 0; }
-  .teacher-view-tabs { gap: 10px; margin-bottom: 20px; }
-  .teacher-view-tabs button { flex: 1; font-size: 13px; gap: 6px; }
+  .teacher-page .v2-tool-group:last-child { align-items: center; justify-content: space-between; padding: 0; }
+  .teacher-view-tabs { display: none; }
+  .teacher-main-content [role="tabpanel"] { scroll-margin-top: 68px; }
   .page-eyebrow { font-size: 10px; margin-bottom: 8px; }
-  .day-slot { grid-template-columns: 76px minmax(0, 1fr) auto; gap: 10px; padding: 18px 14px; }
-  .day-slot-time strong { font-size: 17px; }
-  .day-slot-time span, .day-slot-info p { font-size: 12px; }
-  .day-slot-book { padding: 8px 10px; font-size: 13px !important; }
-  .day-slot-reservations { grid-column: 1 / -1; }
   .coord-overview { gap: 10px; margin: 18px 0 24px; }
   .coord-metric { padding: 14px; }
   .coord-metric-icon { margin-bottom: 10px; }
@@ -1366,9 +1405,6 @@ label,
   .resource-choices label { font-size: 13px; padding: 8px 4px; gap: 5px; }
 }
 @media (max-width: 380px) {
-  .teacher-view-tabs button { flex-wrap: wrap; gap: 4px; }
-  .day-slot { grid-template-columns: 70px minmax(0, 1fr); }
-  .day-slot-book { grid-column: 2; width: 100%; }
   .booking-section .form-row { gap: 10px; }
   .resource-choices label { flex-direction: column; }
 }

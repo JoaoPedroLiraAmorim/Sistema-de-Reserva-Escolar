@@ -461,7 +461,7 @@
     border-right: none;
 }
 
-.calendar-table td.time-col-cell {
+.calendar-table th.time-col-cell {
     width: 86px;
     background-color: #f0f3f8;
     text-align: center;
@@ -490,7 +490,7 @@
     background-color: #f4f7fe;
 }
 
-.calendar-table td:not(.time-col-cell):hover {
+.calendar-table td:hover {
     background-color: #eff2f8;
 }
 
@@ -741,7 +741,7 @@
     }
 
     .calendar-table th.time-col-header,
-    .calendar-table td.time-col-cell {
+    .calendar-table th.time-col-cell {
         width: 52px;
     }
 

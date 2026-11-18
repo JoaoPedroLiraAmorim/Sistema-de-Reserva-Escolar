@@ -2,14 +2,14 @@
 
 Sistema do TCC para reservar salas e notebooks, com áreas de Professor e Coordenação.
 
-## Estado desta etapa
+## Ambiente de desenvolvimento publicado
 
-A interface atual agora pode ser servida por Cloudflare Workers em desenvolvimento local.
-A API contém `GET /api/health` e `GET /api/salas`, esta última consultando D1.
-Há uma migração SQL e uma sala de demonstração opcional para desenvolvimento.
-As telas ainda usam localStorage; não estão conectadas a essa nova consulta.
-O login ainda é de demonstração. Não há login institucional ou permissões no servidor.
-Esta etapa não torna o sistema pronto para dados reais e não cria recursos na Cloudflare.
+O Worker `app` serve a interface em [app.reservas-alceu.workers.dev](https://app.reservas-alceu.workers.dev).
+A rota `GET /api/health` responde pelo Worker e `GET /api/salas` consulta o banco D1 `edulab-dev`.
+O repositório já contém o ID desse banco, a migração da tabela `salas` e um seed opcional.
+
+O login é demonstrativo e as telas guardam reservas no localStorage. Para receber dados reais,
+o sistema ainda precisa de autenticação institucional, permissões e validação de reservas no servidor.
 
 ## Executar no computador
 
@@ -98,10 +98,9 @@ Remove-Item Env:UI_BASE_URL
 
 ## Próximas etapas
 
-1. Criar o banco de desenvolvimento na conta Cloudflare do TCC, seguindo o guia abaixo.
-2. Integrar Microsoft e Google: validar identidade e organização, cadastrar automaticamente
+1. Integrar Microsoft e Google: validar identidade e organização, cadastrar automaticamente
    como Professor e manter Coordenação como permissão explícita.
-3. Conectar as telas e migrar reservas, estoque e bloqueios com validação no servidor e proteção contra concorrência.
+2. Conectar as telas e migrar reservas, estoque e bloqueios com validação no servidor e proteção contra concorrência.
 
 ## Aula prática: SQL, API e conta do TCC
 
@@ -131,7 +130,10 @@ Uma falha de banco retorna 503, não uma lista vazia enganosa.
 O banco local fica em `.wrangler/`, não no localStorage, e persiste ao reiniciar o servidor.
 As migrações e seeds não importam nem modificam dados do navegador.
 
-### Criar o banco na sua conta Cloudflare
+### Criar um banco em outra conta Cloudflare
+
+O ambiente de desenvolvimento do TCC já tem um `edulab-dev`. Siga estes passos quando
+precisar configurar o projeto em outra conta.
 
 A conta Cloudflare é independente da conta usada no ChatGPT. Execute pessoalmente, no terminal
 do projeto, um comando de cada vez:
@@ -140,15 +142,15 @@ do projeto, um comando de cada vez:
 npx wrangler login
 ```
 
-O navegador abrirá a autorização do Wrangler. Confira que está na conta do TCC antes de autorizar.
+O navegador abrirá a autorização do Wrangler. Confira a conta de destino antes de autorizar.
 Se o navegador mostrar outra conta, troque de conta antes de concluir.
 
 ```powershell
 npx wrangler whoami
 ```
 
-Confira o usuário e a conta Cloudflare disponíveis. Se houver várias contas, precisamos selecionar
-a conta do TCC explicitamente na configuração antes de criar recursos. Não prossiga com a conta errada.
+Confira o usuário e a conta Cloudflare disponíveis. Se houver várias contas, selecione
+a conta de destino explicitamente na configuração antes de criar recursos. Não prossiga com a conta errada.
 
 ```powershell
 npx wrangler d1 create edulab-dev
@@ -180,9 +182,7 @@ Eles não sincronizam os dados. A opção `remote: false` do binding mantém `np
 local, mesmo depois de preencher `database_id`. Ver a tabela no painel não faz a interface local
 usar esse banco automaticamente.
 
-Nesta etapa, `/api/salas` é somente leitura e ainda não tem autenticação. Use apenas exemplos
-de desenvolvimento. A publicação e a conexão de um Worker ao banco remoto serão feitas em
-uma etapa própria; não execute deploy como parte desta aula.
+A rota `/api/salas` é pública e somente leitura. Use apenas exemplos de desenvolvimento.
 
 Domínios institucionais informados: Microsoft `professor.educacao.sp.gov.br` e Google
 `prof.educacao.sp.gov.br`. A integração depende dos aplicativos e permissões dos provedores;
@@ -191,16 +191,9 @@ os domínios digitados sozinhos não comprovam a identidade.
 ## Publicação pelo painel (ambiente de desenvolvimento)
 
 No Workers & Pages, a aplicação e o campo `name` do Wrangler devem usar
-`app`. O endereço esperado, após alinhar o painel e a configuração, é
-`https://app.reservas-alceu.workers.dev`. Conecte este repositório e a branch `main`.
-
-Workers não têm uma operação de renomeação direta. Crie uma nova aplicação `app` pelo
-painel, importando este repositório, e confira a integração de build. O código e os arquivos
-estáticos serão publicados juntos. Mantenha o Worker antigo até verificar o novo endereço,
-`/api/health` e `/api/salas`. A integração Git do Worker antigo deve ser desconectada para
-que ele não tente publicar a configuração destinada ao novo nome.
-A marca exibida ao usuário é **Alceu Reservas**. O banco continua com o nome `edulab-dev`;
-o nome interno do banco não aparece no endereço do site.
+`app`. O endereço publicado é `https://app.reservas-alceu.workers.dev`. Para configurar
+a integração de build pelo painel, selecione este repositório e a branch `main`.
+O código e os arquivos estáticos são publicados juntos.
 
 | Campo do painel | Valor |
 | --- | --- |

@@ -24,19 +24,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Navegação de semana
     document.getElementById('btnPrevWeek').addEventListener('click', () => {
-        currentWeekMonday.setDate(currentWeekMonday.getDate() - 7);
-        renderCalendar();
+        showTeacherCalendarWeek(ERS.dayOffset(-7, currentWeekMonday));
     });
     document.getElementById('btnNextWeek').addEventListener('click', () => {
-        currentWeekMonday.setDate(currentWeekMonday.getDate() + 7);
-        renderCalendar();
+        showTeacherCalendarWeek(ERS.dayOffset(7, currentWeekMonday));
     });
 
     // Turno
     document.querySelectorAll('.shift-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.shift-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            document.querySelectorAll('.shift-btn').forEach(button => {
+                button.classList.toggle('active', button === btn);
+                button.setAttribute('aria-pressed', button === btn);
+            });
             currentShift = btn.dataset.shift;
             renderCalendar();
             populateTimeSlots(currentShift);
@@ -167,6 +167,13 @@ function populateBrandSelect() {
 // ─────────────────────────────────────────────────────────────
 //  CALENDÁRIO
 // ─────────────────────────────────────────────────────────────
+function showTeacherCalendarWeek(date) {
+    const monday = ERS.getMonday(date);
+    if (ERS.dateKey(monday) === ERS.dateKey(currentWeekMonday)) return;
+    currentWeekMonday = monday;
+    renderCalendar();
+}
+
 function renderCalendar() {
     const weekDays = ERS.getWeekDays(currentWeekMonday);
     const slots = SHIFT_SLOTS[currentShift];
@@ -180,13 +187,14 @@ function renderCalendar() {
     const thead = document.getElementById('calendarHead');
     const todayStr = ERS.today();
     thead.innerHTML = `<tr>
-        <th class="time-col-header"><span class="material-symbols-outlined">schedule</span></th>
+        <th class="time-col-header" scope="col" aria-label="Horário"><span class="material-symbols-outlined">schedule</span></th>
         ${weekDays.map(d => {
             const dk = ERS.dateKey(d);
             const isToday = dk === todayStr;
-            return `<th data-date="${dk}"${isToday ? ' class="today-col"' : ''}>
+            return `<th scope="col" data-date="${dk}"${isToday ? ' class="today-col"' : ''}>
                 <div class="day-header-tag">${ERS.DIAS_SEMANA_FULL[d.getDay()]}</div>
                 <div class="day-header-number">${d.getDate()}</div>
+                <span class="day-header-resources">Reservas e disponibilidade</span>
             </th>`;
         }).join('')}
     </tr>`;
@@ -197,10 +205,10 @@ function renderCalendar() {
 
     slots.forEach(slot => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="time-col-cell">
+        tr.innerHTML = `<th class="time-col-cell" scope="row">
             <span class="time-start">${slot.start}</span>
             <span class="time-end">${slot.end}</span>
-        </td>`;
+        </th>`;
 
         weekDays.forEach(d => {
             const dk = ERS.dateKey(d);
@@ -223,9 +231,9 @@ function renderCalendar() {
             if (blocks.length > 0 || slotReservations.length > 0) {
                 html += `<div class="calendar-events-container">`;
                 blocks.forEach(b => {
-                    html += `<div class="calendar-event-card event-block" title="${b.motivo}">
-                        <span class="event-teacher">🔒 Bloqueado</span>
-                        <span class="event-desc">${b.motivo}</span>
+                    html += `<div class="calendar-event-card event-block">
+                        <span class="event-teacher">Bloqueado pela coordenação</span>
+                        <span class="event-desc">${ERS.escapeHtml(b.motivo)}</span>
                         <span class="event-room"><span class="material-symbols-outlined">block</span> ${b.inicio}–${b.fim}</span>
                     </div>`;
                 });
