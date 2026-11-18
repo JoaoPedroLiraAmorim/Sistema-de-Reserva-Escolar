@@ -1411,8 +1411,7 @@ label,
     line-height: 1.4;
   }
 
-  .v2-teacher-day #teacher-week-days button { min-height: 54px; gap: 3px; font-size: 12px; }
-  .v2-teacher-day #teacher-week-days strong { font-size: 18px; }
+  .teacher-page #teacher-week-days { display: none; }
   .v2-teacher-day .calendar-table .time-col-header { width: 68px !important; }
   .v2-teacher-day .calendar-table thead th { padding-block: 14px !important; }
   .v2-teacher-day .day-header-resources { font-size: 15px; font-weight: 650; }
@@ -1520,10 +1519,6 @@ label,
 @media (max-width: 768px) {
   .teacher-main-content .agenda-action-header { margin-bottom: 18px; }
   .teacher-page .v2-agenda-tools { gap: 8px; padding: 14px 0; }
-  .teacher-page .v2-tool-group:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 0; gap: 10px; }
-  .teacher-page .v2-tool-group:first-child label { width: auto; min-width: 0; font-size: 12px; }
-  .teacher-page .v2-tool-group:first-child label:first-child { display: grid; grid-template-columns: auto minmax(0, 1fr); }
-  .teacher-page .v2-tool-group:first-child select { min-width: 0; font-size: 13px; }
   .teacher-page .v2-tool-group:last-child { align-items: center; justify-content: space-between; padding: 0; }
   .teacher-view-tabs { display: none; }
   .teacher-main-content [role="tabpanel"] { scroll-margin-top: 68px; }

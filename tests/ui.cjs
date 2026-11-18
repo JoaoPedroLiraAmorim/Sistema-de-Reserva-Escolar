@@ -56,15 +56,24 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await page.getByLabel('E-mail',{exact:true}).fill('professor@exemplo.com');await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');
   await page.getByRole('button',{name:'Criar conta',exact:true}).click();await page.getByText('Enviamos um link de confirmação.',{exact:false}).waitFor();
   await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');await page.getByRole('button',{name:'Entrar',exact:true}).click();
-  await page.waitForURL('**/pages/professor.html');await page.locator('#teacher-week-days').waitFor({state:'visible'});
+  await page.waitForURL('**/pages/professor.html');await page.locator('.teacher-day-controls').waitFor({state:'visible'});
   assert.equal(await page.locator('#calendarTable').isVisible(),true);
   assert.equal(await page.evaluate(()=>localStorage.getItem('ers_session')),null,'não cria sessão local');
   assert.equal(await page.evaluate(()=>localStorage.getItem('ers_seeded_v6')),null,'não popula dados fictícios');
   for(const [width,height] of sizes) {
    await page.setViewportSize({width,height});await visit('pages/professor.html');await noOverflow('professor '+width);
    assert.equal(await page.locator('#v2-day-list,[data-agenda-mode="list"]').count(),0);
+   assert.equal(await page.locator('#v2-room-filter,#v2-only-mine').count(),0,'professor sem filtros de sala ou de minhas reservas');
    const daily=width<=1100;
    assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:6);
+   if(width<=768||width===844) {
+    assert.equal(await page.locator('#teacher-week-days').isVisible(),false,'celular usa apenas as setas para escolher o dia');
+    const day=await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date');
+    await page.locator('#v2-next-day').click();
+    assert.notEqual(await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date'),day);
+    await page.locator('#v2-prev-day').click();
+    assert.equal(await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date'),day);
+   }
    if(width<=768||width===844){assert.equal(await page.locator('.calendar-scroll-area').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);assert.ok(await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el=>el.getBoundingClientRect().height)>=112);}
    await page.locator('#btnOpenNewReservation').click();
    let footer=await page.locator('#new-reservation-form>.modal-footer').boundingBox();assert.ok(footer.y>=0&&footer.y+footer.height<=height+2);

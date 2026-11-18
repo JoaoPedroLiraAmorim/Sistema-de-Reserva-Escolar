@@ -134,11 +134,12 @@
             $('#v2-prev-day').onclick = () => moveAgendaDay(-1);
             $('#v2-next-day').onclick = () => moveAgendaDay(1);
         }
-        controls.insertAdjacentHTML('afterend',`<div class="v2-agenda-tools"><div class="v2-tool-group"><label>Sala <select id="v2-room-filter"><option value="">Todas as salas</option>${ERS.getRooms().map(r=>`<option>${esc(r.nome)}</option>`).join('')}</select></label>${teacherAgenda?'<label><input type="checkbox" id="v2-only-mine">Minhas reservas</label>':''}</div><div class="v2-tool-group"><span id="v2-agenda-summary" class="v2-agenda-summary"></span><div class="v2-segment" role="group" aria-label="Visualização da agenda"><button type="button" data-agenda-mode="grid">${icon('grid')}Semana</button><button type="button" data-agenda-mode="${compactMode}">${icon(teacherAgenda ? 'calendar' : 'list')}${teacherAgenda ? 'Dia' : 'Lista'}</button></div></div></div>`);
+        const roomFilter = teacherAgenda ? '' : `<div class="v2-tool-group"><label>Sala <select id="v2-room-filter"><option value="">Todas as salas</option>${ERS.getRooms().map(r=>`<option>${esc(r.nome)}</option>`).join('')}</select></label></div>`;
+        controls.insertAdjacentHTML('afterend',`<div class="v2-agenda-tools">${roomFilter}<div class="v2-tool-group"><span id="v2-agenda-summary" class="v2-agenda-summary"></span><div class="v2-segment" role="group" aria-label="Visualização da agenda"><button type="button" data-agenda-mode="grid">${icon('grid')}Semana</button><button type="button" data-agenda-mode="${compactMode}">${icon(teacherAgenda ? 'calendar' : 'list')}${teacherAgenda ? 'Dia' : 'Lista'}</button></div></div></div>`);
         const wrapper=$('.calendar-wrapper-card');
         wrapper.insertAdjacentHTML('afterend','<div class="v2-calendar-legend"><span><i></i>Minha reserva</span><span><i class="other"></i>Outra reserva</span><span><i class="block"></i>Período bloqueado</span></div>');
         if (!teacherAgenda) wrapper.insertAdjacentHTML('afterend','<div id="v2-day-list" class="v2-day-list"></div>');
-        $('#v2-room-filter').onchange=renderAgendaList;$('#v2-only-mine')?.addEventListener('change',renderAgendaList);
+        $('#v2-room-filter')?.addEventListener('change',renderAgendaList);
         const todayButton = document.createElement('button');
         todayButton.type = 'button'; todayButton.className = 'v2-today'; todayButton.textContent = 'Hoje';
         todayButton.onclick = () => {
@@ -212,7 +213,7 @@
     function quickReserve(date,start,end) {
         $('#btnOpenNewReservation').click();$('#res-date').value=date;$('#res-start').value=start;$('#res-end').value=end;availability();
     }
-    function renderTeacherAgenda(days, room, mine, session) {
+    function renderTeacherAgenda(days, room) {
         const today = ERS.today();
         const time = ERS.getCurrentTime();
         const daily = isTeacherDay();
@@ -260,7 +261,7 @@
             const cards = [...cell.querySelectorAll('.calendar-event-card[data-res-id]')];
             cards.forEach(card => {
                 const booking = reservations.get(card.dataset.resId);
-                card.hidden = (room && booking?.sala !== room) || (mine && booking?.professorId !== session?.userId);
+                card.hidden = Boolean(room && booking?.sala !== room);
                 if (booking && !cell.hidden && !card.hidden) bookingsShown.add(booking.id);
             });
 
@@ -274,10 +275,6 @@
             slot.append(status);
             cell.append(slot);
             const hasVisibleBookings = cards.some(card => !card.hidden);
-            if (mine && !hasVisibleBookings) {
-                status.textContent = 'Sem reservas suas';
-                return;
-            }
             if (date < today || (date === today && start <= time)) {
                 if (hasVisibleBookings) slot.remove();
                 else status.textContent = 'Horário iniciado ou encerrado';
@@ -315,14 +312,14 @@
     }
 
     function renderAgendaList() {
-        const room=$('#v2-room-filter').value;const mine=$('#v2-only-mine')?.checked;const session=ERS.getSession();
+        const room=$('#v2-room-filter')?.value || '';
         const days = getAgendaDays();
         if (!days.length) return;
         document.querySelectorAll('[data-agenda-mode]').forEach(button => {
             button.setAttribute('aria-pressed', button.dataset.agendaMode === (isTeacherDay() ? 'day' : agendaMode));
         });
         if (teacherAgenda) {
-            renderTeacherAgenda(days, room, mine, session);
+            renderTeacherAgenda(days, room);
             compactCalendarCells();
             decorate();
             return;
@@ -333,7 +330,7 @@
             const seen=new Set(),clones=[];
             document.querySelectorAll(`#calendarBody td[data-date="${date}"] .calendar-event-card`).forEach(card=>{
                 const r=ERS.getReservations().find(r=>r.id===card.dataset.resId);
-                const match=(card.classList.contains('event-block')||(!room||r?.sala===room)&&(!mine||r?.professorId===session?.userId));
+                const match=(card.classList.contains('event-block')||!room||r?.sala===room);
                 card.hidden=!match;
                 const key=card.dataset.resId||card.dataset.blkId||card.textContent;
                 if(match&&!seen.has(key)){seen.add(key);clones.push(card.cloneNode(true));if(r)count++;}
