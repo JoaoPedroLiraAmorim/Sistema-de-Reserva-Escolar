@@ -24,6 +24,16 @@ Os botões **Professor demo** e **Coordenação demo** permitem experimentar a m
 - A migração 0004 preserva as reservas existentes em reservas_salas. A tabela antiga permanece como origem histórica; as novas gravações usam reservas. Nenhuma conta ou reserva existente é apagada.
 - O histórico permanece no banco. A agenda e os relatórios da interface consultam o dia atual e datas futuras; uma consulta histórica completa ainda não está disponível na interface.
 
+## E-mails e confirmação de conta
+
+O SDK e o idioma padrão das notificações Firebase usam pt-BR. O nome visual do projeto é Alceu Reservas; o ID continua projetotcc-3ds.
+
+A página pages/verificar-email.html tem a identidade visual do sistema e trata confirmação de e-mail, recuperação de endereço e redefinição de senha. Usa a configuração confiável da API, verifica os códigos no Firebase e exige uma ação explícita para confirmar. O código de uso único sai do endereço assim que a página carrega.
+
+O arquivo emails/verificar-email.html contém o modelo HTML com botão “Verificar meu e-mail”, usando o marcador %LINK%. Ele não é publicado como um arquivo do site nem é enviado pelo fluxo atual.
+
+Em 18/11/2026, a API Firebase recusou alterações do corpo, assunto, remetente e callbackUri com EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED, mesmo na conta administradora. Portanto, o envio padrão mantém o template e a página de destino do Firebase. Para ativar o modelo completo e o destino https://app.reservas-alceu.workers.dev/pages/verificar-email.html, é necessário liberar a configuração com o suporte Firebase ou integrar um serviço próprio de envio. Não há credenciais SMTP no repositório.
+
 ## Desenvolvimento local
 
 Use Node.js 24 e as dependências do package-lock.json:

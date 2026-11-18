@@ -29,7 +29,8 @@
 			"/index.html",
 			"/api",
 			"/api/*",
-			"/pages/conta.html"
+			"/pages/conta.html",
+			"/pages/verificar-email.html"
 		],
 		"html_handling": "none",
 		"not_found_handling": "none"

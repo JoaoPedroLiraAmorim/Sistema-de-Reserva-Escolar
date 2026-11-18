@@ -1,0 +1,39 @@
+.verification-page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 32px 20px 24px; background: radial-gradient(ellipse at top, #e4edff 0, #f4f7fc 60%); color: #18263f; }
+.verification-brand { margin-bottom: 36px; }
+.verification-brand a { display: flex; align-items: center; gap: 11px; color: #123eaa; font-size: 20px; font-weight: 750; text-decoration: none; }
+.brand-mark { display: grid; place-items: center; width: 44px; height: 44px; background: #1142bc; border-radius: 12px; color: #fff; }
+.brand-mark svg { width: 30px; height: 30px; }
+.verification-brand small { display: block; margin-top: 2px; font-size: 8px; letter-spacing: .14em; color: #6c7d9b; }
+.verification-card { width: min(100%, 500px); padding: 40px; border: 1px solid #dde5f1; border-radius: 24px; background: #fff; box-shadow: 0 16px 48px #123eaa0a; text-align: center; }
+.verification-icon { display: grid; place-items: center; width: 80px; height: 80px; margin: 0 auto 26px; border: 1px solid #dce6ff; border-radius: 23px; background: #eff4ff; color: #1142bc; }
+.verification-icon svg { width: 48px; height: 48px; }
+.icon-success { display: none; }
+.verification-eyebrow { margin-bottom: 12px; color: #5f78a1; font-size: 10px; font-weight: 700; letter-spacing: .14em; }
+.verification-card h1 { margin: 0 0 16px; font-size: clamp(26px, 6vw, 34px); line-height: 1.18; letter-spacing: -.04em; }
+.verification-description { color: #62718a; font-size: 14px; line-height: 1.7; }
+.verification-email { margin: 18px 0 0; padding: 10px; border-radius: 8px; background: #f4f7fc; color: #263d60; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.verification-actions { margin-top: 26px; }
+.verification-actions button, .verification-primary { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 50px; padding: 13px 18px; border: 0; border-radius: 10px; background: #1142bc; color: #fff; font: inherit; font-size: 14px; font-weight: 650; text-decoration: none; cursor: pointer; }
+.verification-actions button:hover, .verification-primary:hover { background: #1e3a8a; }
+.verification-actions button:disabled { opacity: .6; cursor: wait; }
+.verification-actions :focus-visible, .verification-brand a:focus-visible { outline: 3px solid #7ca2f6; outline-offset: 4px; }
+.verification-status { min-height: 20px; margin-top: 12px; color: #6d7c95; font-size: 12px; }
+.verification-password-form { margin-top: 22px; text-align: left; }
+.verification-password-form label { display: block; margin: 14px 0 7px; font-size: 13px; font-weight: 600; }
+.verification-password-form input { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 9px; font: inherit; font-size: 16px; }
+.verification-password-form p { margin-top: 6px; font-size: 11px; color: #62718a; }
+.verification-password-form button { width: 100%; min-height: 50px; margin-top: 20px; border: 0; border-radius: 10px; background: #1142bc; color: #fff; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+.verification-password-form button:disabled { opacity: .6; cursor: wait; }
+.verification-password-form :focus-visible { outline: 3px solid #7ca2f6; outline-offset: 3px; }
+.verification-note { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #ecf0f7; text-align: left; }
+.verification-note > span { color: #1142bc; font-size: 20px; }
+.verification-note p { color: #425575; font-size: 12px; font-weight: 600; }
+.verification-note small { display: block; margin-top: 3px; color: #8a97ac; font-size: 11px; font-weight: 400; }
+.verification-footer { margin-top: 28px; color: #8a97ac; font-size: 11px; text-align: center; }
+.verification-footer span { color: #62718a; font-weight: 600; }
+[data-state="success"] .icon-mail { display: none; }
+[data-state="success"] .icon-success { display: block; }
+[data-state="success"] .verification-icon { color: #15803d; background: #f0fdf4; border-color: #dcfce7; }
+[data-state="error"] .verification-status { color: #a13939; }
+[hidden] { display: none !important; }
+@media (max-width: 480px) { .verification-page { padding: 28px 16px; } .verification-brand { margin-bottom: 28px; } .verification-card { padding: 32px 22px; border-radius: 20px; } }

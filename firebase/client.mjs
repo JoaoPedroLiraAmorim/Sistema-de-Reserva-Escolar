@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import {
-    browserPopupRedirectResolver, createUserWithEmailAndPassword, GoogleAuthProvider,
-    initializeAuth, inMemoryPersistence, sendEmailVerification, sendPasswordResetEmail,
+    ActionCodeOperation, applyActionCode, browserPopupRedirectResolver, checkActionCode, createUserWithEmailAndPassword, GoogleAuthProvider,
+    confirmPasswordReset, initializeAuth, inMemoryPersistence, sendEmailVerification, sendPasswordResetEmail, verifyPasswordResetCode,
     signInWithEmailAndPassword, signInWithPopup, signOut,
 } from 'firebase/auth';
 
@@ -10,6 +10,7 @@ export function prepararLogin(config) {
         persistence: inMemoryPersistence, popupRedirectResolver: browserPopupRedirectResolver,
     });
     const google = new GoogleAuthProvider();
+    auth.languageCode = 'pt-BR';
     google.setCustomParameters({ prompt: 'select_account' });
 
     async function concluir(user, api) {
@@ -47,5 +48,21 @@ export function prepararLogin(config) {
                 if (error.code !== 'auth/user-not-found') throw error;
             });
         },
+    };
+}
+
+export function prepararConfirmacao(config) {
+    const auth = initializeAuth(initializeApp(config, 'confirmacao-email'), { persistence: inMemoryPersistence });
+    auth.languageCode = 'pt-BR';
+    return {
+        async conferir(code, mode = 'verifyEmail') {
+            if (mode === 'resetPassword') return verifyPasswordResetCode(auth, code);
+            const result = await checkActionCode(auth, code);
+            const operation = mode === 'recoverEmail' ? ActionCodeOperation.RECOVER_EMAIL : ActionCodeOperation.VERIFY_EMAIL;
+            if (result.operation !== operation) throw Object.assign(new Error('Link inválido.'), { code: 'auth/invalid-action-code' });
+            return result.data.email;
+        },
+        confirmar: code => applyActionCode(auth, code),
+        redefinir: (code, password) => confirmPasswordReset(auth, code, password),
     };
 }

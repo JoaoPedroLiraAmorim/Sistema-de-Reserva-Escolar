@@ -39,7 +39,15 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    const req=route.request(),url=new URL(req.url());
    if(url.origin!==base)return route.abort();
    if(req.method()==='POST'&&url.pathname.startsWith('/api/'))writes.push(url.pathname);
-   if(url.pathname==='/js/firebase-conta.js')return route.fulfill({contentType:'application/javascript',body:`export function prepararLogin(){return {cadastrar:async()=>{},reenviar:async()=>{},redefinir:async()=>{},entrar:async(email,senha,api)=>{await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;},entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}`});
+   if(url.pathname==='/js/firebase-conta.js')return route.fulfill({contentType:'application/javascript',body:`export function prepararLogin(){return {cadastrar:async()=>{},reenviar:async()=>{},redefinir:async()=>{},entrar:async(email,senha,api)=>{await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;},entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}
+   export function prepararConfirmacao(config) {
+    if(config.projectId!=='demo-alceu') throw Error('Projeto inesperado');
+    return {conferir:async(code,mode)=>{
+     if(code==='expirado')throw Object.assign(Error('expired'),{code:'auth/expired-action-code'});
+     if(code==='rede'&&!window.__verificationRetried){window.__verificationRetried=true;throw Object.assign(Error('network'),{code:'auth/network-request-failed'});}
+     return 'professor@exemplo.com';
+    },confirmar:async()=>{window.__verificationApplied=(window.__verificationApplied||0)+1;},redefinir:async()=>{window.__passwordReset=true;}};
+   }`});
    if(url.pathname==='/api/conta/entrar') {
     const id=req.postDataJSON().idToken;
     return route.fulfill({json:{ok:true},headers:{'Set-Cookie':`__Host-alceu_sessao=${tokens[id]}; Path=/; HttpOnly; Secure; SameSite=Lax`}});
@@ -152,7 +160,41 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await page.getByRole('button',{name:'Entrar com Google'}).click();await page.waitForURL('**/pages/professor.html');
   await page.waitForFunction(()=>!document.documentElement.classList.contains('app-loading'));
   assert.equal(await page.evaluate(()=>window.ERS_REAL),true,'login normal retorna ao sistema real');
+  for(const [width,height] of [[320,740],[390,844],[1366,900]]) {
+   await page.setViewportSize({width,height});
+   await visit('pages/verificar-email.html?mode=verifyEmail&oobCode=teste-valido&apiKey=outro-projeto&continueUrl=https://outro.test');
+   await page.locator('#verification-confirm:enabled').waitFor();
+   assert.equal(await page.evaluate(()=>window.__verificationApplied||0),0,'abrir o link não consome o código');
+   assert.equal(await page.evaluate(()=>location.search),'','código removido do endereço');
+   await noOverflow('confirmação '+width);
+   if(width===390)await screenshot('confirmacao-email-celular');
+   await page.locator('#verification-confirm').click();
+   await page.getByRole('heading',{name:'E-mail confirmado!'}).waitFor();
+   assert.equal(await page.evaluate(()=>window.__verificationApplied),1);
+   assert.equal(await page.locator('#verification-login').getAttribute('href'),'../index.html','retorno restrito ao próprio site');
+  }
+  await visit('pages/verificar-email.html?mode=verifyEmail&oobCode=expirado');
+  await page.getByText('Este link expirou ou já foi utilizado.',{exact:false}).waitFor();
+  assert.equal(await page.locator('#verification-confirm').isVisible(),false);
+  await visit('pages/verificar-email.html?mode=verifyEmail&oobCode=rede');
+  await page.locator('#verification-retry').waitFor({state:'visible'});await page.locator('#verification-retry').click();
+  await page.locator('#verification-confirm:enabled').waitFor();
+  await visit('pages/verificar-email.html?mode=resetPassword&oobCode=teste-valido');
+  await page.locator('#verification-password-form').waitFor({state:'visible'});
+  await page.getByLabel('Nova senha',{exact:true}).fill('senha-teste-123');await page.getByLabel('Repita a nova senha').fill('senha-diferente');
+  await page.getByRole('button',{name:'Salvar nova senha'}).click();await page.getByText('As senhas não conferem.',{exact:false}).waitFor();
+  assert.equal(await page.evaluate(()=>window.__passwordReset||false),false);
+  await page.getByLabel('Repita a nova senha').fill('senha-teste-123');await page.getByRole('button',{name:'Salvar nova senha'}).click();
+  await page.getByRole('heading',{name:'Nova senha salva!'}).waitFor();
+  await visit('pages/verificar-email.html?mode=recoverEmail&oobCode=teste-valido');await page.getByRole('button',{name:'Recuperar meu e-mail'}).click();
+  await page.getByRole('heading',{name:'E-mail recuperado!'}).waitFor();
+  await visit('pages/verificar-email.html');await page.getByRole('heading',{name:'Não foi possível confirmar.'}).waitFor();
+  const emailPreview=await context.newPage();
+  await emailPreview.setViewportSize({width:600,height:900});
+  await emailPreview.setContent(fs.readFileSync(path.join(root,'emails/verificar-email.html'),'utf8').replaceAll('%LINK%',base+'/pages/verificar-email.html'));
+  if(process.env.UI_ARTIFACT_DIR)await emailPreview.screenshot({path:path.join(process.env.UI_ARTIFACT_DIR,'modelo-email-com-botao.png'),fullPage:true});
+  await emailPreview.close();
   assert.deepEqual(errors,[],'sem erros JavaScript');
-  console.log('UI validada: login real, dois perfis demo isolados da API, 8 viewports, 6 telas de coordenação, persistência SQL, retirada, alunos e logout.');
+  console.log('UI validada: login real, dois perfis demo isolados, 8 viewports, telas de coordenação, persistência SQL, confirmação e recuperação de conta, retirada, alunos e logout.');
  } finally {await browser.close();sql.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

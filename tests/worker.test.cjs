@@ -45,6 +45,15 @@ test('a raiz serve index.html sem mudar os caminhos das páginas existentes', as
     });
 });
 
+test('página de confirmação não permite cache ou vazamento de referrer', async () => {
+    const response = await (await worker).fetch(request('/pages/verificar-email.html?mode=verifyEmail&oobCode=teste'), {
+        ASSETS: { fetch: () => new Response('confirmação') },
+    });
+    assert.equal(response.headers.get('Cache-Control'), 'no-store');
+    assert.equal(response.headers.get('Referrer-Policy'), 'no-referrer');
+    assert.match(response.headers.get('Content-Security-Policy'), /frame-ancestors 'none'/);
+});
+
 test('salas converte o booleano do SQL e não expõe metadados do banco', async () => {
     const response = await (await worker).fetch(request('/api/salas'), {
         DB: { prepare: () => ({ all: async () => ({ results: [

@@ -19,7 +19,7 @@ export default {
                 return json({ error: 'Serviço temporariamente indisponível.' }, 503);
             }
         }
-        if (pathname === '/' || pathname === '/index.html') {
+        if (pathname === '/' || pathname === '/index.html' || pathname === '/pages/verificar-email.html') {
             const assetRequest = pathname === '/' ? new Request(new URL('/index.html', url), request) : request;
             const asset = await env.ASSETS.fetch(assetRequest);
             const headers = new Headers(asset.headers);
@@ -30,6 +30,7 @@ export default {
                 `frame-src 'self'${frames}; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`);
             headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
             headers.set('Referrer-Policy', 'no-referrer');
+            if (pathname === '/pages/verificar-email.html') headers.set('Cache-Control', 'no-store');
             return new Response(asset.body, { status: asset.status, headers });
         }
         if (pathname === '/api/health') {
