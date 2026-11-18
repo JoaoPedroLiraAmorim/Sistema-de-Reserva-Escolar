@@ -106,9 +106,9 @@
      */
     function setupLogout() {
         document.querySelectorAll('a.logout, #btnLogout, .btn-header-logout').forEach(el => {
-            el.addEventListener('click', e => {
+            el.addEventListener('click', async e => {
                 e.preventDefault();
-                ERS.logout();
+                if (!await ERS.logout()) return;
                 const isInPages = window.location.pathname.includes('/pages/');
                 window.location.href = isInPages ? '../index.html' : 'index.html';
             });

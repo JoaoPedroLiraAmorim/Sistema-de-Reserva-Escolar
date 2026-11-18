@@ -199,14 +199,14 @@ window.EquipamentosModule = (function () {
                      role="button" 
                      tabindex="0" 
                      data-brand-id="${nb.id}"
-                     title="Clique para ver detalhes de ${nb.marca}"
-                     aria-label="Detalhes da marca ${nb.marca}">
+                     title="Clique para ver detalhes de ${ERS.escapeHtml(nb.marca)}"
+                     aria-label="Detalhes da marca ${ERS.escapeHtml(nb.marca)}">
                     
                     <div class="eq-brand-top">
                         <div class="brand-identity">
-                            <span class="brand-initial-avatar">${initial}</span>
+                            <span class="brand-initial-avatar">${ERS.escapeHtml(initial)}</span>
                             <div class="brand-title-wrap">
-                                <h3 class="brand-name">${nb.marca.toUpperCase()}</h3>
+                                <h3 class="brand-name">${ERS.escapeHtml(nb.marca.toUpperCase())}</h3>
                                 <span class="brand-total-count">${totalLabel}</span>
                             </div>
                         </div>
@@ -312,7 +312,7 @@ window.EquipamentosModule = (function () {
 
         sel.innerHTML = `
             <option value="">Selecione uma marca existente...</option>
-            ${allBrands.map(b => `<option value="${b}">${b}</option>`).join('')}
+            ${allBrands.map(b => `<option value="${b}">${ERS.escapeHtml(b)}</option>`).join('')}
             <option value="__new__">+ Cadastrar nova marca</option>
         `;
     }
@@ -337,7 +337,7 @@ window.EquipamentosModule = (function () {
         }
     }
 
-    function handleAddEquipmentSubmit(e) {
+    async function handleAddEquipmentSubmit(e) {
         e.preventDefault();
 
         const errEl = document.getElementById('add-equipment-error');
@@ -367,7 +367,7 @@ window.EquipamentosModule = (function () {
         if (btnSubmit) btnSubmit.disabled = true;
 
         try {
-            const result = ERS.addNotebooks(brand, qty);
+            const result = await ERS.addNotebooks(brand, qty);
             if (!result.ok) {
                 showFormError(errEl, result.message || 'Erro ao adicionar equipamentos.');
                 return;
@@ -471,7 +471,7 @@ window.EquipamentosModule = (function () {
         if (previewDef) previewDef.textContent = newDef;
     }
 
-    function handleRegisterDefectSubmit(e) {
+    async function handleRegisterDefectSubmit(e) {
         e.preventDefault();
 
         const errEl = document.getElementById('register-defect-error');
@@ -503,7 +503,7 @@ window.EquipamentosModule = (function () {
         if (btnConfirm) btnConfirm.disabled = true;
 
         try {
-            const result = ERS.registerNotebookDefect(nb.id, qtd);
+            const result = await ERS.registerNotebookDefect(nb.id, qtd);
             if (!result.ok) {
                 showFormError(errEl, result.message || 'Erro ao registrar defeito.');
                 return;
@@ -513,7 +513,7 @@ window.EquipamentosModule = (function () {
             document.getElementById('register-defect-form')?.reset();
             renderEquipmentView();
 
-            ERS.showToast(`Defeito de ${qtd} notebook(s) ${nb.marca} registrado com sucesso!`, 'success');
+            ERS.showToast(`Defeito de ${qtd} notebook(s) ${ERS.escapeHtml(nb.marca)} registrado com sucesso!`, 'success');
             if (window.ProatecModule?.renderBrandGrid) window.ProatecModule.renderBrandGrid();
         } finally {
             if (btnConfirm) btnConfirm.disabled = false;
@@ -568,7 +568,7 @@ window.EquipamentosModule = (function () {
                     notebooks.map(n => {
                         const def = n.defeito || 0;
                         const label = def > 0 ? `${n.marca} (${def} com defeito)` : `${n.marca} (nenhum defeito)`;
-                        return `<option value="${n.id}">${label}</option>`;
+                        return `<option value="${n.id}">${ERS.escapeHtml(label)}</option>`;
                     }).join('');
 
                 const firstWithDefect = notebooks.find(n => (n.defeito || 0) > 0);
@@ -662,7 +662,7 @@ window.EquipamentosModule = (function () {
         if (defeitoAtual === 0) {
             if (previewDisp) previewDisp.textContent = '—';
             if (previewDef) previewDef.textContent = '—';
-            showFormError(errEl, `A marca ${nb.marca} não possui computadores com defeito.`);
+            showFormError(errEl, `A marca ${ERS.escapeHtml(nb.marca)} não possui computadores com defeito.`);
             return;
         }
 
@@ -682,7 +682,7 @@ window.EquipamentosModule = (function () {
         if (previewDef) previewDef.textContent = newDef;
     }
 
-    function handleRegisterAvailabilitySubmit(e) {
+    async function handleRegisterAvailabilitySubmit(e) {
         e.preventDefault();
 
         const errEl = document.getElementById('register-availability-error');
@@ -700,7 +700,7 @@ window.EquipamentosModule = (function () {
 
         const defeitoAtual = nb.defeito || 0;
         if (defeitoAtual <= 0) {
-            showFormError(errEl, `Não há computadores com defeito registrados para a marca ${nb.marca}.`);
+            showFormError(errEl, `Não há computadores com defeito registrados para a marca ${ERS.escapeHtml(nb.marca)}.`);
             return;
         }
 
@@ -723,7 +723,7 @@ window.EquipamentosModule = (function () {
         if (btnConfirm) btnConfirm.disabled = true;
 
         try {
-            const result = ERS.registerNotebookAvailability(nb.id, qtd);
+            const result = await ERS.registerNotebookAvailability(nb.id, qtd);
             if (!result.ok) {
                 showFormError(errEl, result.message || 'Erro ao registrar disponibilidade.');
                 return;
@@ -733,7 +733,7 @@ window.EquipamentosModule = (function () {
             document.getElementById('register-availability-form')?.reset();
             renderEquipmentView();
 
-            ERS.showToast(`${qtd} notebook(s) ${nb.marca} retornaram à disponibilidade com sucesso!`, 'success');
+            ERS.showToast(`${qtd} notebook(s) ${ERS.escapeHtml(nb.marca)} retornaram à disponibilidade com sucesso!`, 'success');
             if (window.ProatecModule?.renderBrandGrid) window.ProatecModule.renderBrandGrid();
         } finally {
             if (btnConfirm) btnConfirm.disabled = false;
@@ -750,7 +750,7 @@ window.EquipamentosModule = (function () {
     //  INICIALIZAÇÃO AUTOMÁTICA DA PÁGINA
     // ─────────────────────────────────────────────────────────────
     if (!window.isSpaMode) {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('ers:ready', () => {
             const s = window.AUTH ? AUTH.requireAuth(['proatec', 'coordenacao']) : null;
             if (s) {
                 AUTH.renderUserInfo(s);

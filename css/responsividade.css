@@ -4,6 +4,19 @@
   --responsive-touch-size: 44px;
 }
 
+.app-loading .teacher-app,
+.app-loading .app-container { visibility: hidden; }
+.app-status {
+  position: fixed; inset: 16px 16px auto; z-index: 2000;
+  width: fit-content; max-width: calc(100% - 32px); margin-inline: auto;
+  padding: 16px; border: 1px solid #cbd5e1; border-radius: 10px;
+  background: #fff; color: #263d60; box-shadow: 0 4px 20px #0f172a1a;
+}
+.app-status[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
 .teacher-day-controls { display: none; }
 .teacher-main-content .active-res-chip.hidden { display: none !important; }
 

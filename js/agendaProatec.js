@@ -172,7 +172,7 @@ window.AgendaProatecModule = (function() {
         sel.innerHTML = '<option value="">Qualquer marca</option>';
         if (typeof ERS.getBrands === 'function') {
             ERS.getBrands().forEach(b => {
-                sel.innerHTML += `<option value="${b}">${b}</option>`;
+                sel.innerHTML += `<option value="${b}">${ERS.escapeHtml(b)}</option>`;
             });
         }
         if (curVal) sel.value = curVal;
@@ -268,11 +268,11 @@ window.AgendaProatecModule = (function() {
 
                         html += `<div class="calendar-event-card ${colorClass}"
                             data-res-id="${r.id}" onclick="openReservationDetail('${r.id}')">
-                            <span class="event-teacher">${r.professorNome}</span>
-                            <span class="event-desc">${descText}</span>
+                            <span class="event-teacher">${ERS.escapeHtml(r.professorNome)}</span>
+                            <span class="event-desc">${ERS.escapeHtml(descText)}</span>
                             <span class="event-room">
                                 <span class="material-symbols-outlined">${r.sala ? 'meeting_room' : 'laptop'}</span>
-                                ${r.sala || (r.marca && r.marca !== 'Qualquer marca' ? r.marca : 'Notebooks')}
+                                ${ERS.escapeHtml(r.sala || (r.marca && r.marca !== 'Qualquer marca' ? r.marca : 'Notebooks'))}
                             </span>
                         </div>`;
                     });
@@ -295,7 +295,7 @@ window.AgendaProatecModule = (function() {
         if (!sel) return;
         sel.innerHTML = '<option value="">Sem sala (somente notebooks)</option>';
         ERS.getActiveRooms().forEach(r => {
-            sel.innerHTML += `<option value="${r.nome}">${r.nome}</option>`;
+            sel.innerHTML += `<option value="${ERS.escapeHtml(r.nome)}">${ERS.escapeHtml(r.nome)}</option>`;
         });
     }
 
@@ -315,7 +315,7 @@ window.AgendaProatecModule = (function() {
         }
     }
 
-    function handleCreateReservation(e) {
+    async function handleCreateReservation(e) {
         e.preventDefault();
         const errEl = document.getElementById('res-error');
         if (errEl) errEl.style.display = 'none';
@@ -371,7 +371,7 @@ window.AgendaProatecModule = (function() {
             return;
         }
 
-        const result = ERS.createReservation({
+        const result = await ERS.createReservation({
             professorId: professor.id,
             professorNome: professor.nome,
             data, inicio, fim,
@@ -395,7 +395,7 @@ window.AgendaProatecModule = (function() {
     // ─────────────────────────────────────────────────────────────
     //  CRIAR BLOQUEIO
     // ─────────────────────────────────────────────────────────────
-    function handleCreateBlock(e) {
+    async function handleCreateBlock(e) {
         e.preventDefault();
         const errEl = document.getElementById('blk-error');
         if (errEl) errEl.style.display = 'none';
@@ -416,7 +416,7 @@ window.AgendaProatecModule = (function() {
         }
 
         const creator = currentSession ? currentSession.nome : (currentSession?.role === 'coordenacao' ? 'Coordenação' : 'Coordenação');
-        const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
+        const result = await ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
             return;
@@ -447,13 +447,13 @@ window.AgendaProatecModule = (function() {
                         <div style="margin-top: 6px; padding: 8px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
                             <strong style="color: #065f46; display: flex; align-items: center; gap: 4px;">
                                 <span class="material-symbols-outlined" style="font-size: 16px;">verified</span>
-                                Retirada confirmada por ${r.retiradaConfirmadaPor || 'Coordenação'}
+                                Retirada confirmada por ${ERS.escapeHtml(r.retiradaConfirmadaPor || 'Coordenação')}
                             </strong>
                             ${r.alunosRegistrados && r.alunosNotebooks && r.alunosNotebooks.length > 0 ? `
                                 <div style="margin-top: 8px; font-size: 12px;">
                                     <strong>Alunos registrados (${r.alunosNotebooks.length}):</strong>
                                     <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
-                                        ${r.alunosNotebooks.map(a => `<span style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:11px;"><strong>${a.etiqueta}:</strong> ${a.aluno}</span>`).join('')}
+                                        ${r.alunosNotebooks.map(a => `<span style="background:#ffffff; border:1px solid #cbd5e1; border-radius:4px; padding:2px 6px; font-size:11px;"><strong>${ERS.escapeHtml(a.etiqueta)}:</strong> ${ERS.escapeHtml(a.aluno)}</span>`).join('')}
                                     </div>
                                 </div>
                             ` : '<p style="margin: 4px 0 0; font-size: 11px; color: #047857;">Aguardando professor registrar alunos/etiquetas.</p>'}
@@ -476,9 +476,9 @@ window.AgendaProatecModule = (function() {
                 <div class="detail-list">
                     <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
                     <div><strong>Horário:</strong> ${r.inicio} – ${r.fim}</div>
-                    ${r.sala ? `<div><strong>Sala:</strong> ${r.sala}</div>` : ''}
-                    ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}</div>` : ''}
-                    <div><strong>Professor:</strong> ${r.professorNome}</div>
+                    ${r.sala ? `<div><strong>Sala:</strong> ${ERS.escapeHtml(r.sala)}</div>` : ''}
+                    ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + ERS.escapeHtml(r.marca) + ')' : ''}</div>` : ''}
+                    <div><strong>Professor:</strong> ${ERS.escapeHtml(r.professorNome)}</div>
                     <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
                     ${pickupStatusHtml}
                 </div>
@@ -510,7 +510,7 @@ window.AgendaProatecModule = (function() {
         });
         if (!ok) return;
 
-        const result = ERS.cancelReservation(id);
+        const result = await ERS.cancelReservation(id);
         if (result.ok) {
             closeModal('res-detail-modal');
             ERS.showToast('Reserva cancelada. Recursos liberados.', 'success');
@@ -564,7 +564,8 @@ window.AgendaProatecModule = (function() {
         });
         if (!ok) return;
 
-        ERS.deleteBlock(selectedBlockId);
+        const result = await ERS.deleteBlock(selectedBlockId);
+        if (!result.ok) { ERS.showToast(result.message, 'error'); return; }
         closeModal('block-detail-modal');
         selectedBlockId = null;
         ERS.showToast('Bloqueio removido com sucesso!', 'success');
@@ -574,7 +575,7 @@ window.AgendaProatecModule = (function() {
 
     // Fallback para carregamento isolado da página
     if (!window.isSpaMode) {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);
             if (s) {
                 AUTH.renderUserInfo(s);

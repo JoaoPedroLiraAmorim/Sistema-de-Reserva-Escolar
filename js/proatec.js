@@ -283,9 +283,9 @@ window.ProatecModule = (function() {
         });
         if (!ok) return;
 
-        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'Coordenação');
+        const result = await ERS.confirmPickup(id, currentSession ? currentSession.nome : 'Coordenação');
         if (result.ok) {
-            ERS.showToast(`Retirada de notebooks confirmada para ${r.professorNome}!`, 'success');
+            ERS.showToast(`Retirada de notebooks confirmada para ${ERS.escapeHtml(r.professorNome)}!`, 'success');
             renderPickupCardsInModal();
             renderTodayReservations();
         } else {
@@ -312,9 +312,9 @@ window.ProatecModule = (function() {
         });
         if (!ok) return;
 
-        const result = ERS.confirmPickup(id, currentSession ? currentSession.nome : 'Coordenação');
+        const result = await ERS.confirmPickup(id, currentSession ? currentSession.nome : 'Coordenação');
         if (result.ok) {
-            ERS.showToast(`Retirada de notebooks confirmada para ${r.professorNome}! O professor já pode registrar os alunos.`, 'success');
+            ERS.showToast(`Retirada de notebooks confirmada para ${ERS.escapeHtml(r.professorNome)}! O professor já pode registrar os alunos.`, 'success');
             render();
         } else {
             ERS.showToast(result.message, 'error');
@@ -347,7 +347,7 @@ window.ProatecModule = (function() {
             return `
                 <div class="brand-card">
                     <div class="brand-card-top">
-                        <span class="brand-name">${nb.marca}</span>
+                        <span class="brand-name">${ERS.escapeHtml(nb.marca)}</span>
                         <span class="brand-status-dot ${fillClass}"></span>
                     </div>
                     <div class="brand-count-wrapper">
@@ -365,12 +365,13 @@ window.ProatecModule = (function() {
     // ─────────────────────────────────────────────────────────────
     //  MODAL: CADASTRAR EQUIPAMENTO
     // ─────────────────────────────────────────────────────────────
-    function handleEquipmentSubmit(e) {
+    async function handleEquipmentSubmit(e) {
         e.preventDefault();
         const brand = document.getElementById('eq-brand').value;
         const qty   = parseInt(document.getElementById('eq-quantity').value) || 1;
 
-        ERS.addNotebooks(brand, qty);
+        const result = await ERS.addNotebooks(brand, qty);
+        if (!result.ok) { ERS.showToast(result.message, 'error'); return; }
         closeModal('equipment-modal');
         document.getElementById('equipmentForm').reset();
         renderBrandGrid();
@@ -380,7 +381,7 @@ window.ProatecModule = (function() {
     }
 
     if (!window.isSpaMode) {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);
             if (s) {
                 AUTH.renderUserInfo(s);

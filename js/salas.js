@@ -45,7 +45,7 @@ window.SalasModule = (function() {
         grid.innerHTML = rooms.map(room => {
             const roomRes = todayRes.filter(r => r.sala === room.nome);
             const resText = roomRes.length > 0
-                ? roomRes.map(r => `${r.inicio}–${r.fim} (${r.professorNome})`).join(', ')
+                ? roomRes.map(r => `${r.inicio}–${r.fim} (${ERS.escapeHtml(r.professorNome)})`).join(', ')
                 : 'Sem reservas hoje';
 
             return `
@@ -56,12 +56,12 @@ window.SalasModule = (function() {
                         </div>
                         <span class="room-status ${room.ativa ? 'ativa' : 'inativa'}">${room.ativa ? 'Ativa' : 'Inativa'}</span>
                     </div>
-                    <div class="room-name">${room.nome}</div>
+                    <div class="room-name">${ERS.escapeHtml(room.nome)}</div>
                     <div class="room-meta">
                         <span class="material-symbols-outlined">event</span>
                         ${roomRes.length} reserva(s) hoje
                     </div>
-                    <div class="room-today-reservations">${resText}</div>
+                    <div class="room-today-reservations">${ERS.escapeHtml(resText)}</div>
                     <div class="room-card-actions">
                         <button class="btn-toggle-room ${room.ativa ? 'desativar' : 'ativar'}"
                             onclick="toggleRoom('${room.id}')">
@@ -74,20 +74,21 @@ window.SalasModule = (function() {
         }).join('');
     }
 
-    function toggleRoom(id) {
-        ERS.toggleRoom(id);
+    async function toggleRoom(id) {
+        const result = await ERS.toggleRoom(id);
+        if (!result.ok) { ERS.showToast(result.message, 'error'); return; }
         renderRooms();
         const room = ERS.getRooms().find(r => r.id === id);
         ERS.showToast(`Sala ${room ? (room.ativa ? 'ativada' : 'desativada') : ''} com sucesso.`, 'success');
         if (window.AgendaProatecModule?.populateRoomSelect) window.AgendaProatecModule.populateRoomSelect();
     }
 
-    function handleAddRoom(e) {
+    async function handleAddRoom(e) {
         e.preventDefault();
         const input = document.getElementById('room-name-input');
         const name  = input ? input.value.trim() : '';
         const errEl = document.getElementById('room-error');
-        const result = ERS.addRoom(name);
+        const result = await ERS.addRoom(name);
 
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
@@ -103,7 +104,7 @@ window.SalasModule = (function() {
 
     // Fallback para carregamento isolado da página
     if (!window.isSpaMode) {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);
             if (s) {
                 AUTH.renderUserInfo(s);

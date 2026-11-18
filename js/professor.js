@@ -15,7 +15,7 @@ const SHIFT_SLOTS = ERS.SHIFT_SLOTS;
 // ─────────────────────────────────────────────────────────────
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('ers:ready', () => {
     currentSession = AUTH.requireAuth(['professor']);
     if (!currentSession) return;
 
@@ -158,7 +158,7 @@ function populateBrandSelect() {
     sel.innerHTML = '<option value="">Qualquer marca</option>';
     if (typeof ERS.getBrands === 'function') {
         ERS.getBrands().forEach(b => {
-            sel.innerHTML += `<option value="${b}">${b}</option>`;
+            sel.innerHTML += `<option value="${b}">${ERS.escapeHtml(b)}</option>`;
         });
     }
     if (curVal) sel.value = curVal;
@@ -254,11 +254,11 @@ function renderCalendar() {
                     html += `<div class="calendar-event-card ${colorClass}${isMine ? ' event-mine' : ''}"
                         data-res-id="${r.id}" onclick="openReservationDetail('${r.id}')">
                         ${isMine ? '<span class="event-mine-label">Minha</span>' : ''}
-                        <span class="event-teacher">${r.professorNome}</span>
-                        <span class="event-desc">${descText}</span>
+                        <span class="event-teacher">${ERS.escapeHtml(r.professorNome)}</span>
+                        <span class="event-desc">${ERS.escapeHtml(descText)}</span>
                         <span class="event-room">
                             <span class="material-symbols-outlined">${r.sala ? 'meeting_room' : 'laptop'}</span>
-                            ${r.sala || (r.marca && r.marca !== 'Qualquer marca' ? r.marca : 'Notebooks')}
+                            ${ERS.escapeHtml(r.sala || (r.marca && r.marca !== 'Qualquer marca' ? r.marca : 'Notebooks'))}
                         </span>
                     </div>`;
                 });
@@ -295,14 +295,14 @@ function renderMyReservations() {
 
     list.innerHTML = myRes.map(r => {
         const blocked = ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim));
-        const nbText = r.notebooks ? `${r.notebooks} notebooks${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}` : '';
+        const nbText = r.notebooks ? `${r.notebooks} notebooks${r.marca && r.marca !== 'Qualquer marca' ? ' (' + ERS.escapeHtml(r.marca) + ')' : ''}` : '';
         const infoDetail = [r.sala, nbText].filter(Boolean).join(' • ');
         return `
         <div class="my-res-item${blocked ? ' reservation-blocked' : ''}">
             <div class="res-date">${ERS.formatDate(r.data)}</div>
             <div class="res-info">
                 <strong>${r.inicio}–${r.fim}</strong>
-                <p>${infoDetail || 'Reserva de recursos'}</p>
+                <p>${ERS.escapeHtml(infoDetail) || 'Reserva de recursos'}</p>
             </div>
             <div class="res-actions">
                 <span class="badge-situacao ${blocked ? 'badge-blocked' : 'badge-confirmada'}">${blocked ? 'Indisponível por bloqueio' : 'Confirmada'}</span>
@@ -375,7 +375,7 @@ function renderActiveChip() {
             const r = todayRoomOnly[0];
             chip.classList.remove('hidden');
             chip.classList.remove('chip-ready');
-            if (textLabel) textLabel.textContent = `${r.inicio}–${r.fim} • ${r.sala}`;
+            if (textLabel) textLabel.textContent = `${r.inicio}–${r.fim} • ${ERS.escapeHtml(r.sala)}`;
             if (statusLabel) statusLabel.textContent = 'Reserva hoje';
             if (btnRegister) btnRegister.style.display = 'none';
         } else {
@@ -487,7 +487,7 @@ function updateRegCounter() {
     }
 }
 
-function handleSaveStudentRegistration(e) {
+async function handleSaveStudentRegistration(e) {
     e.preventDefault();
     if (!currentRegResId) return;
 
@@ -520,7 +520,7 @@ function handleSaveStudentRegistration(e) {
         return;
     }
 
-    const result = ERS.saveStudentAssignments(currentRegResId, assignments);
+    const result = await ERS.saveStudentAssignments(currentRegResId, assignments);
     if (result.ok) {
         closeModal('register-students-modal');
         ERS.showToast(`Uso de ${assignments.length} notebooks registrado com sucesso!`, 'success');
@@ -541,7 +541,7 @@ function populateRoomSelect() {
     if (!sel) return;
     sel.innerHTML = '<option value="">Sem sala (somente notebooks)</option>';
     ERS.getActiveRooms().forEach(r => {
-        sel.innerHTML += `<option value="${r.nome}">${r.nome}</option>`;
+        sel.innerHTML += `<option value="${ERS.escapeHtml(r.nome)}">${ERS.escapeHtml(r.nome)}</option>`;
     });
 }
 
@@ -561,7 +561,7 @@ function updateAvailInfo() {
     }
 }
 
-function handleCreateReservation(e) {
+async function handleCreateReservation(e) {
     e.preventDefault();
     const errEl = document.getElementById('res-error');
     errEl.style.display = 'none';
@@ -617,7 +617,7 @@ function handleCreateReservation(e) {
         return;
     }
 
-    const result = ERS.createReservation({
+    const result = await ERS.createReservation({
         professorId:   currentSession.userId,
         professorNome: currentSession.nome,
         data, inicio, fim,
@@ -680,9 +680,9 @@ function openReservationDetail(id) {
         <div class="detail-list">
             <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
             <div><strong>Horário:</strong> ${r.inicio} – ${r.fim}</div>
-            ${r.sala ? `<div><strong>Sala:</strong> ${r.sala}</div>` : ''}
-            ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + r.marca + ')' : ''}</div>` : ''}
-            <div><strong>Professor:</strong> ${r.professorNome}</div>
+            ${r.sala ? `<div><strong>Sala:</strong> ${ERS.escapeHtml(r.sala)}</div>` : ''}
+            ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + ERS.escapeHtml(r.marca) + ')' : ''}</div>` : ''}
+            <div><strong>Professor:</strong> ${ERS.escapeHtml(r.professorNome)}</div>
             <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
             ${r.retiradaConfirmada ? `<div><strong>Entrega:</strong> <span class="badge badge-success">Retirada confirmada pela Coordenação</span></div>` : (r.notebooks ? `<div><strong>Entrega:</strong> <span class="badge badge-warning">Aguardando confirmação da Coordenação</span></div>` : '')}
             ${studentsHtml}
@@ -725,7 +725,7 @@ async function cancelRes(id) {
     });
     if (!ok) return;
 
-    const result = ERS.cancelReservation(id);
+    const result = await ERS.cancelReservation(id);
     if (result.ok) {
         closeModal('res-detail-modal');
         ERS.showToast('Reserva cancelada. Recursos liberados.', 'success');

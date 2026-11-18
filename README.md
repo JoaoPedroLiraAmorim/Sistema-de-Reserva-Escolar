@@ -1,257 +1,88 @@
 # Alceu Reservas — Sistema de Reserva Escolar
 
-Sistema do TCC para reservar salas e notebooks, com áreas de Professor e Coordenação.
+Sistema de reservas de salas e notebooks, com uma interface para Professor e Coordenação.
 
-## Ambiente de desenvolvimento publicado
+## Site publicado
 
-O Worker `app` serve a interface em [app.reservas-alceu.workers.dev](https://app.reservas-alceu.workers.dev).
-A rota `GET /api/health` responde pelo Worker e `GET /api/salas` consulta o banco D1 `edulab-dev`.
-O repositório já contém o ID desse banco, a migração da tabela `salas` e um seed opcional.
+https://app.reservas-alceu.workers.dev
 
-A agenda de salas usa Firebase Authentication para o login e Cloudflare Workers e D1
-para sessões, permissões e reservas. A demonstração mantém dados fictícios no navegador.
+O Firebase Authentication autentica contas Google e e-mail/senha. O Worker Cloudflare serve a interface e a API; o banco D1 edulab-dev guarda as contas, sessões, salas, estoque, reservas, bloqueios, retiradas e vínculos de alunos. O nome do banco é legado; a publicação usa sua instância remota.
 
-## Executar no computador
+Após entrar, professores abrem pages/professor.html e a Coordenação abre pages/proatec.html. A antiga pages/conta.html redireciona para a interface principal. Não há acesso de demonstração no login publicado.
 
-Use Node.js 24 LTS e npm. No terminal, dentro da pasta do projeto:
+## Dados e permissões
 
-```powershell
+- A sessão usa cookie HttpOnly e dura oito horas. O perfil é conferido pelo servidor em cada operação.
+- Novas contas entram como Professor. Confirmar o e-mail é necessário para entrar com senha.
+- Professores reservam recursos para si e cancelam suas reservas. A Coordenação pode reservar para professores ativos, cancelar reservas e gerenciar salas, estoque e bloqueios.
+- Apenas a Coordenação confirma retiradas, durante o horário da reserva. O registro de alunos exige a retirada confirmada, fica limitado à quantidade de notebooks e é visível somente ao professor responsável e à Coordenação.
+- Salas, marcas e quantidades devem ser cadastradas pela Coordenação. A integração não importa os exemplos antigos do navegador nem cria estoque fictício.
+- Os dados do sistema ficam no SQL. O navegador guarda apenas preferências como menu e e-mail lembrado. A interface mantém um cache em memória e consulta atualizações a cada 15 segundos.
+- Horários e validações do servidor usam America/Sao_Paulo. Conflitos de sala, bloqueios e estoque são verificados na gravação, inclusive em pedidos concorrentes.
+- A migração 0004 preserva as reservas existentes em reservas_salas. A tabela antiga permanece como origem histórica; as novas gravações usam reservas. Nenhuma conta ou reserva existente é apagada.
+- O histórico permanece no banco. A agenda e os relatórios da interface consultam o dia atual e datas futuras; uma consulta histórica completa ainda não está disponível na interface.
+
+## Desenvolvimento local
+
+Use Node.js 24 e as dependências do package-lock.json:
+
+~~~powershell
 npm install
 npm run db:migrate:local
-npm run db:seed:local
 npm run dev
-```
+~~~
 
-O comando `dev` executa a ferramenta oficial Wrangler em modo local. Ela gera `public/`
-automaticamente antes de iniciar. Não exige login na Cloudflare nesta etapa.
+Abra http://127.0.0.1:8787. O banco local é independente do publicado. O seed opcional de salas é somente para desenvolvimento.
 
-Abra o endereço exibido no terminal, normalmente:
+Para entrar de verdade no endereço local, configure FIREBASE_PROJECT_ID e FIREBASE_WEB_API_KEY em .dev.vars e autorize o host local no Firebase Authentication. Nunca versione esse arquivo. A publicação já usa o projeto projetotcc-3ds.
 
-- Interface: http://127.0.0.1:8787/
-- API: http://127.0.0.1:8787/api/health
-- Salas vindas do SQL: http://127.0.0.1:8787/api/salas
+A migração não cria uma conta de Coordenação. Um administrador deve promover a identidade correta no D1 Console, pelo identificador Firebase verificado:
 
-A API deve responder:
+~~~sql
+UPDATE contas SET papel = 'coordenacao'
+WHERE identidade_externa = 'firebase:projetotcc-3ds:UID_DA_PESSOA';
+~~~
 
-```json
-{"ok":true,"service":"edulab-api"}
-```
-
-Isso significa que o servidor respondeu; não verifica banco ou autenticação.
-Uma rota inexistente, como `/api/reservas`, retorna 404 em JSON, pois ainda não foi implementada.
-Para parar, pressione Ctrl+C no terminal.
-
-Ao editar HTML, CSS ou JavaScript da interface, rode `npm run build` em outro terminal e
-recarregue o navegador. A pasta `public/` é gerada: não edite seus arquivos diretamente.
-Mudanças no código do Worker são acompanhadas pelo Wrangler.
-
-O endereço local é um novo localStorage. Reservas salvas por arquivo, outro endereço ou outra
-porta não aparecerão nele e não foram apagadas. Use sempre o mesmo endereço durante os testes.
-
-## Entender a estrutura
+## Arquitetura
 
 | Arquivo/pasta | Responsabilidade |
 | --- | --- |
-| `index.html`, `pages/`, `css/`, `js/`, `imagens/` | Fontes da interface existente |
-| `scripts/build.mjs` | Copia somente os tipos de arquivos públicos permitidos para `public/` |
-| `public/` | Arquivos que o navegador pode receber; pasta gerada e ignorada pelo Git |
-| `src/worker.mjs` | Código do servidor; trata a rota de verificação e erros da API |
-| `wrangler.jsonc` | Define o servidor, a pasta pública e o encaminhamento de `/api` |
-| `tests/` | Testes das regras de reserva, da API e da interface |
-| `.wrangler/` | Arquivos locais gerados pela ferramenta |
+| index.html, pages/, css/, js/ | Interface compartilhada |
+| js/real-mode.js, js/real-store.js | Inicialização da sessão, cache em memória e gravações pela API |
+| js/store.js | Utilitários e cálculos da interface; a demonstração legada permanece apenas para testes isolados |
+| firebase/client.mjs | Login e verificação de e-mail pelo Firebase |
+| src/contas.mjs | Validação de identidade Firebase e sessões |
+| src/sistema.mjs | Dados compartilhados, permissões e operações de recursos/reservas |
+| migrations/ | Evoluções do SQL, sem aplicação automática no build |
+| scripts/build.mjs | Geração de public/; não editar arquivos gerados |
 
-As telas são entregues como arquivos estáticos. Pedidos a `/api` e `/api/*` passam pelo Worker.
-O Worker também atende `/`, entregando `index.html`. Desativamos a remoção automática de
-`.html` dos endereços porque a navegação atual identifica as telas por esses nomes.
-O binding `ASSETS` é a ligação do Worker com os arquivos públicos.
-O binding `DB` é a ligação do servidor com o banco D1, já configurado para desenvolvimento.
+A API de sessão está em /api/conta/sessao. /api/agenda/estado retorna os dados permitidos à conta e /api/agenda/acao recebe as operações explícitas da interface. /api/health confirma a resposta do Worker; /api/salas permite consultar o catálogo de salas.
 
-O build não publica `src/`, `tests/`, configurações ou arquivos de ambiente.
-Nunca coloque segredos no JavaScript da interface. `.dev.vars*` e `.env*` estão ignorados pelo Git.
+## Verificações
 
-## Verificar
-
-```powershell
+~~~powershell
 npm test
 npm run test:ui
 npm run check:worker
-```
+~~~
 
-- `test`: regras locais de reserva e respostas do Worker.
-- `test:ui`: fluxos e responsividade da interface com Playwright; precisa de Chrome/Edge
-  instalado nos caminhos usuais do Windows ou de um navegador instalado pelo Playwright.
-- `check:worker`: prepara o pacote em modo de simulação, sem publicar.
+Os testes de interface usam o código real do Worker e SQLite em memória, com o login Firebase substituído por identidades fictícias de teste. Cobrem cadastro/login na interface principal, oito viewports, telas da Coordenação, persistência, retiradas, privacidade dos alunos e logout. Nenhum dado de teste é enviado à publicação.
 
-O teste de interface usa arquivos locais interceptados e não substitui a verificação do
-endereço servido pelo Wrangler. Confira também a interface e `/api/health` com `npm run dev`.
+Com npm run dev aberto:
 
-Para testar os mesmos fluxos pelo servidor real, mantenha `npm run dev` aberto e use outro terminal:
-
-```powershell
-$env:UI_BASE_URL = 'http://127.0.0.1:8787'
+~~~powershell
 npm run test:http
-npm run test:ui
-Remove-Item Env:UI_BASE_URL
-```
+~~~
 
-`test:http` verifica a API, o acesso aos arquivos públicos e respostas 404 para arquivos internos.
+## Publicação
 
-## Contas e agenda de salas
+O build gera os assets e o pacote Firebase. Para atualizar o Worker existente, preserve as variáveis configuradas no painel:
 
-Use a tela inicial para entrar com Google ou e-mail e senha. Quem cria uma conta com e-mail e senha
-precisa confirmar o endereço. A API verifica o token do projeto Firebase, abre uma
-sessão de oito horas e cadastra novas contas como **Professor**. A Coordenação pode
-cadastrar e ativar salas e cancelar qualquer reserva. Professores podem cancelar as
-próprias reservas. Os horários usam o fuso `America/Sao_Paulo`.
-
-A conta fixa de desenvolvimento é `coordenacao@demo.com`, senha `123456`, no acesso de
-demonstração. Ela usa apenas o localStorage, assim como os notebooks, os bloqueios e
-os registros de uso da demonstração.
-
-### Configurar a autenticação
-
-- No Firebase Authentication, habilite **Google** e **E-mail/senha** e autorize
-  `app.reservas-alceu.workers.dev`. O projeto do Alceu Reservas é `projetotcc-3ds`.
-- No Worker `app`, configure `FIREBASE_PROJECT_ID` e `FIREBASE_WEB_API_KEY` com o ID
-  do projeto e a chave pública do app Web. Para desenvolvimento local com um projeto
-  Firebase de teste, use as mesmas chaves em `.dev.vars` e autorize o host local
-  nesse projeto. O arquivo é ignorado pelo Git.
-- Aplique as migrações do D1, incluindo `0003_identidade_firebase.sql`, antes de
-  publicar o Worker. O Firebase é usado para autenticação. A API roda no plano do Worker.
-
-### Liberar Coordenação para uma conta
-
-A pessoa entra na agenda uma vez com sua conta verificada. Depois, um administrador
-do D1 pode consultar o UID no Firebase Console e promover exatamente essa identidade
-no D1 Console. Use o UID do projeto `projetotcc-3ds`.
-
-```sql
-UPDATE contas SET papel = 'coordenacao'
-WHERE identidade_externa = 'firebase:projetotcc-3ds:UID_DA_PESSOA';
-```
-
-[Login com Google](https://firebase.google.com/docs/auth/web/google-signin) ·
-[Login com e-mail e senha](https://firebase.google.com/docs/auth/web/password-auth)
-
-## Aula prática: SQL, API e conta do TCC
-
-### O que já funciona no computador
-
-- `migrations/0001_criar_salas.sql` cria a estrutura da tabela. Uma migração é um passo numerado
-  do histórico do banco. O Wrangler registra quais passos já foram aplicados; repetir o comando
-  de migração não recria a tabela.
-- `id` identifica a sala; `nome` é obrigatório e único; `ativa` só aceita 0 ou 1.
-- `seeds/salas-demo.sql` insere uma sala fictícia, sem substituir uma sala existente com esse ID.
-  Esse arquivo é separado da estrutura para não carregar dados demonstrativos por padrão.
-- `npm run db:salas:local` executa um SELECT: consulta as linhas sem alterá-las.
-- `/api/salas` faz um SELECT no D1 e converte 0/1 para false/true na resposta JSON.
-- `/api/health` continua verificando somente o servidor; não testa o banco.
-
-Para ver o SQL diretamente:
-
-```powershell
-npm run db:salas:local
-```
-
-Para comparar com a API, abra `/api/salas` no navegador com `npm run dev` aberto.
-Você verá `{"salas":[{"id":"sala-demo-d1","nome":"Sala de teste D1","ativa":true}]}`
-depois de executar o seed. Antes dele, um banco com a migração aplicada retorna `{"salas":[]}`.
-Uma falha de banco retorna 503, não uma lista vazia enganosa.
-
-O banco local fica em `.wrangler/`, não no localStorage, e persiste ao reiniciar o servidor.
-As migrações e seeds não importam nem modificam dados do navegador.
-
-### Criar um banco em outra conta Cloudflare
-
-O ambiente de desenvolvimento do TCC já tem um `edulab-dev`. Siga estes passos quando
-precisar configurar o projeto em outra conta.
-
-A conta Cloudflare é independente da conta usada no ChatGPT. Execute pessoalmente, no terminal
-do projeto, um comando de cada vez:
-
-```powershell
-npx wrangler login
-```
-
-O navegador abrirá a autorização do Wrangler. Confira a conta de destino antes de autorizar.
-Se o navegador mostrar outra conta, troque de conta antes de concluir.
-
-```powershell
-npx wrangler whoami
-```
-
-Confira o usuário e a conta Cloudflare disponíveis. Se houver várias contas, selecione
-a conta de destino explicitamente na configuração antes de criar recursos. Não prossiga com a conta errada.
-
-```powershell
-npx wrangler d1 create edulab-dev
-```
-
-Este é o primeiro comando que cria um recurso na nuvem: um banco de desenvolvimento vazio.
-Não cria um Worker publicado nem migra os dados locais.
-Ele exibirá um `database_id`. Esse identificador não é uma senha. Precisamos adicionar o ID real
-à entrada `d1_databases` existente de `wrangler.jsonc`, sem duplicar o binding `DB`.
-Se o Wrangler oferecer atualizar a configuração automaticamente, confira o diff resultante.
-Não invente um ID: ele só existe depois da criação.
-
-Após confirmar o ID e a conta, estes comandos aplicam a mesma estrutura na nuvem:
-
-```powershell
+~~~powershell
 npx wrangler d1 migrations apply edulab-dev --remote
-npx wrangler d1 execute edulab-dev --remote --command "SELECT id, nome, ativa FROM salas;"
-```
+npx wrangler deploy --keep-vars
+~~~
 
-O resultado do SELECT será vazio, pois a migração cria a tabela sem inserir exemplos.
-Para inserir o mesmo exemplo, somente nesse banco de desenvolvimento:
+Aplique somente migrações revisadas e confira a conta, o Worker app e o ID do banco em wrangler.jsonc antes de publicar. Nenhuma migração é executada automaticamente pelo build.
 
-```powershell
-npx wrangler d1 execute edulab-dev --remote --file seeds/salas-demo.sql
-```
-
-`--local` altera o banco do computador; `--remote` altera o banco da conta Cloudflare.
-Eles não sincronizam os dados. A opção `remote: false` do binding mantém `npm run dev` no banco
-local, mesmo depois de preencher `database_id`. Ver a tabela no painel não faz a interface local
-usar esse banco automaticamente.
-
-A rota `/api/salas` é pública e somente leitura. Use apenas exemplos de desenvolvimento.
-
-## Publicação pelo painel (ambiente de desenvolvimento)
-
-No Workers & Pages, a aplicação e o campo `name` do Wrangler devem usar
-`app`. O endereço publicado é `https://app.reservas-alceu.workers.dev`. Para configurar
-a integração de build pelo painel, selecione este repositório e a branch `main`.
-O código e os arquivos estáticos são publicados juntos.
-
-| Campo do painel | Valor |
-| --- | --- |
-| Build command | `npm run build` |
-| Deploy command | `npx wrangler deploy` |
-| Root directory | Raiz do repositório (`/`) |
-
-O `package-lock.json` é versionado para instalar as versões verificadas das dependências.
-O banco de desenvolvimento configurado usa o binding `DB`; confirme no painel que o ID
-corresponde ao seu `edulab-dev` antes da publicação. `remote: false` controla apenas o
-desenvolvimento local: o Worker publicado acessa o banco da Cloudflare pelo ID configurado.
-
-A demonstração guarda dados no localStorage. A agenda de salas usa o D1 para as salas e reservas
-de salas. Nenhuma migração ou seed é executado automaticamente durante o build ou deploy.
-Se a tabela foi criada manualmente no Console, precisamos reconciliar o histórico de
-migrações antes de aplicar a primeira migração pelo Wrangler; não apague a tabela para isso.
-
-Depois do deploy, confira no endereço fornecido pelo painel:
-
-1. `/`: abre o acesso do sistema.
-2. `/api/health`: retorna `{"ok":true,"service":"edulab-api"}`.
-3. `/api/salas`: retorna a lista de salas do banco de desenvolvimento.
-
-Se o último retornar 503, confira o binding `DB`, o ID do banco e a existência da tabela `salas`.
-
-## Referências oficiais
-
-Consultadas em 26/10/2026:
-
-- [Workers com arquivos estáticos](https://developers.cloudflare.com/workers/static-assets/binding/)
-- [Configuração do Wrangler](https://developers.cloudflare.com/workers/wrangler/configuration/)
-- [Desenvolvimento local](https://developers.cloudflare.com/workers/local-development/)
-- [D1 local](https://developers.cloudflare.com/d1/best-practices/local-development/)
-- [Migrações do D1](https://developers.cloudflare.com/d1/reference/migrations/)
+O domínio .web.app requer publicação no Firebase Hosting. Firebase Authentication, usado aqui, é independente da hospedagem; migrar o host exige adaptar a ligação com a API e os cookies da sessão.

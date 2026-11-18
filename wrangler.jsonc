@@ -3,6 +3,11 @@
 	"name": "app",
 	"main": "src/worker.mjs",
 	"compatibility_date": "2026-10-26",
+	"keep_vars": true,
+	"observability": {
+		"enabled": true,
+		"traces": { "enabled": true }
+	},
 	"vars": {
 		"ACCOUNT_ORIGIN": "https://app.reservas-alceu.workers.dev"
 	},

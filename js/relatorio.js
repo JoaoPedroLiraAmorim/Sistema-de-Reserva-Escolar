@@ -308,7 +308,7 @@ window.RelatorioModule = (function() {
 
     // Fallback para carregamento direto da página
     if (!window.isSpaMode) {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);
             if (s) {
                 AUTH.renderUserInfo(s);

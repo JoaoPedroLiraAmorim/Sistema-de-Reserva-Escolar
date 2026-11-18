@@ -1,11 +1,12 @@
 import { firebaseConfig, origemDaConta, rotaConta } from './contas.mjs';
 import { HttpError, json } from './http.mjs';
-import { rotaReservas } from './reservas.mjs';
+import { rotaReservas } from './sistema.mjs';
 
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
         const { pathname } = url;
+        if (pathname === '/pages/conta.html') return Response.redirect(new URL('/pages/professor.html', url), 302);
         if (pathname.startsWith('/api/conta/') || pathname.startsWith('/api/agenda/')) {
             if (!origemDaConta(url, env)) return json({ error: 'Rota não encontrada.' }, 404);
             try {
@@ -18,7 +19,7 @@ export default {
                 return json({ error: 'Serviço temporariamente indisponível.' }, 503);
             }
         }
-        if (pathname === '/' || pathname === '/index.html' || pathname === '/pages/conta.html') {
+        if (pathname === '/' || pathname === '/index.html') {
             const assetRequest = pathname === '/' ? new Request(new URL('/index.html', url), request) : request;
             const asset = await env.ASSETS.fetch(assetRequest);
             const headers = new Headers(asset.headers);

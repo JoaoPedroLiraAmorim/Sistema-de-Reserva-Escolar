@@ -411,6 +411,7 @@
             }
             resources.addEventListener('change', event => { if (event.target.name === 'resource-type') resourceMode(); });
             form.addEventListener('reset', () => requestAnimationFrame(resourceMode));
+            if (!ERS.getTotalDisponivel()) resources.querySelector('[value="sala"]').checked = true;
             resourceMode();
         }
         form.querySelector('button[type=submit]').textContent='Revisar reserva';
@@ -487,18 +488,19 @@
         if($('#sidebar'))window.AUTH?.adaptSidebarByRole(ERS.getSession());
         const main=$('main');if(main){main.id=main.id||'main-content';main.tabIndex=-1;document.body.insertAdjacentHTML('afterbegin',`<a class="skip-link" href="#${main.id}">Pular para o conteúdo</a>`);}
         const wrapper=$('.main-wrapper');
-        if(wrapper){wrapper.insertAdjacentHTML('afterbegin',`<header class="v2-topbar"><div class="v2-topbar-brand"><button class="v2-mobile-menu" id="v2-mobile-menu" aria-label="Abrir menu de navegação">${icon('menu')}</button><span class="v2-logo">${icon('school')}</span>Alceu Reservas</div><div class="v2-topbar-note"><span>Gestão de salas e notebooks</span><a href="../index.html" id="v2-switch">Trocar perfil</a></div></header>`);$('#v2-switch').onclick=()=>ERS.logout();$('#v2-mobile-menu').onclick=e=>{e.stopPropagation();$('#sidebar').classList.toggle('open');$('#sidebarBackdrop')?.classList.toggle('active');};}
+        if(wrapper){wrapper.insertAdjacentHTML('afterbegin',`<header class="v2-topbar"><div class="v2-topbar-brand"><button class="v2-mobile-menu" id="v2-mobile-menu" aria-label="Abrir menu de navegação">${icon('menu')}</button><span class="v2-logo">${icon('school')}</span>Alceu Reservas</div><div class="v2-topbar-note"><span>Gestão de salas e notebooks</span><a href="../index.html" id="v2-switch">Trocar perfil</a></div></header>`);$('#v2-switch').textContent='Sair';$('#v2-switch').onclick=async e=>{e.preventDefault();if(await ERS.logout())location.assign('../index.html');};$('#v2-mobile-menu').onclick=e=>{e.stopPropagation();$('#sidebar').classList.toggle('open');$('#sidebarBackdrop')?.classList.toggle('active');};}
         if(main&&!teacherAgenda&&!document.body.classList.contains('login-page'))main.insertAdjacentHTML('beforeend','<footer class="v2-version-footer"><span>Alceu Reservas · Gestão de recursos escolares</span><span>Salas e equipamentos</span></footer>');
         if (location.pathname.endsWith('/proatec.html')) {
             $('.dashboard-header')?.insertAdjacentHTML('afterend', '<section id="coord-overview" class="coord-overview" aria-label="Resumo de hoje"></section>');
             const todayList = $('#today-reservations-list');
             if (todayList) new MutationObserver(refreshCoordination).observe(todayList, {childList:true});
         }
-        const registration=$('#register-students-modal .modal-body');if(registration)registration.insertAdjacentHTML('afterbegin','<p class="v2-student-note">Associe cada notebook ao aluno que o utiliza. Os registros ficam disponíveis para a coordenação até o término da reserva.</p>');
+        const registration=$('#register-students-modal .modal-body');if(registration)registration.insertAdjacentHTML('afterbegin','<p class="v2-student-note">Associe cada notebook ao aluno que o utiliza. Os registros ficam disponíveis para você e para a coordenação.</p>');
     }
     window.addEventListener('ers:reservations-updated', () => {
         if (teacherAgenda && typeof renderCalendar === 'function') { renderCalendar(); renderMyReservations(); renderActiveChip(); }
         else { window.ProatecModule?.render(); window.AgendaProatecModule?.render(); window.RelatorioModule?.render(); }
+        window.SalasModule?.render(); window.EquipamentosModule?.render(); window.BloqueiosModule?.render();
         refreshCoordination();
     });
     window.addEventListener('storage', event => {
@@ -506,5 +508,5 @@
             window.dispatchEvent(new Event('ers:reservations-updated'));
         }
     });
-    document.addEventListener('DOMContentLoaded',()=>{chrome();setupAgenda();myReservations();decorate();watchModals();refreshCoordination();new MutationObserver(queueDecorate).observe(document.body,{childList:true,subtree:true,characterData:true});});
+    document.addEventListener(window.ERS_REAL && location.pathname.includes('/pages/') ? 'ers:ready' : 'DOMContentLoaded',()=>{chrome();setupAgenda();myReservations();decorate();watchModals();refreshCoordination();new MutationObserver(queueDecorate).observe(document.body,{childList:true,subtree:true,characterData:true});});
 })();

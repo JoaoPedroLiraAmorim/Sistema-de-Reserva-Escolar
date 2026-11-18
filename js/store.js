@@ -51,11 +51,16 @@
     //  UTILITÁRIOS
     // ─────────────────────────────────────────────────────────────
     function load(key) {
+        if (window.ERS_REAL) {
+            const fields = { ers_users: 'professors', ers_rooms: 'rooms', ers_notebooks: 'notebooks', ers_reservations: 'reservations', ers_blocks: 'blocks', ers_session: 'session' };
+            return window.ERS_DATA[fields[key]] ?? null;
+        }
         try { return JSON.parse(localStorage.getItem(key)) || null; }
         catch { return null; }
     }
 
     function save(key, data) {
+        if (window.ERS_REAL) throw new Error('Os dados do sistema devem ser salvos pela API.');
         localStorage.setItem(key, JSON.stringify(data));
     }
 
@@ -73,7 +78,9 @@
     }
 
     /** Retorna 'YYYY-MM-DD' para hoje */
-    function today() { return dateKey(new Date()); }
+    function today() {
+        return window.ERS_REAL ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date()) : dateKey(new Date());
+    }
 
     /** Retorna 'YYYY-MM-DD' para N dias a partir de hoje (ou de baseDate) */
     function dayOffset(n, baseDate = null) {
@@ -654,6 +661,7 @@
     }
 
     function getProfessors() {
+        if (window.ERS_REAL) return window.ERS_DATA.professors;
         return (load(KEYS.USERS) || []).filter(user => user.role === 'professor')
             .map(({ id, nome }) => ({ id, nome }));
     }
@@ -847,6 +855,7 @@
     // ─────────────────────────────────────────────────────────────
     function getReservations() {
         const reservations = load(KEYS.RESERVATIONS) || [];
+        if (window.ERS_REAL) return reservations;
         const currentDate = today();
         const currentTime = getCurrentTime();
         const active = reservations.filter(r => r.data > currentDate ||
@@ -976,6 +985,7 @@
 
     /** Retorna o horário atual no formato HH:MM (suporta mock em window._ers_mock_time) */
     function getCurrentTime() {
+        if (window.ERS_REAL) return new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
         if (typeof window !== 'undefined' && window._ers_mock_time) {
             return window._ers_mock_time;
         }
@@ -1144,6 +1154,7 @@
     //  SEGURANÇA — Listener de storage para detectar logout em outra aba
     // ─────────────────────────────────────────────────────────────
     window.addEventListener('storage', (e) => {
+        if (window.ERS_REAL) return;
         if (e.key === KEYS.SESSION && e.newValue === null) {
             // Sessão removida em outra aba → redireciona para login
             const isInPages = window.location.pathname.includes('/pages/');
@@ -1179,6 +1190,7 @@
     // ─────────────────────────────────────────────────────────────
     //  INICIALIZAÇÃO
     // ─────────────────────────────────────────────────────────────
+    if (window.ERS_REAL) return;
     seed().then(() => getReservations());
     setInterval(() => {
         const before = localStorage.getItem(KEYS.RESERVATIONS);

@@ -3,7 +3,7 @@
  * Funções globais compartilhadas (Modais, Sidebar Mobile, Atalhos de Teclado)
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('ers:ready', () => {
     // ---------------------------------------------------------
     // 1. Controle de Sidebar (Retrátil com Ícones Clicáveis)
     // ---------------------------------------------------------

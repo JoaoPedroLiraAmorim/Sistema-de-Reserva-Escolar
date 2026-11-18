@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script src="js/real-mode.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso · Alceu Reservas</title><meta name="theme-color" content="#123eaa">
@@ -106,42 +107,13 @@
                     </div>
                 </form>
 
-                <!-- Seletor Rápido de Perfis (Tabs de Demonstração) -->
-                <div class="role-segmented-section" id="demonstracao">
-                    <div class="role-section-label">
-                        <span>Acesso de desenvolvimento</span>
-                        <span class="access-demo-badge">DEMONSTRAÇÃO</span>
-                    </div>
-                    <p class="access-demo-description">Escolha um perfil para preencher o formulário acima.</p><div class="role-segmented-control" role="group" aria-label="Preencher perfil de demonstração">
-                        <button type="button" class="role-tab-btn" aria-pressed="false" data-role="professor" data-email="professor@demo.com" data-pass="123456" title="Preencher dados de Professor">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                            <span>Professor</span>
-                        </button>
-                        <button type="button" class="role-tab-btn" aria-pressed="false" data-role="coordenacao" data-email="coordenacao@demo.com" data-pass="123456" title="Preencher dados de Coordenação">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                            <span>Coordenação</span>
-                        </button>
-                    </div>
-                    <div id="roleFeedbackPill" role="status" class="role-feedback-pill">
-                        <span id="roleFeedbackText"></span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                </div>
-
-                <p class="access-demo-note">Dados fictícios, salvos apenas neste navegador.</p>
 <!-- Rodapé -->
                 <footer class="form-footer"><span>Precisa de ajuda para acessar?</span><button type="button" class="access-help" data-access-help>Fale com a equipe da escola ↗</button></footer>
             </div>
         </main>
     </div>
 
-    <dialog id="access-help-dialog" aria-labelledby="access-help-title"><h2 id="access-help-title">Vamos ajudar você a entrar.</h2><p>Para recuperar seu acesso, use “Esqueceu a senha?” ou procure a coordenação da sua escola.</p><div class="access-help-demo"><strong>Quer conhecer o sistema?</strong><p>Feche esta janela e escolha Professor, Coordenação em “Acesso de desenvolvimento”. Os campos serão preenchidos para você.</p></div><form method="dialog"><button class="btn-primary">Entendi</button></form></dialog><!-- Scripts do Sistema -->
+    <dialog id="access-help-dialog" aria-labelledby="access-help-title"><h2 id="access-help-title">Vamos ajudar você a entrar.</h2><p>Para recuperar seu acesso, use “Esqueceu a senha?” ou procure a coordenação da sua escola.</p><form method="dialog"><button class="btn-primary">Entendi</button></form></dialog><!-- Scripts do Sistema -->
     <script src="js/store.js"></script>
     <script src="js/login-novo.js"></script>
 <script src="js/refinamento.js"></script>

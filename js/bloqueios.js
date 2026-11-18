@@ -62,7 +62,7 @@ window.BloqueiosModule = (function() {
                     <span class="material-symbols-outlined">block</span>
                 </div>
                 <div class="block-body">
-                    <div class="block-title">${b.motivo}</div>
+                    <div class="block-title">${ERS.escapeHtml(b.motivo)}</div>
                     <div class="block-meta">
                         <span class="block-meta-item">
                             <span class="material-symbols-outlined">calendar_today</span>
@@ -74,7 +74,7 @@ window.BloqueiosModule = (function() {
                         </span>
                         <span class="block-meta-item">
                             <span class="material-symbols-outlined">person</span>
-                            ${b.criadoPor}
+                            ${ERS.escapeHtml(b.criadoPor)}
                         </span>
                     </div>
                 </div>
@@ -97,7 +97,8 @@ window.BloqueiosModule = (function() {
         });
         if (!ok) return;
 
-        ERS.deleteBlock(id);
+        const result = await ERS.deleteBlock(id);
+        if (!result.ok) { ERS.showToast(result.message, 'error'); return; }
         renderBlocks();
         ERS.showToast('Bloqueio removido com sucesso.', 'success');
         if (window.AgendaProatecModule?.render) window.AgendaProatecModule.render();
@@ -106,7 +107,7 @@ window.BloqueiosModule = (function() {
     // ─────────────────────────────────────────────────────────────
     //  CRIAR BLOQUEIO
     // ─────────────────────────────────────────────────────────────
-    function handleCreateBlock(e) {
+    async function handleCreateBlock(e) {
         e.preventDefault();
         const errEl = document.getElementById('blk-error');
         if (errEl) errEl.style.display = 'none';
@@ -127,7 +128,7 @@ window.BloqueiosModule = (function() {
         }
 
         const creator = currentSession ? currentSession.nome : 'Coordenação';
-        const result = ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
+        const result = await ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
             return;
@@ -142,7 +143,7 @@ window.BloqueiosModule = (function() {
 
     // Fallback para carregamento isolado da página bloqueios.html
     if (!window.isSpaMode && window.location.pathname.includes('bloqueios.html')) {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['coordenacao']);
             if (s) {
                 AUTH.renderUserInfo(s);

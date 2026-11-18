@@ -2,222 +2,109 @@ const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-
-// Interceptação serve os arquivos locais, sem servidor ou dependência da rede.
+const { DatabaseSync } = require('node:sqlite');
+const { randomBytes, createHash } = require('node:crypto');
 const root = path.resolve(__dirname, '..');
-const baseUrl = process.env.UI_BASE_URL || 'https://edulab.test';
-const artifacts = process.env.UI_ARTIFACT_DIR;
-const sizes = [[320, 740], [390, 844], [768, 1024], [820, 1180], [1024, 768], [1366, 768], [1920, 1080], [844, 390]];
-const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(f => fs.existsSync(f));
+const base = 'https://edulab.test';
+const sizes = [[320,740],[390,844],[768,1024],[820,1180],[1024,768],[1366,768],[1920,1080],[844,390]];
+const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(fs.existsSync);
 
 (async () => {
-    const browser = await chromium.launch({ headless: true, ...(chrome ? { executablePath: chrome } : {}) });
-    try {
-        const context = await browser.newContext({ timezoneId: 'America/Sao_Paulo', reducedMotion: 'reduce' });
-        const page = await context.newPage();
-        const errors = [];
-        page.on('pageerror', error => errors.push(error.message));
-        if (!process.env.UI_BASE_URL) await page.route('**/*', async route => {
-            const url = new URL(route.request().url());
-            if (url.hostname !== 'edulab.test') return route.abort();
-            const file = path.resolve(root, '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
-            if (!file.startsWith(root + path.sep)) return route.fulfill({ status: 403, body: '' });
-            const type = { '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png', '.svg': 'image/svg+xml', '.html': 'text/html' }[path.extname(file)];
-            try { await route.fulfill({ body: fs.readFileSync(file), contentType: type || 'application/octet-stream' }); }
-            catch { await route.fulfill({ status: 404, body: '' }); }
-        });
-        const visit = async file => { await page.goto(new URL(file, baseUrl + '/').href); await page.waitForTimeout(80); };
-        const login = async role => page.evaluate(role => ERS.login(role + '@demo.com', '123456'), role);
-        const noOverflow = async label => {
-            const d = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
-            assert.ok(d.scroll <= d.width + 1, label + ': página ultrapassa a tela');
-            assert.ok(d.body <= d.width + 1, label + ': corpo ultrapassa a tela');
-        };
-        const screenshot = async name => {
-            if (!artifacts) return;
-            fs.mkdirSync(artifacts, { recursive: true });
-            await page.screenshot({ path: path.join(artifacts, name + '.png'), fullPage: true });
-        };
-        const visibleDayColumns = () => page.locator('#calendarHead th[data-date]:visible');
-        const selectedDay = () => page.locator('#teacher-week-days [aria-pressed="true"]').getAttribute('data-date');
-        await visit('index.html');
-        assert.equal(await page.locator('[data-role]').count(), 2);
-        for (const [width, height] of sizes) {
-            await page.setViewportSize({ width, height });
-            await page.evaluate(() => ERS.logout()); await visit('index.html');
-            await noOverflow('login ' + width);
-            await login('professor'); await visit('pages/professor.html');
-            await noOverflow('professor ' + width);
-            assert.equal(await page.locator('[data-res-tab]').count(), 0);
-            assert.equal(await page.locator('#my-reservations-section').isVisible(), false);
-            assert.equal(await page.locator('#calendarTable').isVisible(), true);
-            assert.equal(await page.locator('#v2-day-list, [data-agenda-mode="list"]').count(), 0, 'professor consulta a agenda, sem visualização em lista');
-            assert.equal(await visibleDayColumns().count(), width <= 1100 ? 1 : 6);
-            if (width <= 768 || width === 844) {
-                assert.equal(await page.locator('[data-agenda-mode="grid"]').isVisible(), false);
-                const tableFits = await page.locator('.calendar-scroll-area').evaluate(el => el.scrollWidth <= el.clientWidth);
-                assert.equal(tableFits, true, 'a grade diária cabe no celular');
-                const slotHeight = await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el => el.getBoundingClientRect().height);
-                assert.ok(slotHeight >= 112, 'a agenda diária tem espaço para cada aula');
-                const newButton = await page.locator('#btnOpenNewReservation').boundingBox();
-                assert.ok(newButton.height >= 44 && newButton.height <= 48 && newButton.width < width / 2, `botão compacto em ${width}: ${JSON.stringify(newButton)}`);
-            }
-            if (width === 1366) {
-                await page.locator('[data-agenda-mode="day"]').click();
-                assert.equal(await visibleDayColumns().count(), 1);
-                await page.locator('[data-agenda-mode="grid"]').click();
-                assert.equal(await visibleDayColumns().count(), 6);
-                await page.setViewportSize({ width: 390, height: 844 });
-                await page.locator('#teacher-week-days').waitFor({ state: 'visible' });
-                assert.equal(await visibleDayColumns().count(), 1, 'o celular usa a grade diária após redimensionar');
-                await page.setViewportSize({ width, height });
-                await page.locator('#teacher-week-days').waitFor({ state: 'hidden' });
-                assert.equal(await visibleDayColumns().count(), 6);
-                await page.locator('#tab-reservas').click();
-                await page.keyboard.press('ArrowLeft');
-                assert.equal(await page.locator('#tab-agenda').getAttribute('aria-selected'), 'true');
-            }
-            if ([390, 1366].includes(width)) await screenshot('professor-' + width);
-            await page.locator('#btnOpenNewReservation').click(); await page.waitForTimeout(50);
-            assert.equal(await page.locator('.booking-section').count(), 2);
-            const footer = await page.locator('#new-reservation-form > .modal-footer').boundingBox();
-            assert.ok(footer.y >= 0 && footer.y + footer.height <= height + 2, 'rodapé acessível em ' + width);
-            if (width === 844) await screenshot('reserva-horizontal');
-            await page.keyboard.press('Escape');
-
-            await page.evaluate(() => openRegisterStudentsModal(ERS.getReservations()[0].id));
-            const registration = page.locator('#register-students-modal');
-            await registration.waitFor({ state: 'visible' });
-            await noOverflow('registro de alunos ' + width);
-            const registrationFooter = await registration.locator('.modal-footer').boundingBox();
-            assert.ok(registrationFooter.y >= 0 && registrationFooter.y + registrationFooter.height <= height + 2, 'ações do registro acessíveis em ' + width);
-            if (width <= 768) {
-                for (const selector of ['.modal-body', '.student-registration-table-wrapper']) {
-                    assert.equal(await registration.locator(selector).evaluate(el => el.scrollWidth <= el.clientWidth + 1), true, selector + ' sem rolagem lateral em ' + width);
-                }
-                const count = await registration.locator('.student-row').count();
-                await page.locator('#btnAddStudentRow').click();
-                const added = registration.locator('.student-row').last();
-                await added.getByRole('textbox', { name: /Etiqueta do notebook/ }).fill('NT-TESTE');
-                await added.getByRole('textbox', { name: /Aluno do notebook/ }).fill('Aluno de teste com nome completo');
-                await added.getByRole('button', { name: 'Remover', exact: true }).click();
-                assert.equal(await registration.locator('.student-row').count(), count);
-                if (width === 390) {
-                    await registration.locator('.modal-body').evaluate(el => { el.scrollTop = 0; });
-                    await screenshot('registro-alunos-celular');
-                }
-            }
-            await page.keyboard.press('Escape');
-        }
-        await page.setViewportSize({ width: 390, height: 844 });
-        await visit('pages/professor.html');
-        await page.locator('#btnOpenNewReservation').click();
-        const futureSchoolDay = await page.evaluate(() => ERS.dateKey(ERS.getMonday(ERS.dayOffset(14))));
-        await page.locator('#res-date').fill(futureSchoolDay);
-        await page.locator('#res-start').selectOption('07:00'); await page.locator('#res-end').selectOption('07:50');
-        await page.locator('#res-brand').selectOption('Dell'); await page.locator('#res-quantity').fill('2');
-        await screenshot('reserva-celular');
-        await page.locator('#new-reservation-form button[type="submit"]').click();
-        assert.equal(await page.locator('#v2-review').isVisible(), true);
-        await screenshot('conferencia-celular');
-        await page.locator('#v2-confirm-res').click();
-        assert.equal(await page.locator('#new-reservation-modal').isVisible(), false);
-        const saved = await page.evaluate(() => ERS.getReservations().find(r => !r.id.startsWith('mock-res-')));
-        assert.equal(saved.marca, 'Dell'); assert.equal(saved.notebooks, 2);
-        await page.locator('#mobileMyResBtn').click();
-        assert.equal(await page.locator('#teacher-agenda-panel').isVisible(), false);
-        assert.equal(await page.locator('#my-reservations-section').isVisible(), true);
-        await screenshot('proximas-celular');
-        await page.locator('#mobileAgendaBtn').click();
-        assert.equal(await page.locator('#mobileAgendaBtn').getAttribute('aria-current'), 'location');
-        assert.equal(await page.locator('#teacher-agenda-panel').isVisible(), true);
-        const saturday = await page.locator('#teacher-week-days button').last().getAttribute('data-date');
-        await page.locator('#teacher-week-days button').last().click();
-        assert.equal(await visibleDayColumns().getAttribute('data-date'), saturday);
-        await page.locator('#v2-next-day').click();
-        assert.equal(await selectedDay(), await page.evaluate(date => ERS.dayOffset(2, date + 'T12:00:00'), saturday));
-        await page.locator('#v2-prev-day').click();
-        assert.equal(await selectedDay(), saturday);
-        await page.getByRole('button', { name: 'Hoje', exact: true }).click();
-        assert.equal(await selectedDay(), await page.evaluate(() => new Date().getDay() === 0 ? ERS.dateKey(ERS.getMonday(new Date())) : ERS.today()));
-
-        for (let day = 0; day < 14 && await selectedDay() < saved.data; day++) {
-            await page.locator('#v2-next-day').click();
-        }
-        assert.equal(await selectedDay(), saved.data);
-        await page.locator('#v2-only-mine').check();
-        const savedEvent = page.locator(`#calendarTable [data-res-id="${saved.id}"]:visible`);
-        await screenshot('agenda-dia-celular');
-        await savedEvent.click();
-        assert.equal(await page.locator('#res-detail-modal').isVisible(), true);
-        await page.keyboard.press('Escape');
-        await page.locator('#v2-only-mine').uncheck();
-        await page.locator('[data-shift="tarde"]').click();
-        assert.equal(await page.locator('#calendarBody .time-start').first().textContent(), '13:00');
-        assert.equal(await page.locator('[data-shift="tarde"]').getAttribute('aria-pressed'), 'true');
-        await page.locator('#v2-room-filter').selectOption('Aquário');
-        const firstSlot = page.locator('.teacher-slot-book').first();
-        const slotDate = await selectedDay();
-        const start = await firstSlot.locator('xpath=ancestor::td').getAttribute('data-start');
-        await firstSlot.click();
-        assert.equal(await page.locator('#res-date').inputValue(), slotDate);
-        assert.equal(await page.locator('#res-start').inputValue(), start);
-        assert.equal(await page.locator('[name="resource-type"][value="sala"]').isChecked(), true);
-        assert.equal(await page.locator('#res-room').inputValue(), 'Aquário');
-        await page.keyboard.press('Escape');
-        await page.locator('#v2-room-filter').selectOption('');
-        await page.locator('[data-shift="manha"]').click();
-        await page.evaluate(date => {
-            ERS.createBlock({data:date,inicio:'07:00',fim:'07:50',motivo:'Bloqueio de teste',criadoPor:'Coordenação'});
-            window.dispatchEvent(new Event('ers:reservations-updated'));
-        }, saved.data);
-        const blockedSlot = page.locator('#calendarTable td[data-start="07:00"]:visible');
-        assert.equal(await blockedSlot.locator('.event-block').isVisible(), true);
-        assert.equal(await blockedSlot.locator('.teacher-slot-book').count(), 0);
-        await page.locator('#mobileMyResBtn').click();
-        assert.equal(await page.locator('.my-res-item.reservation-blocked').count(), 1);
-        assert.equal(await page.locator('.reservation-blocked .btn-secondary').count(), 0);
-        await page.evaluate(() => {
-            const all = ERS.getReservations();
-            all.push({ id: 'expired-test', data: ERS.dayOffset(-1), inicio: '07:00', fim: '07:50', alunosNotebooks: [{ aluno: 'Teste' }] });
-            localStorage.setItem('ers_reservations', JSON.stringify(all)); ERS.getReservations();
-        });
-        assert.equal(await page.evaluate(() => localStorage.getItem('ers_reservations').includes('expired-test')), false);
-
-        await login('coordenacao');
-        for (const [width, height] of [[320, 740], [820, 1180], [1366, 768]]) {
-            await page.setViewportSize({ width, height });
-            for (const file of ['proatec', 'agendaProatec', 'equipamentos', 'salas', 'bloqueios', 'relatorio']) {
-                await visit('pages/' + file + '.html'); await noOverflow(file + ' ' + width);
-                assert.ok(page.url().endsWith(file + '.html'));
-                if (file === 'proatec') {
-                    assert.equal(await page.locator('.coord-metric').count(), 4);
-                    if (width === 1366 || width === 320) await screenshot('coordenacao-' + width);
-                    if (width === 320) {
-                        await page.locator('#v2-mobile-menu').click();
-                        assert.equal(await page.locator('#sidebar').evaluate(el => el.classList.contains('open')), true);
-                        await page.locator('#sidebarBackdrop').click({position:{x:310,y:200}});
-                        assert.equal(await page.locator('#sidebar').evaluate(el => el.classList.contains('open')), false);
-                    }
-                }
-                if (file === 'agendaProatec' && width === 820) assert.equal(await page.locator('#v2-day-list').isVisible(), true);
-            }
-        }
-        await visit('pages/agendaProatec.html');
-        await page.locator('#btnOpenNewReservation').click();
-        await page.locator('#res-professor').selectOption('u4');
-        await page.locator('#res-date').fill(await page.evaluate(() => ERS.dayOffset(15)));
-        await page.locator('#res-start').selectOption('07:00'); await page.locator('#res-end').selectOption('07:50');
-        await page.locator('[name="resource-type"][value="sala"]').check();
-        await page.locator('#res-room').selectOption('Aquário');
-        await page.locator('#new-reservation-form button[type="submit"]').click();
-        await page.locator('#v2-confirm-res').click();
-        const coordinated = await page.evaluate(() => ERS.getReservations().at(-1));
-        assert.equal(coordinated.professorId, 'u4'); assert.equal(coordinated.notebooks, 0); assert.equal(coordinated.sala, 'Aquário');
-        await login('proatec');
-        assert.equal(await page.evaluate(() => ERS.getSession().role), 'coordenacao');
-        await visit('pages/bloqueios.html'); assert.ok(page.url().endsWith('/bloqueios.html'));
-        assert.deepEqual(errors, [], 'sem exceções JavaScript');
-        console.log('UI validada: 8 viewports, 6 telas de coordenação, agenda diária e semanal, formulário, conferência, abas, marca, vínculo do professor, expiração e perfil legado.');
-    } finally { await browser.close(); }
-})().catch(error => { console.error(error); process.exitCode = 1; });
+ const worker = (await import('../src/worker.mjs')).default;
+ const sql = new DatabaseSync(':memory:');
+ for(const f of fs.readdirSync(path.join(root,'migrations')).filter(f=>f.endsWith('.sql')).sort()) sql.exec(fs.readFileSync(path.join(root,'migrations',f),'utf8'));
+ const DB = {prepare(query) { const s=sql.prepare(query); const bind = params => ({bind:(...p)=>bind(p),first:async()=>s.get(...params)??null,all:async()=>({results:s.all(...params)}),run:async()=>({meta:s.run(...params)})});return bind([]);},async batch(items) {sql.exec('BEGIN');try{const result=[];for(const item of items)result.push(await item.all());sql.exec('COMMIT');return result;}catch(e){sql.exec('ROLLBACK');throw e;}}};
+ const tokens = {};
+ for(const [id,papel] of [['p1','professor'],['p2','professor'],['c1','coordenacao']]) {
+  sql.prepare('INSERT INTO contas (id,email,papel,identidade_externa) VALUES (?,?,?,?)').run(id,id+'@exemplo.com',papel,'firebase:test:'+id);
+  tokens[id]=randomBytes(32).toString('base64url');
+  sql.prepare('INSERT INTO sessoes VALUES (?,?,?)').run(createHash('sha256').update(tokens[id]).digest('base64url'),id,Math.floor(Date.now()/1000)+3600);
+ }
+ sql.exec("INSERT INTO salas VALUES ('r1','Laboratório',1); INSERT INTO equipamentos VALUES ('n1','Dell',10,2)");
+ const today = new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo'}).format(new Date());
+ sql.prepare("INSERT INTO reservas (id,conta_id,data,inicio,fim,notebooks) VALUES ('active','p1',?,'00:00','23:59',2)").run(today);
+ const mime = {'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png','.svg':'image/svg+xml'};
+ const assets = async request => {
+  const file = path.resolve(root, '.' + new URL(request.url).pathname);
+  if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory())return new Response('',{status:404});
+  return new Response(fs.readFileSync(file),{headers:{'Content-Type':mime[path.extname(file)]||'application/octet-stream'}});
+ };
+ const env={DB,ASSETS:{fetch:assets},ACCOUNT_ORIGIN:base,FIREBASE_PROJECT_ID:'demo-alceu',FIREBASE_WEB_API_KEY:'test-public'};
+ const browser = await chromium.launch({headless:true,...(chrome?{executablePath:chrome}:{})});
+ try {
+  const context = await browser.newContext({timezoneId:'America/Sao_Paulo',reducedMotion:'reduce'});
+  const errors=[];context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
+  await context.route('**/*',async route=>{
+   const req=route.request(),url=new URL(req.url());
+   if(url.origin!==base)return route.abort();
+   if(url.pathname==='/js/firebase-conta.js')return route.fulfill({contentType:'application/javascript',body:`export function prepararLogin(){return {cadastrar:async()=>{},reenviar:async()=>{},redefinir:async()=>{},entrar:async(email,senha,api)=>{await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;},entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}`});
+   if(url.pathname==='/api/conta/entrar') {
+    const id=req.postDataJSON().idToken;
+    return route.fulfill({json:{ok:true},headers:{'Set-Cookie':`__Host-alceu_sessao=${tokens[id]}; Path=/; HttpOnly; Secure; SameSite=Lax`}});
+   }
+   const request=new Request(req.url(),{method:req.method(),headers:await req.allHeaders(),...(req.postData()?{body:req.postData()}: {})});
+   const response=await worker.fetch(request,env);
+   return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});
+  });
+  const page=await context.newPage();
+  const visit=async file=>{await page.goto(base+'/'+file);if(file.startsWith('pages/'))await page.waitForFunction(()=>!document.documentElement.classList.contains('app-loading'));};
+  const login=async id=>{await context.addCookies([{name:'__Host-alceu_sessao',value:tokens[id],url:base,httpOnly:true,secure:true,sameSite:'Lax'}]);};
+  const noOverflow=async label=>assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1&&document.body.scrollWidth<=innerWidth+1),true,label);
+  const screenshot=async name=>{if(!process.env.UI_ARTIFACT_DIR)return;fs.mkdirSync(process.env.UI_ARTIFACT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.UI_ARTIFACT_DIR,name+'.png'),fullPage:true});};
+  await page.setViewportSize({width:390,height:844});await visit('index.html');
+  assert.equal(await page.locator('[data-role]').count(),0,'não oferece acesso demo');
+  await page.getByLabel('E-mail',{exact:true}).fill('professor@exemplo.com');await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');
+  await page.getByRole('button',{name:'Criar conta',exact:true}).click();await page.getByText('Enviamos um link de confirmação.',{exact:false}).waitFor();
+  await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');await page.getByRole('button',{name:'Entrar',exact:true}).click();
+  await page.waitForURL('**/pages/professor.html');await page.locator('#teacher-week-days').waitFor({state:'visible'});
+  assert.equal(await page.locator('#calendarTable').isVisible(),true);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('ers_session')),null,'não cria sessão local');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('ers_seeded_v6')),null,'não popula dados fictícios');
+  for(const [width,height] of sizes) {
+   await page.setViewportSize({width,height});await visit('pages/professor.html');await noOverflow('professor '+width);
+   assert.equal(await page.locator('#v2-day-list,[data-agenda-mode="list"]').count(),0);
+   const daily=width<=1100;
+   assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:6);
+   if(width<=768||width===844){assert.equal(await page.locator('.calendar-scroll-area').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);assert.ok(await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el=>el.getBoundingClientRect().height)>=112);}
+   await page.locator('#btnOpenNewReservation').click();
+   let footer=await page.locator('#new-reservation-form>.modal-footer').boundingBox();assert.ok(footer.y>=0&&footer.y+footer.height<=height+2);
+   await page.keyboard.press('Escape');await page.evaluate(()=>openRegisterStudentsModal('active'));
+   const reg=page.locator('#register-students-modal');await reg.waitFor({state:'visible'});
+   if(width<=768)for(const sel of ['.modal-body','.student-registration-table-wrapper'])assert.equal(await reg.locator(sel).evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);
+   footer=await reg.locator('.modal-footer').boundingBox();assert.ok(footer.y>=0&&footer.y+footer.height<=height+2);
+   await page.keyboard.press('Escape');
+  }
+  await page.setViewportSize({width:390,height:844});await visit('pages/professor.html');
+  const date=await page.evaluate(()=>ERS.dateKey(ERS.getMonday(ERS.dayOffset(14))));
+  await page.locator('#btnOpenNewReservation').click();await page.locator('#res-date').fill(date);
+  await page.locator('#res-start').selectOption('07:00');await page.locator('#res-end').selectOption('07:50');
+  await page.locator('[name="resource-type"][value="ambos"]').check();await page.locator('#res-room').selectOption('Laboratório');
+  await page.locator('#res-brand').selectOption('Dell');await page.locator('#res-quantity').fill('2');
+  await page.locator('#new-reservation-form button[type="submit"]').click();await page.locator('#v2-confirm-res').click();
+  await page.locator('#new-reservation-modal').waitFor({state:'hidden'});
+  assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM reservas WHERE data=?').get(date).n,1);
+  await page.reload();await page.waitForFunction(()=>!document.documentElement.classList.contains('app-loading'));
+  await page.locator('#mobileMyResBtn').click();assert.equal(await page.locator('.my-res-item').count(),2,'reservas persistem após recarregar');
+  await page.locator('#mobileAgendaBtn').click();await screenshot('professor-real-celular');
+  await login('c1');
+  for(const [width,height] of [[320,740],[820,1180],[1366,768]]) {
+   await page.setViewportSize({width,height});
+   for(const file of ['proatec','agendaProatec','equipamentos','salas','bloqueios','relatorio']){await visit('pages/'+file+'.html');await noOverflow(file+' '+width);}
+  }
+  await page.setViewportSize({width:390,height:844});await visit('pages/salas.html');
+  await page.locator('#btnAddRoom').click();await page.locator('#room-name-input').fill('<img src=x onerror=alert(1)>');await page.locator('#add-room-form button[type=submit]').click();
+  await page.locator('#add-room-modal').waitFor({state:'hidden'});assert.equal(await page.locator('#rooms-grid img').count(),0,'nome da sala não executa HTML');
+  await page.evaluate(async()=>{const r=await ERS.confirmPickup('active');if(!r.ok)throw Error(r.message);});
+  await login('p1');await visit('pages/professor.html');await page.evaluate(()=>openRegisterStudentsModal('active'));
+  const reg=page.locator('#register-students-modal');await reg.locator('.student-row').first().getByRole('textbox',{name:/Etiqueta do notebook/}).fill('NT-1');
+  await reg.locator('.student-row').first().getByRole('textbox',{name:/Aluno do notebook/}).fill('Aluno de teste');
+  await reg.locator('button[type=submit]').click();await reg.waitFor({state:'hidden'});
+  assert.equal(JSON.parse(sql.prepare("SELECT alunos FROM reservas WHERE id='active'").get().alunos)[0].aluno,'Aluno de teste');
+  await login('c1');await visit('pages/relatorio.html');assert.equal(await page.evaluate(()=>ERS.getReservations().find(r=>r.id==='active').alunosNotebooks[0].aluno),'Aluno de teste');
+  await login('p2');await visit('pages/professor.html');assert.deepEqual(await page.evaluate(()=>ERS.getReservations().find(r=>r.id==='active').alunosNotebooks),[]);
+  await page.locator('.btn-header-logout').click();await page.waitForURL('**/index.html');
+  await page.getByRole('button',{name:'Entrar com Google'}).click();await page.waitForURL('**/pages/professor.html');
+  assert.deepEqual(errors,[],'sem erros JavaScript');
+  console.log('UI real validada: cadastro/login e Google na interface principal; 8 viewports; 6 telas de coordenação; reserva persistida no SQL; retirada e alunos entre perfis; logout e proteção contra HTML.');
+ } finally {await browser.close();sql.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

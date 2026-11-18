@@ -103,7 +103,7 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
     const sessao = async session => (await (await call('/api/conta/sessao', config, null, { cookie: session })).json()).conta;
     const conta = await sessao(cookie);
     assert.equal(conta.papel, 'professor');
-    assert.equal((await call('/api/agenda/sala/cadastrar', config, { nome: 'Laboratório' }, { cookie })).status, 403);
+    assert.equal((await call('/api/agenda/acao', config, { acao: 'addRoom', args: ['Laboratório'] }, { cookie })).status, 403);
     assert.equal((await entrar({ uid: 'outra-identidade' })).status, 409);
 
     sql.prepare("UPDATE contas SET papel = 'coordenacao' WHERE id = ?").run(conta.id);
@@ -111,7 +111,7 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
     const outraSessao = retorno.headers.get('Set-Cookie').split(';')[0];
     assert.equal(await sessao(cookie), null, 'A sessão anterior foi revogada.');
     assert.equal((await sessao(outraSessao)).papel, 'coordenacao');
-    assert.equal((await call('/api/agenda/sala/cadastrar', config, { nome: 'Laboratório' }, { cookie: outraSessao })).status, 201);
+    assert.equal((await call('/api/agenda/acao', config, { acao: 'addRoom', args: ['Laboratório'] }, { cookie: outraSessao })).status, 200);
 
     await call('/api/conta/sair', config, {}, { cookie: outraSessao });
     assert.equal(await sessao(outraSessao), null);

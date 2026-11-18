@@ -36,51 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. Seletor de Perfis Rápidos de Demonstração
-    // ─────────────────────────────────────────────────────────────
-    const roleTabs = document.querySelectorAll('.role-tab-btn');
     const emailInput = document.getElementById('email');
-    const feedbackPill = document.getElementById('roleFeedbackPill');
-    const feedbackText = document.getElementById('roleFeedbackText');
     const errorBox = document.getElementById('login-error');
-
-    const roleNameMap = {
-        professor:   'Prof. Marcelo (Professor)',
-        proatec:     'João Almeida (Coordenação)',
-        coordenacao: 'Dra. Sandra Lima (Coordenação)',
-    };
-
-    roleTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const role = tab.dataset.role;
-            const email = tab.dataset.email;
-            const pass = tab.dataset.pass;
-
-            // Marca aba ativa
-            roleTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-pressed','false'); });
-            tab.classList.add('active');
-            tab.setAttribute('aria-pressed','true');
-
-            // Preenche os campos
-            if (emailInput) emailInput.value = email;
-            if (passwordInput) passwordInput.value = pass;
-            clearFieldErrors();
-            mensagem();
-            resendButton.hidden = true;
-
-            // Limpa mensagem de erro se houver
-            if (errorBox) {
-                errorBox.style.display = 'none';
-            }
-
-            // Exibe mensagem de feedback discreta
-            if (feedbackPill && feedbackText && roleNameMap[role]) {
-                feedbackText.textContent = `Acesso rápido: ${roleNameMap[role]}`;
-                feedbackPill.style.display = 'flex';
-            }
-        });
-    });
 
     const loginForm = document.getElementById('login-form');
     const btnLogin = document.getElementById('btn-login');
@@ -89,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetButton = document.getElementById('login-redefinir');
     const resendButton = document.getElementById('login-reenviar');
     const status = document.getElementById('login-status');
-    const demoEmail = email => email.toLowerCase().endsWith('@demo.com');
     let busy = false;
 
     async function api(path, body) {
@@ -110,6 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
         googleButton.disabled = false;
         return auth;
     }).catch(() => null);
+
+    async function abrirSistema() {
+        const { conta } = await api('conta/sessao');
+        if (!conta) throw new Error('Não foi possível abrir sua sessão. Entre novamente.');
+        location.assign(conta.papel === 'coordenacao' ? 'pages/proatec.html' : 'pages/professor.html');
+    }
 
     async function autenticacao() {
         const auth = await firebaseReady;
@@ -192,15 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resendButton.hidden = true;
 
         executar(button, async () => {
-            if (demoEmail(email)) {
-                if (cadastrar) throw new Error('Para criar uma conta, informe seu e-mail pessoal ou institucional.');
-                const result = await ERS.login(email, password);
-                if (!result.ok) throw new Error('E-mail ou senha da demonstração inválidos.');
-                lembrar(email);
-                location.assign(result.user.role === 'professor' ? 'pages/professor.html' : 'pages/proatec.html');
-                return;
-            }
-
             const auth = await autenticacao();
             if (cadastrar) {
                 if (password.length < 6) throw new Error('A senha precisa ter pelo menos seis caracteres.');
@@ -212,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (await auth.entrar(email, password, api)) {
                 lembrar(email);
-                location.assign('pages/conta.html');
+                await abrirSistema();
                 return;
             }
             mensagem('Confirme seu e-mail antes de entrar.');
@@ -222,16 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     googleButton.addEventListener('click', () => executar(googleButton, async () => {
         await (await autenticacao()).entrarGoogle(api);
-        location.assign('pages/conta.html');
+        await abrirSistema();
     }));
 
     resetButton.addEventListener('click', () => executar(resetButton, async () => {
         const email = lerEmail();
         if (!email) return;
-        if (demoEmail(email)) {
-            mensagem('Para recuperar o acesso de desenvolvimento, selecione novamente o perfil abaixo.');
-            return;
-        }
         await (await autenticacao()).redefinir(email);
         mensagem('Se o endereço tiver uma conta, você receberá as instruções para redefinir a senha.');
     }));
@@ -263,8 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
             resendButton.hidden = true;
         }
         if(errorBox)errorBox.style.display='none';
-        roleTabs.forEach(t=>{t.classList.remove('active');t.setAttribute('aria-pressed','false');});
-        if(feedbackPill)feedbackPill.style.display='none';
     }));
     passwordInput?.addEventListener('keyup',e=>{
         const hint=document.getElementById('caps-hint');
