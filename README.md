@@ -8,9 +8,8 @@ O Worker `app` serve a interface em [app.reservas-alceu.workers.dev](https://app
 A rota `GET /api/health` responde pelo Worker e `GET /api/salas` consulta o banco D1 `edulab-dev`.
 O repositório já contém o ID desse banco, a migração da tabela `salas` e um seed opcional.
 
-A demonstração mantém dados fictícios no navegador. O acesso **Entrar com convite ou conta cadastrada**
-abre a agenda de salas com contas, permissões e reservas compartilhadas no D1. A migração
-`0002_contas_e_reservas.sql` precisa estar aplicada para que esta área funcione.
+A agenda de salas usa Firebase Authentication para o login e Cloudflare Workers e D1
+para sessões, permissões e reservas. A demonstração mantém dados fictícios no navegador.
 
 ## Executar no computador
 
@@ -97,42 +96,42 @@ Remove-Item Env:UI_BASE_URL
 
 `test:http` verifica a API, o acesso aos arquivos públicos e respostas 404 para arquivos internos.
 
-## Contas por convite e agenda de salas
+## Contas e agenda de salas
 
-Abra `http://localhost:8787/pages/conta.html` depois de executar as migrações locais.
-Crie o primeiro convite de coordenação em um terminal com acesso ao ambiente correspondente.
+Abra **Entrar na agenda com Google ou e-mail**. Quem cria uma conta com e-mail e senha
+precisa confirmar o endereço. A API verifica o token do projeto Firebase, abre uma
+sessão de oito horas e cadastra novas contas como **Professor**. A Coordenação pode
+cadastrar e ativar salas e cancelar qualquer reserva. Professores podem cancelar as
+próprias reservas. Os horários usam o fuso `America/Sao_Paulo`.
 
-```sh
-node scripts/convidar-coordenacao.mjs coordenacao@exemplo.com --local
+A conta fixa de desenvolvimento é `coordenacao@demo.com`, senha `123456`, no acesso de
+demonstração. Ela usa apenas o localStorage, assim como os notebooks, os bloqueios e
+os registros de uso da demonstração.
+
+### Configurar a autenticação
+
+- No Firebase Authentication, habilite **Google** e **E-mail/senha** e autorize
+  `app.reservas-alceu.workers.dev`. O projeto do Alceu Reservas é `projetotcc-3ds`.
+- No Worker `app`, configure `FIREBASE_PROJECT_ID` e `FIREBASE_WEB_API_KEY` com o ID
+  do projeto e a chave pública do app Web. Para desenvolvimento local com um projeto
+  Firebase de teste, use as mesmas chaves em `.dev.vars` e autorize o host local
+  nesse projeto. O arquivo é ignorado pelo Git.
+- Aplique as migrações do D1, incluindo `0003_identidade_firebase.sql`, antes de
+  publicar o Worker. O Firebase é usado para autenticação. A API roda no plano do Worker.
+
+### Liberar Coordenação para uma conta
+
+A pessoa entra na agenda uma vez com sua conta verificada. Depois, um administrador
+do D1 pode consultar o UID no Firebase Console e promover exatamente essa identidade
+no D1 Console. Use o UID do projeto `projetotcc-3ds`.
+
+```sql
+UPDATE contas SET papel = 'coordenacao'
+WHERE identidade_externa = 'firebase:projetotcc-3ds:UID_DA_PESSOA';
 ```
 
-O comando imprime um link válido por 48 horas. Entregue-o diretamente à pessoa responsável.
-A coordenação pode cadastrar e ativar salas e gerar convites de Professor pela própria agenda.
-O cadastro consome o convite e configura uma chave de acesso (WebAuthn). A sessão expira em oito horas.
-Cada conta pode reservar uma sala livre e cancelar as próprias reservas. A Coordenação pode cancelar
-qualquer reserva. Os horários seguem o fuso `America/Sao_Paulo`.
-
-Para publicar, primeiro confira a conta e o histórico do banco `edulab-dev`. Depois aplique as
-migrações pendentes com `npx wrangler d1 migrations apply edulab-dev --remote` e publique pela integração
-com o GitHub. Use o comando de convite com `--remote` para a primeira conta de Coordenação.
-Os dados de demonstração continuam locais, incluindo reservas de notebooks, bloqueios e registros de uso.
-
-### Habilitar Entrar com Google
-
-1. No projeto do Alceu Reservas no Google Cloud, configure a [plataforma de autenticação](https://console.cloud.google.com/auth/overview).
-   Selecione público **Externo** para permitir convidados de outras organizações. Em desenvolvimento,
-   cadastre as contas de teste conforme a configuração de público do projeto.
-2. Em **Clientes**, crie um cliente **Aplicativo da Web**. Em **URIs de redirecionamento autorizados**,
-   cadastre `https://app.reservas-alceu.workers.dev/api/conta/google/retorno`. Para testar localmente,
-   cadastre também `http://localhost:8787/api/conta/google/retorno`.
-3. Em **Workers & Pages → app → Configurações → Variáveis e segredos**, configure
-   `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` como segredos. Para testes locais,
-   use as mesmas chaves em `.dev.vars`. O arquivo é ignorado pelo Git.
-
-O botão do Google aparece após configurar as duas chaves. No primeiro acesso, abra o link de
-convite e selecione o endereço exato indicado pela coordenação. O app aceita endereços Gmail e
-contas Google Workspace com e-mail verificado. Para usos seguintes, escolha o mesmo método usado
-ao aceitar o convite. [Configuração oficial do cliente](https://developers.google.com/workspace/guides/create-credentials)
+[Login com Google](https://firebase.google.com/docs/auth/web/google-signin) ·
+[Login com e-mail e senha](https://firebase.google.com/docs/auth/web/password-auth)
 
 ## Aula prática: SQL, API e conta do TCC
 
@@ -234,7 +233,7 @@ O banco de desenvolvimento configurado usa o binding `DB`; confirme no painel qu
 corresponde ao seu `edulab-dev` antes da publicação. `remote: false` controla apenas o
 desenvolvimento local: o Worker publicado acessa o banco da Cloudflare pelo ID configurado.
 
-A demonstração guarda dados no localStorage. A agenda por convite usa o D1 para as salas e reservas
+A demonstração guarda dados no localStorage. A agenda de salas usa o D1 para as salas e reservas
 de salas. Nenhuma migração ou seed é executado automaticamente durante o build ou deploy.
 Se a tabela foi criada manualmente no Console, precisamos reconciliar o histórico de
 migrações antes de aplicar a primeira migração pelo Wrangler; não apague a tabela para isso.

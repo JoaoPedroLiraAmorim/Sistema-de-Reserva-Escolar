@@ -1,4 +1,4 @@
-import { origemDaConta, rotaConta } from './contas.mjs';
+import { firebaseConfig, origemDaConta, rotaConta } from './contas.mjs';
 import { HttpError, json } from './http.mjs';
 import { rotaReservas } from './reservas.mjs';
 
@@ -21,7 +21,12 @@ export default {
         if (pathname === '/pages/conta.html') {
             const asset = await env.ASSETS.fetch(request);
             const headers = new Headers(asset.headers);
-            headers.set('Content-Security-Policy', "default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+            const firebase = firebaseConfig(env);
+            const frames = firebase ? ` https://${firebase.authDomain} https://accounts.google.com https://apis.google.com` : '';
+            headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' https://apis.google.com; " +
+                "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://apis.google.com; " +
+                `frame-src 'self'${frames}; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`);
+            headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
             headers.set('Referrer-Policy', 'no-referrer');
             return new Response(asset.body, { status: asset.status, headers });
         }

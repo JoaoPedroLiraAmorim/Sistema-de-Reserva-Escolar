@@ -1,16 +1,11 @@
 'use strict';
 
 const $ = id => document.getElementById(id);
-const inviteHash = new URLSearchParams(location.hash.slice(1)).get('convite');
-if (inviteHash) {
-    sessionStorage.setItem('alceu-convite', inviteHash);
-    history.replaceState(null, '', location.pathname + location.search);
-}
-const convite = sessionStorage.getItem('alceu-convite');
 const erro = $('erro-conta');
 const dataAgenda = $('data-agenda');
 const salasSelect = $('sala');
 let conta;
+let autenticacao;
 let leitura = 0;
 
 function mostrarErro(message = '') {
@@ -38,7 +33,21 @@ async function executar(button, action) {
     try {
         await action();
     } catch (error) {
-        mostrarErro(error.name === 'NotAllowedError' ? 'A chave de acesso foi cancelada ou expirou. Tente novamente.' : error.message);
+        const messages = {
+            'auth/invalid-credential': 'E-mail ou senha inválidos.',
+            'auth/wrong-password': 'E-mail ou senha inválidos.',
+            'auth/user-not-found': 'E-mail ou senha inválidos.',
+            'auth/email-already-in-use': 'Este e-mail já tem uma conta. Use Entrar ou Esqueci minha senha.',
+            'auth/weak-password': 'A senha precisa ter pelo menos seis caracteres.',
+            'auth/popup-closed-by-user': 'A janela do Google foi fechada.',
+            'auth/popup-blocked': 'Permita a abertura da janela do Google e tente novamente.',
+            'auth/account-exists-with-different-credential': 'Entre pelo método que já usa para este e-mail.',
+            'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+            'auth/network-request-failed': 'Falha na conexão. Confira a internet e tente novamente.',
+            'auth/operation-not-allowed': 'Este método de login ainda precisa ser habilitado.',
+            'auth/unauthorized-domain': 'Este endereço ainda precisa ser autorizado no Firebase.',
+        };
+        mostrarErro(messages[error.code] ?? error.message);
     } finally {
         button.disabled = false;
     }
@@ -123,43 +132,60 @@ receberForm('sala-form', async (body, form) => {
     form.reset();
     await carregarAgenda();
 });
-receberForm('convite-form', async (body, form) => {
-    const result = await api('conta/convites', body);
-    $('link-convite').value = new URL(result.link, location.origin).href;
-    $('convite-gerado').hidden = false;
-    $('status-convite').textContent = '';
-    form.reset();
-});
-$('copiar-convite').onclick = () => executar($('copiar-convite'), async () => {
-    await navigator.clipboard.writeText($('link-convite').value);
-    $('status-convite').textContent = 'Link copiado.';
-});
 $('sair').onclick = () => executar($('sair'), async () => {
     await api('conta/sair', {});
     location.assign('../');
 });
 dataAgenda.onchange = () => { mostrarErro(); carregarAgenda().catch(error => mostrarErro(error.message)); };
-$('google').onclick = () => executar($('google'), async () => {
-    const { url } = await api('conta/google/iniciar', convite ? { convite } : {});
-    location.assign(url);
+const statusAcesso = $('status-acesso');
+const emailConta = $('email-conta');
+const reenviar = $('reenviar');
+
+$('acesso-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const button = event.submitter ?? $('acesso-form').querySelector('[name="entrar"]');
+    executar(button, async () => {
+        statusAcesso.textContent = '';
+        reenviar.hidden = true;
+        const email = emailConta.value.trim();
+        const senha = $('senha-conta').value;
+
+        if (button.name === 'cadastrar') {
+            if (senha.length < 6) throw new Error('A senha precisa ter pelo menos seis caracteres.');
+            await autenticacao.cadastrar(email, senha);
+            statusAcesso.textContent = 'Enviamos um link de confirmação. Confirme o e-mail e depois entre na sua conta.';
+            $('senha-conta').value = '';
+            reenviar.hidden = false;
+            return;
+        }
+        if (await autenticacao.entrar(email, senha, api)) {
+            location.replace(location.pathname);
+            return;
+        }
+        statusAcesso.textContent = 'Confirme o e-mail antes de entrar.';
+        reenviar.hidden = false;
+    });
 });
-$('chave').onclick = () => executar($('chave'), async () => {
-    const webAuthn = window.SimpleWebAuthnBrowser;
-    if (!webAuthn?.browserSupportsWebAuthn()) throw new Error('Este navegador não oferece chaves de acesso. Atualize-o ou entre pelo Google, se disponível.');
-    const rota = convite ? 'cadastro' : 'login';
-    const { options, id } = await api('conta/' + rota + '/opcoes', convite ? { convite } : {});
-    const credencial = convite
-        ? await webAuthn.startRegistration({ optionsJSON: options })
-        : await webAuthn.startAuthentication({ optionsJSON: options });
-    await api('conta/' + rota + '/verificar', { id, credencial });
+
+$('google').onclick = () => executar($('google'), async () => {
+    statusAcesso.textContent = '';
+    await autenticacao.entrarGoogle(api);
     location.replace(location.pathname);
+});
+$('redefinir').onclick = () => executar($('redefinir'), async () => {
+    if (!emailConta.reportValidity()) return;
+    await autenticacao.redefinir(emailConta.value.trim());
+    statusAcesso.textContent = 'Se o endereço tiver uma conta, o Firebase enviará as instruções para redefinir a senha.';
+});
+reenviar.onclick = () => executar(reenviar, async () => {
+    await autenticacao.reenviar();
+    statusAcesso.textContent = 'Enviamos outro link de confirmação.';
 });
 
 async function iniciar() {
     const config = await api('conta/config');
     ({ conta } = await api('conta/sessao'));
     if (conta) {
-        sessionStorage.removeItem('alceu-convite');
         $('area-conta').hidden = false;
         $('area-coordenacao').hidden = conta.papel !== 'coordenacao';
         $('usuario').textContent = conta.email;
@@ -168,14 +194,17 @@ async function iniciar() {
         return;
     }
     $('acesso').hidden = false;
-    $('google').hidden = !config.google;
-    if (convite) {
-        $('titulo-acesso').textContent = 'Aceitar convite';
-        $('instrucao-acesso').textContent = 'Crie sua chave de acesso ou use o endereço Google indicado no convite, quando disponível.';
-        $('chave').textContent = 'Criar chave de acesso';
+    if (!config.firebaseConfig) {
+        $('acesso-form').hidden = true;
+        document.querySelector('.conta-ajuda').hidden = true;
+        statusAcesso.textContent = 'O acesso à agenda ainda está sendo configurado.';
+        return;
     }
-    const motivo = new URL(location.href).searchParams.get('erro');
-    if (motivo === 'convite') mostrarErro('Abra um convite válido e selecione o endereço de e-mail indicado.');
-    if (motivo === 'google') mostrarErro('O acesso pelo Google não foi concluído. Tente novamente.');
+    $('acesso-form').hidden = true;
+    document.querySelector('.conta-ajuda').hidden = true;
+    const firebase = await import('./firebase-conta.js');
+    autenticacao = firebase.prepararLogin(config.firebaseConfig);
+    $('acesso-form').hidden = false;
+    document.querySelector('.conta-ajuda').hidden = false;
 }
 iniciar().catch(error => mostrarErro(error.message)).finally(() => { $('carregando').hidden = true; });

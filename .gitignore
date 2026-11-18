@@ -3,3 +3,8 @@ public/
 .wrangler/
 .dev.vars*
 .env*
+public-firebase/
+.firebase/
+firebase-debug*.log
+firestore-debug.log
+ui-debug.log

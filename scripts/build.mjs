@@ -36,6 +36,12 @@ async function copyDirectory(relative, extensions) {
     }
 }
 for (const [directory, extensions] of Object.entries(allowed)) await copyDirectory(directory, extensions);
-await copyFile(path.join(root, 'node_modules', '@simplewebauthn', 'browser', 'dist', 'bundle', 'index.umd.min.js'),
-    path.join(output, 'js', 'webauthn.js'));
+const { build } = await import('esbuild');
+await build({
+    entryPoints: [path.join(root, 'firebase', 'client.mjs')],
+    outfile: path.join(output, 'js', 'firebase-conta.js'),
+    bundle: true,
+    format: 'esm',
+    minify: true,
+});
 console.log('public/ gerada: index.html, pages/, css/, js/ e imagens/.');
