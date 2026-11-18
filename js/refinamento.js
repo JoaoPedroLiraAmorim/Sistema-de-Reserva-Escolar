@@ -503,7 +503,8 @@
         refreshCoordination();
     });
     window.addEventListener('storage', event => {
-        if (['ers_reservations', 'ers_notebooks', 'ers_blocks'].includes(event.key)) {
+        const key = window.ERS_DEMO && event.key?.startsWith('alceu_demo:') ? event.key.slice('alceu_demo:'.length) : event.key;
+        if (['ers_reservations', 'ers_notebooks', 'ers_blocks'].includes(key)) {
             window.dispatchEvent(new Event('ers:reservations-updated'));
         }
     });

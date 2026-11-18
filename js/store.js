@@ -55,13 +55,15 @@
             const fields = { ers_users: 'professors', ers_rooms: 'rooms', ers_notebooks: 'notebooks', ers_reservations: 'reservations', ers_blocks: 'blocks', ers_session: 'session' };
             return window.ERS_DATA[fields[key]] ?? null;
         }
-        try { return JSON.parse(localStorage.getItem(key)) || null; }
+        const storage = window.ERS_DEMO && key === KEYS.SESSION ? sessionStorage : localStorage;
+        try { return JSON.parse(storage.getItem(window.ERS_DEMO ? 'alceu_demo:' + key : key)) || null; }
         catch { return null; }
     }
 
     function save(key, data) {
         if (window.ERS_REAL) throw new Error('Os dados do sistema devem ser salvos pela API.');
-        localStorage.setItem(key, JSON.stringify(data));
+        const storage = window.ERS_DEMO && key === KEYS.SESSION ? sessionStorage : localStorage;
+        storage.setItem(window.ERS_DEMO ? 'alceu_demo:' + key : key, JSON.stringify(data));
     }
 
     function genId() {
@@ -166,14 +168,13 @@
             { id: 'nb4', marca: 'Samsung', total: 10, funcionando: 9,  defeito: 1 },
         ]);
 
-        // Reservas mock ancoradas na semana ativa (Segunda a Sábado)
+        // Reservas mock ancoradas na semana letiva (segunda a sexta)
         const mon = getMonday(new Date());
         const dSeg = dateKey(mon);
         const dTer = dayOffset(1, mon);
         const dQua = dayOffset(2, mon);
         const dQui = dayOffset(3, mon);
         const dSex = dayOffset(4, mon);
-        const dSab = dayOffset(5, mon);
 
         // Preserva reservas manuais criadas pelo usuário
         const existingRes = (load(KEYS.RESERVATIONS) || []).filter(r =>
@@ -525,22 +526,6 @@
                 turma: '1A Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: false
-            },
-
-            // Sábado
-            {
-                id: 'mock-res-23',
-                professorId: 'u1',
-                professorNome: 'Prof. Marcelo',
-                data: dSab,
-                inicio: '08:40',
-                fim: '09:30',
-                sala: 'Aquário',
-                marca: 'Dell',
-                notebooks: 15,
-                turma: 'Plantão Pré-Vestibular',
-                situacao: 'confirmada',
-                retiradaConfirmada: false
             }
         ];
 
@@ -582,15 +567,9 @@
     }
 
     async function resetDemoData() {
-        localStorage.removeItem(KEYS.SEEDED);
-        localStorage.removeItem('ers_seeded_v4');
-        localStorage.removeItem('ers_seeded_v5');
-        localStorage.removeItem('ers_seeded_v6');
-        localStorage.removeItem(KEYS.NOTEBOOKS);
-        localStorage.removeItem(KEYS.RESERVATIONS);
-        localStorage.removeItem(KEYS.BLOCKS);
-        localStorage.removeItem(KEYS.ROOMS);
-        localStorage.removeItem(KEYS.USERS);
+        for (const key of [KEYS.SEEDED, 'ers_seeded_v4', 'ers_seeded_v5', 'ers_seeded_v6', KEYS.NOTEBOOKS, KEYS.RESERVATIONS, KEYS.BLOCKS, KEYS.ROOMS, KEYS.USERS]) {
+            localStorage.removeItem(window.ERS_DEMO ? 'alceu_demo:' + key : key);
+        }
         await seed(true);
         if (typeof window !== 'undefined' && window.location) {
             window.location.reload();
@@ -647,7 +626,9 @@
     }
 
     function logout() {
+        if (window.ERS_DEMO) { sessionStorage.removeItem('alceu_demo:' + KEYS.SESSION); return true; }
         localStorage.removeItem(KEYS.SESSION);
+        return true;
     }
 
     function getSession() {
@@ -1155,6 +1136,7 @@
     // ─────────────────────────────────────────────────────────────
     window.addEventListener('storage', (e) => {
         if (window.ERS_REAL) return;
+        if (window.ERS_DEMO) return;
         if (e.key === KEYS.SESSION && e.newValue === null) {
             // Sessão removida em outra aba → redireciona para login
             const isInPages = window.location.pathname.includes('/pages/');
@@ -1191,11 +1173,12 @@
     //  INICIALIZAÇÃO
     // ─────────────────────────────────────────────────────────────
     if (window.ERS_REAL) return;
-    seed().then(() => getReservations());
+    window.ERS.ready = seed().then(() => getReservations());
     setInterval(() => {
-        const before = localStorage.getItem(KEYS.RESERVATIONS);
+        const reservationKey = window.ERS_DEMO ? 'alceu_demo:' + KEYS.RESERVATIONS : KEYS.RESERVATIONS;
+        const before = localStorage.getItem(reservationKey);
         getReservations();
-        if (before !== localStorage.getItem(KEYS.RESERVATIONS)) {
+        if (before !== localStorage.getItem(reservationKey)) {
             window.dispatchEvent(new Event('ers:reservations-updated'));
         }
     }, 15000);

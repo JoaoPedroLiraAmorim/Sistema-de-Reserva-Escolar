@@ -34,9 +34,11 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
  try {
   const context = await browser.newContext({timezoneId:'America/Sao_Paulo',reducedMotion:'reduce'});
   const errors=[];context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
+  const writes=[];
   await context.route('**/*',async route=>{
    const req=route.request(),url=new URL(req.url());
    if(url.origin!==base)return route.abort();
+   if(req.method()==='POST'&&url.pathname.startsWith('/api/'))writes.push(url.pathname);
    if(url.pathname==='/js/firebase-conta.js')return route.fulfill({contentType:'application/javascript',body:`export function prepararLogin(){return {cadastrar:async()=>{},reenviar:async()=>{},redefinir:async()=>{},entrar:async(email,senha,api)=>{await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;},entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}`});
    if(url.pathname==='/api/conta/entrar') {
     const id=req.postDataJSON().idToken;
@@ -52,7 +54,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   const noOverflow=async label=>assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1&&document.body.scrollWidth<=innerWidth+1),true,label);
   const screenshot=async name=>{if(!process.env.UI_ARTIFACT_DIR)return;fs.mkdirSync(process.env.UI_ARTIFACT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.UI_ARTIFACT_DIR,name+'.png'),fullPage:true});};
   await page.setViewportSize({width:390,height:844});await visit('index.html');
-  assert.equal(await page.locator('[data-role]').count(),0,'não oferece acesso demo');
+  assert.equal(await page.locator('[data-demo-role]').count(),2,'oferece dois acessos demo explícitos');
   await page.getByLabel('E-mail',{exact:true}).fill('professor@exemplo.com');await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');
   await page.getByRole('button',{name:'Criar conta',exact:true}).click();await page.getByText('Enviamos um link de confirmação.',{exact:false}).waitFor();
   await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');await page.getByRole('button',{name:'Entrar',exact:true}).click();
@@ -121,7 +123,36 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await login('p2');await visit('pages/professor.html');assert.deepEqual(await page.evaluate(()=>ERS.getReservations().find(r=>r.id==='active').alunosNotebooks),[]);
   await page.locator('.btn-header-logout').click();await page.waitForURL('**/index.html');
   await page.getByRole('button',{name:'Entrar com Google'}).click();await page.waitForURL('**/pages/professor.html');
+  const savedCount = sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n;
+  const roomsCount = sql.prepare('SELECT COUNT(*) AS n FROM salas').get().n;
+  const writesBeforeDemo = writes.length;
+  for (const role of ['professor','coordenacao']) {
+   await visit('index.html');
+   await page.locator(`[data-demo-role="${role}"]`).click();
+   await page.waitForURL(role === 'professor' ? '**/pages/professor.html' : '**/pages/proatec.html');
+   await page.locator('.demo-notice').waitFor({state:'visible'});
+   assert.equal(await page.evaluate(()=>ERS.getSession().role),role);
+   assert.equal(await page.evaluate(()=>window.ERS_REAL),false);
+   await noOverflow('demo '+role);
+   if(role==='professor') {
+    const result=await page.evaluate(()=>ERS.createReservation({professorId:ERS.getSession().userId,professorNome:ERS.getSession().nome,data:ERS.dateKey(ERS.getMonday(ERS.dayOffset(21))),inicio:'07:00',fim:'07:50',notebooks:1}));
+    assert.equal(result.ok,true);
+   } else {
+    await page.locator('#v2-mobile-menu').click();
+    await page.locator('#sidebar a[href="salas.html"]').click();await page.waitForURL('**/pages/salas.html');
+    await page.locator('.demo-notice').waitFor({state:'visible'});
+    assert.equal(await page.evaluate(()=>ERS.addRoom('Sala demonstrativa').ok),true);
+    await page.locator('#v2-switch').click();await page.waitForURL('**/index.html');
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('alceu_demo')),null);
+   }
+  }
+  assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n,savedCount,'demo não grava reservas no banco real');
+  assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM salas').get().n,roomsCount,'demo não grava salas no banco real');
+  assert.equal(writes.length,writesBeforeDemo,'demo não envia alterações para a API real');
+  await page.getByRole('button',{name:'Entrar com Google'}).click();await page.waitForURL('**/pages/professor.html');
+  await page.waitForFunction(()=>!document.documentElement.classList.contains('app-loading'));
+  assert.equal(await page.evaluate(()=>window.ERS_REAL),true,'login normal retorna ao sistema real');
   assert.deepEqual(errors,[],'sem erros JavaScript');
-  console.log('UI real validada: cadastro/login e Google na interface principal; 8 viewports; 6 telas de coordenação; reserva persistida no SQL; retirada e alunos entre perfis; logout e proteção contra HTML.');
+  console.log('UI validada: login real, dois perfis demo isolados da API, 8 viewports, 6 telas de coordenação, persistência SQL, retirada, alunos e logout.');
  } finally {await browser.close();sql.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

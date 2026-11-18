@@ -1,6 +1,22 @@
 /* Cache em memória; todas as gravações são confirmadas pelo servidor. */
 (function () {
     'use strict';
+    if (window.ERS_DEMO) {
+        const logout = ERS.logout;
+        ERS.logout = () => { logout(); sessionStorage.removeItem('alceu_demo'); return true; };
+        document.addEventListener('DOMContentLoaded', async () => {
+            await ERS.ready;
+            const session = ERS.getSession();
+            if (!session) { location.replace('../index.html'); return; }
+            const expected = document.body.classList.contains('teacher-page') ? 'professor' : 'coordenacao';
+            if (session.role !== expected) { location.replace(session.role === 'professor' ? 'professor.html' : 'proatec.html'); return; }
+            document.dispatchEvent(new Event('ers:ready'));
+            const main = document.querySelector('.teacher-main-content, .dashboard-content');
+            main?.insertAdjacentHTML('afterbegin', '<p class="demo-notice" role="status">Demonstração · dados fictícios salvos neste navegador.</p>');
+            document.documentElement.classList.remove('app-loading');
+        });
+        return;
+    }
     let refreshing;
     const pending = new Map();
     async function api(path, body) {

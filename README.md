@@ -8,7 +8,9 @@ https://app.reservas-alceu.workers.dev
 
 O Firebase Authentication autentica contas Google e e-mail/senha. O Worker Cloudflare serve a interface e a API; o banco D1 edulab-dev guarda as contas, sessões, salas, estoque, reservas, bloqueios, retiradas e vínculos de alunos. O nome do banco é legado; a publicação usa sua instância remota.
 
-Após entrar, professores abrem pages/professor.html e a Coordenação abre pages/proatec.html. A antiga pages/conta.html redireciona para a interface principal. Não há acesso de demonstração no login publicado.
+Após entrar, professores abrem pages/professor.html e a Coordenação abre pages/proatec.html. A antiga pages/conta.html redireciona para a interface principal.
+
+Os botões **Professor demo** e **Coordenação demo** permitem experimentar a mesma interface com dados fictícios. Não exigem senha e não gravam no banco real. A sessão demo fica nesta aba; os exemplos ficam no navegador com o prefixo alceu_demo:. Use Sair para retornar ao login normal. Os perfis demo não concedem acesso às APIs autenticadas.
 
 ## Dados e permissões
 
@@ -49,7 +51,7 @@ WHERE identidade_externa = 'firebase:projetotcc-3ds:UID_DA_PESSOA';
 | --- | --- |
 | index.html, pages/, css/, js/ | Interface compartilhada |
 | js/real-mode.js, js/real-store.js | Inicialização da sessão, cache em memória e gravações pela API |
-| js/store.js | Utilitários e cálculos da interface; a demonstração legada permanece apenas para testes isolados |
+| js/store.js | Utilitários e cálculos da interface e dados locais exclusivos da demonstração |
 | firebase/client.mjs | Login e verificação de e-mail pelo Firebase |
 | src/contas.mjs | Validação de identidade Firebase e sessões |
 | src/sistema.mjs | Dados compartilhados, permissões e operações de recursos/reservas |

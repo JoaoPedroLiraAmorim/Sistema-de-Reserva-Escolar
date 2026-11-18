@@ -48,6 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('login-status');
     let busy = false;
 
+    document.querySelectorAll('[data-demo-role]').forEach(button => button.addEventListener('click', () => executar(button, async () => {
+        window.ERS_DEMO = true;
+        window.ERS_REAL = false;
+        sessionStorage.setItem('alceu_demo', '1');
+        try {
+            const role = button.dataset.demoRole;
+            const result = await ERS.login(role + '@demo.com', '123456');
+            if (!result.ok) throw new Error(result.message);
+            location.assign(role === 'professor' ? 'pages/professor.html' : 'pages/proatec.html');
+        } catch (error) {
+            sessionStorage.removeItem('alceu_demo'); window.ERS_DEMO = false; window.ERS_REAL = true;
+            throw error;
+        }
+    })));
+
     async function api(path, body) {
         const request = { cache: 'no-store' };
         if (body) Object.assign(request, {
