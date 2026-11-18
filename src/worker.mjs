@@ -1,13 +1,30 @@
-function json(data, status = 200, extraHeaders = {}) {
-    return Response.json(data, {
-        status,
-        headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...extraHeaders },
-    });
-}
+import { origemDaConta, rotaConta } from './contas.mjs';
+import { HttpError, json } from './http.mjs';
+import { rotaReservas } from './reservas.mjs';
 
 export default {
     async fetch(request, env) {
-        const { pathname } = new URL(request.url);
+        const url = new URL(request.url);
+        const { pathname } = url;
+        if (pathname.startsWith('/api/conta/') || pathname.startsWith('/api/agenda/')) {
+            if (!origemDaConta(url, env)) return json({ error: 'Rota não encontrada.' }, 404);
+            try {
+                return pathname.startsWith('/api/conta/')
+                    ? await rotaConta(request, env, url)
+                    : await rotaReservas(request, env, url);
+            } catch (error) {
+                if (error instanceof HttpError) return json({ error: error.message }, error.status);
+                if (url.hostname === 'localhost') console.error(error);
+                return json({ error: 'Serviço temporariamente indisponível.' }, 503);
+            }
+        }
+        if (pathname === '/pages/conta.html') {
+            const asset = await env.ASSETS.fetch(request);
+            const headers = new Headers(asset.headers);
+            headers.set('Content-Security-Policy', "default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+            headers.set('Referrer-Policy', 'no-referrer');
+            return new Response(asset.body, { status: asset.status, headers });
+        }
         if (pathname === '/api/health') {
             if (request.method !== 'GET' && request.method !== 'HEAD') {
                 return json({ error: 'Método não permitido.' }, 405, { Allow: 'GET, HEAD' });

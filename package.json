@@ -13,5 +13,10 @@
   "devDependencies": {
     "playwright": "^1.63.0",
     "wrangler": "4.153.0"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.3",
+    "jose": "^6.2.17"
   }
 }

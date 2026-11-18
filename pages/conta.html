@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <title>Agenda de salas · Alceu Reservas</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/conta.css">
+    <script src="../js/webauthn.js" defer></script>
+    <script src="../js/conta.js" defer></script>
+</head>
+<body>
+    <main class="conta">
+        <a class="conta-inicio" href="../">Alceu Reservas</a>
+        <p id="erro-conta" class="conta-erro" role="alert" hidden></p>
+        <section class="conta-card" id="acesso" hidden>
+            <h1 id="titulo-acesso">Entrar na sua conta</h1>
+            <p id="instrucao-acesso">Para criar uma conta, abra o convite recebido da coordenação.</p>
+            <div class="conta-acoes">
+                <button class="btn-primary" type="button" id="chave">Entrar com chave de acesso</button>
+                <button class="btn-secondary" type="button" id="google" hidden>Entrar com Google</button>
+            </div>
+        </section>
+
+        <div id="area-conta" hidden>
+            <header class="conta-cabecalho">
+                <div>
+                    <h1>Agenda de salas</h1>
+                    <p id="usuario"></p>
+                </div>
+                <button class="btn-secondary" type="button" id="sair">Sair</button>
+            </header>
+
+            <section class="conta-card">
+                <label for="data-agenda">Dia da agenda</label>
+                <input class="form-control" type="date" id="data-agenda" required>
+                <p id="agenda-status" role="status"></p>
+                <ul class="conta-lista" id="agenda"></ul>
+            </section>
+
+            <section class="conta-card">
+                <h2>Reservar sala</h2>
+                <form id="reserva-form" class="conta-form">
+                    <label for="sala">Sala
+                        <select id="sala" name="salaId" class="form-control" required></select>
+                    </label>
+                    <div class="conta-horarios">
+                        <label for="inicio">Início
+                            <input class="form-control" id="inicio" name="inicio" type="time" required>
+                        </label>
+                        <label for="fim">Fim
+                            <input class="form-control" id="fim" name="fim" type="time" required>
+                        </label>
+                    </div>
+                    <button class="btn-primary" type="submit">Reservar</button>
+                </form>
+            </section>
+
+            <div id="area-coordenacao" hidden>
+                <section class="conta-card">
+                    <h2>Gerenciar salas</h2>
+                    <form id="sala-form" class="conta-form">
+                        <label for="nome-sala">Nome da sala
+                            <input class="form-control" id="nome-sala" name="nome" maxlength="100" required>
+                        </label>
+                        <button class="btn-primary" type="submit">Cadastrar sala</button>
+                    </form>
+                    <ul class="conta-lista" id="salas"></ul>
+                </section>
+
+                <section class="conta-card">
+                    <h2>Convidar professor</h2>
+                    <form id="convite-form" class="conta-form">
+                        <label for="email-convite">E-mail do professor
+                            <input class="form-control" id="email-convite" type="email" name="email" maxlength="254" required>
+                        </label>
+                        <button class="btn-primary" type="submit">Gerar convite</button>
+                    </form>
+                    <div id="convite-gerado" hidden>
+                        <label for="link-convite">Link de uso único, válido por 48 horas</label>
+                        <input class="form-control" id="link-convite" type="url" readonly>
+                        <button class="btn-secondary" id="copiar-convite" type="button">Copiar link</button>
+                        <p role="status" id="status-convite"></p>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <p id="carregando" role="status">Carregando…</p>
+    </main>
+</body>
+</html>

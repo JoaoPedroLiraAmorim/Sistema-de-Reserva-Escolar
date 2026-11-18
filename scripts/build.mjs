@@ -36,4 +36,6 @@ async function copyDirectory(relative, extensions) {
     }
 }
 for (const [directory, extensions] of Object.entries(allowed)) await copyDirectory(directory, extensions);
+await copyFile(path.join(root, 'node_modules', '@simplewebauthn', 'browser', 'dist', 'bundle', 'index.umd.min.js'),
+    path.join(output, 'js', 'webauthn.js'));
 console.log('public/ gerada: index.html, pages/, css/, js/ e imagens/.');

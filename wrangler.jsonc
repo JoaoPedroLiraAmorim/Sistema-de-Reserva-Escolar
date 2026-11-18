@@ -3,6 +3,9 @@
 	"name": "app",
 	"main": "src/worker.mjs",
 	"compatibility_date": "2026-10-26",
+	"vars": {
+		"ACCOUNT_ORIGIN": "https://app.reservas-alceu.workers.dev"
+	},
 	// Banco de desenvolvimento criado na Cloudflare; dev continua usando a cópia local.
 	"d1_databases": [
 		{
@@ -19,7 +22,8 @@
 		"run_worker_first": [
 			"/",
 			"/api",
-			"/api/*"
+			"/api/*",
+			"/pages/conta.html"
 		],
 		"html_handling": "none",
 		"not_found_handling": "none"
