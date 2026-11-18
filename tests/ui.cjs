@@ -65,7 +65,8 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    assert.equal(await page.locator('#v2-day-list,[data-agenda-mode="list"]').count(),0);
    assert.equal(await page.locator('#v2-room-filter,#v2-only-mine').count(),0,'professor sem filtros de sala ou de minhas reservas');
    const daily=width<=1100;
-   assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:6);
+   assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:5);
+   assert.equal(await page.locator('#calendarHead th[data-date]').count(),5,'semana letiva tem cinco dias');
    if(width<=768||width===844) {
     assert.equal(await page.locator('#teacher-week-days').isVisible(),false,'celular usa apenas as setas para escolher o dia');
     const day=await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date');
@@ -84,6 +85,13 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    await page.keyboard.press('Escape');
   }
   await page.setViewportSize({width:390,height:844});await visit('pages/professor.html');
+  const friday=await page.locator('#calendarHead th[data-date]').last().getAttribute('data-date');
+  await page.evaluate(date=>{const button=document.querySelector(`#teacher-week-days button[data-date="${date}"]`);button.click();},friday);
+  await page.locator('#v2-next-day').click();
+  const monday=await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date');
+  assert.equal((new Date(monday+'T12:00:00Z')-new Date(friday+'T12:00:00Z'))/86400000,3,'sexta avança direto para segunda');
+  await page.locator('#v2-prev-day').click();
+  assert.equal(await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date'),friday,'segunda volta direto para sexta');
   const date=await page.evaluate(()=>ERS.dateKey(ERS.getMonday(ERS.dayOffset(14))));
   await page.locator('#btnOpenNewReservation').click();await page.locator('#res-date').fill(date);
   await page.locator('#res-start').selectOption('07:00');await page.locator('#res-end').selectOption('07:50');

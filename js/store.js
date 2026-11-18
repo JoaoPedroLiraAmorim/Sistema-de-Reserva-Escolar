@@ -1131,19 +1131,19 @@
     const MESES      = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-    /** Retorna a segunda-feira da semana que contém a data dada */
+    /** Retorna a segunda-feira da semana letiva; no fim de semana, avança para a próxima. */
     function getMonday(date) {
         const d = new Date(typeof date === 'string' ? date + 'T12:00:00' : date);
         d.setHours(12, 0, 0, 0); // evita bug de timezone
         const day = d.getDay();
-        const diff = day === 0 ? 1 : 1 - day;
+        const diff = day === 0 ? 1 : day === 6 ? 2 : 1 - day;
         d.setDate(d.getDate() + diff);
         return d;
     }
 
-    /** Retorna array de 6 datas (Seg→Sáb) de uma semana, dado a segunda-feira */
+    /** Retorna as cinco datas letivas (segunda a sexta), dada a segunda-feira. */
     function getWeekDays(monday) {
-        return Array.from({ length: 6 }, (_, i) => {
+        return Array.from({ length: 5 }, (_, i) => {
             const d = new Date(monday);
             d.setDate(d.getDate() + i);
             return d;

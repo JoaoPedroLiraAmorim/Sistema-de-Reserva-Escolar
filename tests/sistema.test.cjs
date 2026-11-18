@@ -33,7 +33,9 @@ function fixture(t) {
     }), { DB, ACCOUNT_ORIGIN: origin });
     const action = (user, acao, ...args) => request(user, '/api/agenda/acao', { acao, args });
     const state = async user => (await request(user, '/api/agenda/estado')).json();
-    const date = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const next = new Date(Date.now() + 86400000);
+    while ([0, 6].includes(next.getUTCDay())) next.setUTCDate(next.getUTCDate() + 1);
+    const date = next.toISOString().slice(0, 10);
     return { sql, request, action, state, booking: { data: date, inicio: '07:00', fim: '07:50', sala: 'Laboratório', notebooks: 0 } };
 }
 
@@ -60,6 +62,19 @@ test('reservas concorrentes respeitam sala, estoque e intervalos consecutivos', 
     assert.equal((await f.action('p2', 'createReservation', { ...nb, inicio: '07:50', fim: '08:40' })).status, 200);
     assert.equal((await f.action('p1', 'createReservation', { ...nb, inicio: '07:00', fim: '08:40', notebooks: 4 })).status, 200);
     assert.equal((await f.action('p1', 'createReservation', { ...nb, notebooks: 1.5 })).status, 400);
+});
+
+test('servidor rejeita reservas no sábado e domingo', async t => {
+    const f = fixture(t);
+    const saturday = new Date(f.booking.data + 'T12:00:00Z');
+    while (saturday.getUTCDay() !== 6) saturday.setUTCDate(saturday.getUTCDate() + 1);
+    for (let day = 0; day < 2; day++) {
+        const response = await f.action('p1', 'createReservation', { ...f.booking, data: saturday.toISOString().slice(0, 10) });
+        assert.equal(response.status, 400);
+        assert.match((await response.json()).error, /segunda a sexta/);
+        saturday.setUTCDate(saturday.getUTCDate() + 1);
+    }
+    assert.equal(f.sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n, 0);
 });
 
 test('bloqueios e estoque são compartilhados, sem importar dados locais', async t => {

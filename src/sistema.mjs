@@ -44,6 +44,8 @@ export async function alterar(db, conta, acao, args) {
     const [first, second] = args;
     if (acao === 'createReservation') {
         const b = first || {}; periodo(b);
+        const weekday = new Date(b.data + 'T12:00:00Z').getUTCDay();
+        exigir(weekday !== 0 && weekday !== 6, 'As reservas são de segunda a sexta-feira. Escolha um dia letivo.');
         const notebooks = b.notebooks ?? 0;
         exigir(Number.isInteger(notebooks) && notebooks >= 0 && notebooks <= 1000, 'Informe uma quantidade inteira de até 1000 notebooks.');
         let salaId = null;

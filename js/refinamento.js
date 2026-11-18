@@ -115,7 +115,7 @@
 
     function moveAgendaDay(direction) {
         const date = new Date(selectedAgendaDay + 'T12:00:00');
-        do { date.setDate(date.getDate() + direction); } while (date.getDay() === 0);
+        do { date.setDate(date.getDate() + direction); } while (date.getDay() === 0 || date.getDay() === 6);
         selectAgendaDay(ERS.dateKey(date));
     }
 
@@ -145,7 +145,7 @@
         todayButton.onclick = () => {
             const today = new Date();
             if (teacherAgenda) {
-                const date = today.getDay() === 0 ? ERS.getMonday(today) : today;
+                const date = today.getDay() === 0 || today.getDay() === 6 ? ERS.getMonday(today) : today;
                 selectAgendaDay(ERS.dateKey(date));
                 return;
             }
@@ -423,6 +423,8 @@
         const v=id=>$('#'+id)?.value||'';
         const data={data:v('res-date'),inicio:v('res-start'),fim:v('res-end'),sala:v('res-room'),marca:v('res-brand'),notebooks:Number(v('res-quantity'))};
         let error=(!data.sala&&!data.notebooks?'Escolha uma sala ou informe a quantidade de notebooks.':'');
+        const weekday = new Date(data.data + 'T12:00:00').getDay();
+        if (weekday === 0 || weekday === 6) error = 'As reservas são de segunda a sexta-feira. Escolha um dia letivo.';
         if (data.data < ERS.today() || (data.data === ERS.today() && data.inicio <= ERS.getCurrentTime())) error = 'Escolha uma data e um horário futuros.';
         if(!error){const c=ERS.checkConflicts(data);if(!c.ok)error=c.message;}
         if(error){$('#res-error').textContent=error;$('#res-error').style.display='block';$('#res-error').scrollIntoView({block:'nearest'});return;}
