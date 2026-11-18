@@ -14,3 +14,25 @@ body.login-page{height:auto;min-height:100dvh;background:#fff;overflow-x:hidden}
 @media(max-width:420px){.access-story{padding:22px 25px}.access-brand small{font-size:6.5px}.access-story-content{margin-top:22px}.access-story h1{font-size:27px!important;max-width:340px}.access-eyebrow{font-size:7px;letter-spacing:1.2px}.login-page .login-form-panel{padding:27px 25px 23px!important}.login-page .form-header-text h2{font-size:25px!important}.login-page .role-segmented-section{margin-top:23px;padding-top:20px}.access-demo-description{font-size:10px}.login-page .form-options-row{gap:7px}.login-page .checkbox-control,.login-page .forgot-pwd-link{font-size:10px!important}.access-demo-note{font-size:9px}.login-page .v2-reset{font-size:9px}.login-page .form-footer{margin-top:19px}.login-page .btn-submit{font-size:13px!important}}
 /* Texto auxiliar com contraste e tamanho de leitura, mantendo a hierarquia. */
 .login-page .access-form-eyebrow{color:#61718b}.login-page #login-form .form-group label{font-size:12px!important}.login-page #login-form .input-container input::placeholder{color:#64748b}.login-page .checkbox-control{font-size:11px;color:#63718a}.login-page .forgot-pwd-link{font-size:11px}.login-page .btn-submit{font-size:14px!important}.login-page .role-tab-btn{color:#5f718d;font-size:11px!important}.login-page .role-tab-btn svg{width:20px;height:20px}.login-page .access-demo-description{color:#63718a;font-size:11px}.login-page .access-demo-note{color:#63718a;font-size:10px}.login-page .form-footer{color:#63718a}.login-page .v2-reset{color:#63718a;font-size:10px}.login-page .access-demo-badge{color:#526b92}.login-page .input-container .input-icon-left,.login-page .password-toggle-btn{color:#64748b}
+
+.login-page .login-opcoes {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+.login-page .login-opcoes .btn-secondary {
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 13px;
+    text-align: center;
+}
+.login-page .login-status {
+    margin-bottom: 10px;
+    color: #314f7f;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.login-page .login-reenviar { min-height: 44px; margin-bottom: 4px; font-size: 13px; }
+.login-page .login-reenviar[hidden] { display: none; }

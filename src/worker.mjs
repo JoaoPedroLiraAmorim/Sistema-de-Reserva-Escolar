@@ -18,8 +18,9 @@ export default {
                 return json({ error: 'Serviço temporariamente indisponível.' }, 503);
             }
         }
-        if (pathname === '/pages/conta.html') {
-            const asset = await env.ASSETS.fetch(request);
+        if (pathname === '/' || pathname === '/index.html' || pathname === '/pages/conta.html') {
+            const assetRequest = pathname === '/' ? new Request(new URL('/index.html', url), request) : request;
+            const asset = await env.ASSETS.fetch(assetRequest);
             const headers = new Headers(asset.headers);
             const firebase = firebaseConfig(env);
             const frames = firebase ? ` https://${firebase.authDomain} https://accounts.google.com https://apis.google.com` : '';
@@ -57,12 +58,6 @@ export default {
         }
         if (pathname === '/api' || pathname.startsWith('/api/')) {
             return json({ error: 'Rota não encontrada.' }, 404);
-        }
-        // As telas existentes dependem dos endereços terminados em .html.
-        if (pathname === '/') {
-            const url = new URL(request.url);
-            url.pathname = '/index.html';
-            return env.ASSETS.fetch(new Request(url, request));
         }
         return env.ASSETS.fetch(request);
     },

@@ -41,21 +41,15 @@
                 <!-- Cabeçalho da Marca -->
                 <header class="brand-header"><span class="access-form-eyebrow">SEU ESPAÇO NA ESCOLA</span><div class="form-header-text"><h2>Bem-vindo de volta.</h2><p>Acesse sua conta para preparar a próxima aula.</p></div></header>
 
-                <p class="access-demo-description"><a href="pages/conta.html">Entrar na agenda com Google ou e-mail</a></p>
-
-                <!-- Formulário de demonstração -->
-                <div id="demonstracao">
-                    <p class="access-demo-description">Conta fixa de desenvolvimento: coordenacao@demo.com · senha 123456. Os dados são de demonstração.</p>
-                </div>
                 <form id="login-form" novalidate>
                     <!-- Campo E-mail -->
                     <div class="form-group">
-                        <label for="email">E-mail de demonstração</label>
+                        <label for="email">E-mail</label>
                         <div class="input-container">
                             <svg class="input-icon-left" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <input type="email" id="email" placeholder="professor@demo.com" inputmode="email" autocapitalize="none" spellcheck="false" autocomplete="username" required>
+                            <input type="email" id="email" placeholder="nome@exemplo.com" inputmode="email" autocapitalize="none" spellcheck="false" autocomplete="username" required>
                         </div>
                     </div>
 
@@ -82,7 +76,7 @@
                             <input type="checkbox" id="rememberEmail">
                             <span>Lembrar meu e-mail</span>
                         </label>
-                        <button type="button" class="forgot-pwd-link access-help" data-access-help>Esqueceu a senha?</button>
+                        <button type="button" class="forgot-pwd-link access-help" id="login-redefinir">Esqueceu a senha?</button>
                     </div>
 
                     <!-- Mensagem de Erro -->
@@ -95,6 +89,9 @@
                         <span class="error-text">E-mail ou senha incorretos.</span>
                     </div>
 
+                    <p class="login-status" id="login-status" role="status" hidden></p>
+                    <button type="button" class="access-help login-reenviar" id="login-reenviar" hidden>Reenviar confirmação</button>
+
                     <!-- Botão de Entrar -->
                     <button type="submit" class="btn-submit" id="btn-login">
                         <svg class="btn-spinner" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
@@ -103,15 +100,19 @@
                         </svg>
                         <span class="btn-text">Entrar</span><svg class="access-enter-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 12h14 M13 6l6 6-6 6"/></svg>
                     </button>
+                    <div class="login-opcoes">
+                        <button type="button" class="btn-secondary" id="login-google" disabled>Entrar com Google</button>
+                        <button type="submit" class="btn-secondary" id="login-cadastrar">Criar conta</button>
+                    </div>
                 </form>
 
                 <!-- Seletor Rápido de Perfis (Tabs de Demonstração) -->
-                <div class="role-segmented-section">
+                <div class="role-segmented-section" id="demonstracao">
                     <div class="role-section-label">
-                        <span>Conheça o sistema</span>
+                        <span>Acesso de desenvolvimento</span>
                         <span class="access-demo-badge">DEMONSTRAÇÃO</span>
                     </div>
-                    <p class="access-demo-description">Escolha um perfil para preencher o acesso de teste.</p><div class="role-segmented-control" role="group" aria-label="Preencher perfil de demonstração">
+                    <p class="access-demo-description">Escolha um perfil para preencher o formulário acima.</p><div class="role-segmented-control" role="group" aria-label="Preencher perfil de demonstração">
                         <button type="button" class="role-tab-btn" aria-pressed="false" data-role="professor" data-email="professor@demo.com" data-pass="123456" title="Preencher dados de Professor">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -140,7 +141,7 @@
         </main>
     </div>
 
-    <dialog id="access-help-dialog" aria-labelledby="access-help-title"><h2 id="access-help-title">Vamos ajudar você a entrar.</h2><p>Para recuperar seu acesso institucional, procure o Coordenação da sua escola.</p><div class="access-help-demo"><strong>Quer conhecer o sistema?</strong><p>Feche esta janela e escolha Professor, Coordenação em “Conheça o sistema”. Os campos serão preenchidos para você.</p></div><form method="dialog"><button class="btn-primary">Entendi</button></form></dialog><!-- Scripts do Sistema -->
+    <dialog id="access-help-dialog" aria-labelledby="access-help-title"><h2 id="access-help-title">Vamos ajudar você a entrar.</h2><p>Para recuperar seu acesso, use “Esqueceu a senha?” ou procure a coordenação da sua escola.</p><div class="access-help-demo"><strong>Quer conhecer o sistema?</strong><p>Feche esta janela e escolha Professor, Coordenação em “Acesso de desenvolvimento”. Os campos serão preenchidos para você.</p></div><form method="dialog"><button class="btn-primary">Entendi</button></form></dialog><!-- Scripts do Sistema -->
     <script src="js/store.js"></script>
     <script src="js/login-novo.js"></script>
 <script src="js/refinamento.js"></script>

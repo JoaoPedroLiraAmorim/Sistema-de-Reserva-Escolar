@@ -16,7 +16,7 @@ const base = process.env.UI_BASE_URL || 'http://localhost:8787';
             if (path === '/api/agenda/salas') return route.fulfill({ json: { salas: [], reservas: [] } });
             requests.push(path);
             if (path === '/api/conta/entrar') {
-                assert.equal(route.request().postDataJSON().idToken, 'token-google-teste');
+                assert.ok(['token-email-teste', 'token-google-teste'].includes(route.request().postDataJSON().idToken));
                 conta = { email: 'professor@exemplo.com', papel: 'professor' };
                 return route.fulfill({ json: { ok: true } });
             }
@@ -30,7 +30,11 @@ const base = process.env.UI_BASE_URL || 'http://localhost:8787';
             contentType: 'application/javascript',
             body: `export function prepararLogin() {
                 return {
-                    entrar: async () => false,
+                    entrar: async (email, password, api) => {
+                        if (email === 'nao-confirmado@exemplo.com') return false;
+                        await api('conta/entrar', { idToken: 'token-email-teste' });
+                        return true;
+                    },
                     cadastrar: async () => {},
                     reenviar: async () => {},
                     redefinir: async () => {},
@@ -40,31 +44,48 @@ const base = process.env.UI_BASE_URL || 'http://localhost:8787';
         }));
 
         await page.goto(base + '/pages/conta.html');
-        await page.getByRole('heading', { name: 'Entrar na agenda' }).waitFor();
-        await page.getByLabel('E-mail', { exact: true }).fill('professor@exemplo.com');
-        await page.getByLabel('Senha', { exact: true }).fill('senha-de-teste');
+        await page.waitForURL(base + '/');
+        assert.equal(await page.getByRole('heading', { name: 'Bem-vindo de volta.' }).isVisible(), true);
+        const email = page.getByRole('textbox', { name: 'E-mail', exact: true });
+        const password = page.getByLabel('Senha', { exact: true });
+        const entrar = page.getByRole('button', { name: 'Entrar', exact: true });
+
+        await email.fill('coordenacao@demo.com');
+        await password.fill('123456');
+        await entrar.click();
+        await page.waitForURL('**/pages/proatec.html');
+        assert.deepEqual(requests, [], 'A conta de desenvolvimento só usa o armazenamento local.');
+
+        await page.goto(base + '/');
+        await email.fill('nao-confirmado@exemplo.com');
+        await password.fill('senha-de-teste');
         await page.getByRole('button', { name: 'Criar conta' }).click();
         await page.getByText('Enviamos um link de confirmação.', { exact: false }).waitFor();
-
-        await page.getByLabel('Senha', { exact: true }).fill('senha-de-teste');
-        await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-        await page.getByText('Confirme o e-mail antes de entrar.').waitFor();
+        await password.fill('senha-de-teste');
+        await entrar.click();
+        await page.getByText('Confirme seu e-mail antes de entrar.').waitFor();
         assert.deepEqual(requests, []);
         await page.getByRole('button', { name: 'Reenviar confirmação' }).click();
         await page.getByText('Enviamos outro link de confirmação.').waitFor();
-        await page.getByRole('button', { name: 'Esqueci minha senha' }).click();
+        await page.getByRole('button', { name: 'Esqueceu a senha?' }).click();
         await page.getByText('Se o endereço tiver uma conta', { exact: false }).waitFor();
 
-        await page.getByRole('button', { name: 'Entrar com Google' }).click();
+        await email.fill('professor@exemplo.com');
+        await password.fill('senha-de-teste');
+        await entrar.click();
+        await page.waitForURL('**/pages/conta.html');
         await page.getByRole('heading', { name: 'Agenda de salas' }).waitFor();
         assert.equal(await page.locator('#area-coordenacao').isVisible(), false);
-        assert.equal(await page.getByText('Convidar professor').count(), 0);
+        assert.equal(await page.getByRole('button', { name: 'Entrar com Google' }).count(), 0);
         assert.deepEqual(requests, ['/api/conta/entrar']);
 
         await page.getByRole('button', { name: 'Sair', exact: true }).click();
         await page.waitForURL(base + '/');
-        await page.getByText('Conta fixa de desenvolvimento:', { exact: false }).waitFor();
-        console.log('Tela de acesso validada: cadastro, verificação, redefinição, entrada e demonstração fixa.');
+        await page.getByRole('button', { name: 'Entrar com Google' }).click();
+        await page.waitForURL('**/pages/conta.html');
+        await page.getByRole('heading', { name: 'Agenda de salas' }).waitFor();
+        assert.deepEqual(requests, ['/api/conta/entrar', '/api/conta/sair', '/api/conta/entrar']);
+        console.log('Acesso unificado validado: demonstração, cadastro e login por e-mail ou Google.');
     } finally {
         await browser.close();
     }

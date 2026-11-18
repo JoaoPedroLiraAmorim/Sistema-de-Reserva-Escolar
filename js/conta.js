@@ -5,7 +5,6 @@ const erro = $('erro-conta');
 const dataAgenda = $('data-agenda');
 const salasSelect = $('sala');
 let conta;
-let autenticacao;
 let leitura = 0;
 
 function mostrarErro(message = '') {
@@ -20,7 +19,6 @@ async function api(path, body) {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
     });
     const response = await fetch('/api/' + path, options);
-    if (response.status === 404 && path === 'conta/config') throw new Error('O acesso por conta própria ainda não foi habilitado neste endereço.');
     const data = await response.json();
     if (!response.ok) throw new Error(data.error ?? 'O serviço está indisponível no momento.');
     return data;
@@ -33,21 +31,7 @@ async function executar(button, action) {
     try {
         await action();
     } catch (error) {
-        const messages = {
-            'auth/invalid-credential': 'E-mail ou senha inválidos.',
-            'auth/wrong-password': 'E-mail ou senha inválidos.',
-            'auth/user-not-found': 'E-mail ou senha inválidos.',
-            'auth/email-already-in-use': 'Este e-mail já tem uma conta. Use Entrar ou Esqueci minha senha.',
-            'auth/weak-password': 'A senha precisa ter pelo menos seis caracteres.',
-            'auth/popup-closed-by-user': 'A janela do Google foi fechada.',
-            'auth/popup-blocked': 'Permita a abertura da janela do Google e tente novamente.',
-            'auth/account-exists-with-different-credential': 'Entre pelo método que já usa para este e-mail.',
-            'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
-            'auth/network-request-failed': 'Falha na conexão. Confira a internet e tente novamente.',
-            'auth/operation-not-allowed': 'Este método de login ainda precisa ser habilitado.',
-            'auth/unauthorized-domain': 'Este endereço ainda precisa ser autorizado no Firebase.',
-        };
-        mostrarErro(messages[error.code] ?? error.message);
+        mostrarErro(error.message);
     } finally {
         button.disabled = false;
     }
@@ -137,74 +121,16 @@ $('sair').onclick = () => executar($('sair'), async () => {
     location.assign('../');
 });
 dataAgenda.onchange = () => { mostrarErro(); carregarAgenda().catch(error => mostrarErro(error.message)); };
-const statusAcesso = $('status-acesso');
-const emailConta = $('email-conta');
-const reenviar = $('reenviar');
-
-$('acesso-form').addEventListener('submit', event => {
-    event.preventDefault();
-    const button = event.submitter ?? $('acesso-form').querySelector('[name="entrar"]');
-    executar(button, async () => {
-        statusAcesso.textContent = '';
-        reenviar.hidden = true;
-        const email = emailConta.value.trim();
-        const senha = $('senha-conta').value;
-
-        if (button.name === 'cadastrar') {
-            if (senha.length < 6) throw new Error('A senha precisa ter pelo menos seis caracteres.');
-            await autenticacao.cadastrar(email, senha);
-            statusAcesso.textContent = 'Enviamos um link de confirmação. Confirme o e-mail e depois entre na sua conta.';
-            $('senha-conta').value = '';
-            reenviar.hidden = false;
-            return;
-        }
-        if (await autenticacao.entrar(email, senha, api)) {
-            location.replace(location.pathname);
-            return;
-        }
-        statusAcesso.textContent = 'Confirme o e-mail antes de entrar.';
-        reenviar.hidden = false;
-    });
-});
-
-$('google').onclick = () => executar($('google'), async () => {
-    statusAcesso.textContent = '';
-    await autenticacao.entrarGoogle(api);
-    location.replace(location.pathname);
-});
-$('redefinir').onclick = () => executar($('redefinir'), async () => {
-    if (!emailConta.reportValidity()) return;
-    await autenticacao.redefinir(emailConta.value.trim());
-    statusAcesso.textContent = 'Se o endereço tiver uma conta, o Firebase enviará as instruções para redefinir a senha.';
-});
-reenviar.onclick = () => executar(reenviar, async () => {
-    await autenticacao.reenviar();
-    statusAcesso.textContent = 'Enviamos outro link de confirmação.';
-});
-
 async function iniciar() {
-    const config = await api('conta/config');
     ({ conta } = await api('conta/sessao'));
-    if (conta) {
-        $('area-conta').hidden = false;
-        $('area-coordenacao').hidden = conta.papel !== 'coordenacao';
-        $('usuario').textContent = conta.email;
-        dataAgenda.value = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date());
-        await carregarAgenda();
+    if (!conta) {
+        location.replace('../');
         return;
     }
-    $('acesso').hidden = false;
-    if (!config.firebaseConfig) {
-        $('acesso-form').hidden = true;
-        document.querySelector('.conta-ajuda').hidden = true;
-        statusAcesso.textContent = 'O acesso à agenda ainda está sendo configurado.';
-        return;
-    }
-    $('acesso-form').hidden = true;
-    document.querySelector('.conta-ajuda').hidden = true;
-    const firebase = await import('./firebase-conta.js');
-    autenticacao = firebase.prepararLogin(config.firebaseConfig);
-    $('acesso-form').hidden = false;
-    document.querySelector('.conta-ajuda').hidden = false;
+    $('area-conta').hidden = false;
+    $('area-coordenacao').hidden = conta.papel !== 'coordenacao';
+    $('usuario').textContent = conta.email;
+    dataAgenda.value = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+    await carregarAgenda();
 }
 iniciar().catch(error => mostrarErro(error.message)).finally(() => { $('carregando').hidden = true; });

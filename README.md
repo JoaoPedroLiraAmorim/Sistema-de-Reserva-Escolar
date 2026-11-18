@@ -98,7 +98,7 @@ Remove-Item Env:UI_BASE_URL
 
 ## Contas e agenda de salas
 
-Abra **Entrar na agenda com Google ou e-mail**. Quem cria uma conta com e-mail e senha
+Use a tela inicial para entrar com Google ou e-mail e senha. Quem cria uma conta com e-mail e senha
 precisa confirmar o endereço. A API verifica o token do projeto Firebase, abre uma
 sessão de oito horas e cadastra novas contas como **Professor**. A Coordenação pode
 cadastrar e ativar salas e cancelar qualquer reserva. Professores podem cancelar as

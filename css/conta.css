@@ -6,7 +6,7 @@ body { background: #f4f7fc; }
     color: #18263f;
 }
 .conta-inicio { display: inline-block; margin-bottom: 20px; font-weight: 700; color: #1142bc; }
-.conta-cabecalho, .conta-acoes, .conta-lista li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.conta-cabecalho, .conta-lista li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .conta-cabecalho, .conta-lista li { justify-content: space-between; }
 .conta-card {
     margin-top: 16px;
@@ -21,7 +21,6 @@ body { background: #f4f7fc; }
 .conta-erro { margin-block: 12px; padding: 10px 14px; border: 1px solid #f4c8bd; border-radius: 8px; color: #832f1f; background: #fff4f1; }
 .conta-form { display: grid; gap: 12px; align-items: start; }
 .conta-form button { justify-self: start; }
-.conta-ajuda { margin-block: 12px; }
 .conta-horarios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .conta-horarios label { min-width: 0; }
 .conta input, .conta select { display: block; min-width: 0; width: 100%; margin: 5px 0; font-size: 16px; }

@@ -6,21 +6,6 @@
 
 'use strict';
 
-// Redireciona caso o usuário já possua uma sessão ativa válida
-(function () {
-    if (typeof ERS !== 'undefined') {
-        const session = ERS.getSession();
-        if (session) {
-            const roleRedirectMap = {
-                professor:   'pages/professor.html',
-                proatec:     'pages/proatec.html',
-                coordenacao: 'pages/proatec.html',
-            };
-            window.location.href = roleRedirectMap[session.role] || 'pages/professor.html';
-        }
-    }
-})();
-
 document.addEventListener('DOMContentLoaded', () => {
     // ─────────────────────────────────────────────────────────────
     // 1. Alternar Visibilidade da Senha (Eye Toggle)
@@ -81,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (emailInput) emailInput.value = email;
             if (passwordInput) passwordInput.value = pass;
             clearFieldErrors();
+            mensagem();
+            resendButton.hidden = true;
 
             // Limpa mensagem de erro se houver
             if (errorBox) {
@@ -95,85 +82,164 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // 3. Submissão do Formulário de Login
-    // ─────────────────────────────────────────────────────────────
     const loginForm = document.getElementById('login-form');
-    const btnLogin  = document.getElementById('btn-login');
-    const btnText   = btnLogin ? btnLogin.querySelector('.btn-text') : null;
+    const btnLogin = document.getElementById('btn-login');
+    const btnText = btnLogin.querySelector('.btn-text');
+    const googleButton = document.getElementById('login-google');
+    const resetButton = document.getElementById('login-redefinir');
+    const resendButton = document.getElementById('login-reenviar');
+    const status = document.getElementById('login-status');
+    const demoEmail = email => email.toLowerCase().endsWith('@demo.com');
+    let busy = false;
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const email    = emailInput ? emailInput.value.trim() : '';
-            const password = passwordInput ? passwordInput.value : '';
-
-            if (!email || !password) {
-                showError('Informe seu e-mail e sua senha.');
-                if (!email) emailInput.setAttribute('aria-invalid','true');
-                if (!password) passwordInput.setAttribute('aria-invalid','true');
-                (!email ? emailInput : passwordInput).focus();
-                return;
-            }
-            if (!emailInput.validity.valid) {
-                showError('Confira o formato do e-mail. Exemplo: nome@escola.edu.br.');
-                emailInput.setAttribute('aria-invalid','true');
-                emailInput.focus();
-                return;
-            }
-            clearFieldErrors();
-
-            // Feedback de carregamento no botão
-            if (errorBox) errorBox.style.display = 'none';
-            if (btnLogin) {
-                btnLogin.classList.add('loading');
-                btnLogin.disabled = true;
-                if (btnText) btnText.textContent = 'Entrando...';
-            }
-
-            try {
-                if (typeof ERS === 'undefined') {
-                    showError('Erro interno: Módulo de dados não encontrado.');
-                    resetButton();
-                    return;
-                }
-
-                // ERS.login é uma função assíncrona (retorna Promise)
-                const result = await ERS.login(email, password);
-
-                if (result.ok) {
-                    if (btnText) btnText.textContent = 'Sucesso!';
-
-                    // Salva e-mail caso checkbox esteja marcado
-                    const rememberCheck = document.getElementById('rememberEmail');
-                    if (rememberCheck && rememberCheck.checked) {
-                        localStorage.setItem('edulab_saved_email', email);
-                    } else {
-                        localStorage.removeItem('edulab_saved_email');
-                    }
-
-                    const roleMap = {
-                        professor:   'pages/professor.html',
-                        proatec:     'pages/proatec.html',
-                        coordenacao: 'pages/proatec.html',
-                    };
-
-                    const targetUrl = roleMap[result.user.role] || 'pages/professor.html';
-                    setTimeout(() => {
-                        window.location.href = targetUrl;
-                    }, 200);
-                } else {
-                    showError(result.message?.replace('Selecione um perfil acima.', 'Confira os dados e tente novamente.') || 'E-mail ou senha incorretos.');
-                    resetButton();
-                }
-            } catch (err) {
-                console.error('Erro na autenticação:', err);
-                showError('Erro ao processar login. Tente novamente.');
-                resetButton();
-            }
+    async function api(path, body) {
+        const request = { cache: 'no-store' };
+        if (body) Object.assign(request, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         });
+        const response = await fetch('/api/' + path, request);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'O acesso está indisponível no momento.');
+        return data;
     }
+
+    const firebaseReady = api('conta/config').then(async ({ firebaseConfig }) => {
+        if (!firebaseConfig) return null;
+        const { prepararLogin } = await import('./firebase-conta.js');
+        const auth = prepararLogin(firebaseConfig);
+        googleButton.disabled = false;
+        return auth;
+    }).catch(() => null);
+
+    async function autenticacao() {
+        const auth = await firebaseReady;
+        if (!auth) throw new Error('O acesso está indisponível no momento. Tente novamente.');
+        return auth;
+    }
+
+    function mensagem(message = '') {
+        status.textContent = message;
+        status.hidden = !message;
+    }
+
+    async function executar(button, action) {
+        if (busy) return;
+        busy = true;
+        button.disabled = true;
+        errorBox.style.display = 'none';
+        mensagem();
+        const loading = button === btnLogin;
+        if (loading) {
+            btnLogin.classList.add('loading');
+            btnText.textContent = 'Entrando...';
+        }
+        try {
+            await action();
+        } catch (error) {
+            const messages = {
+                'auth/invalid-credential': 'E-mail ou senha inválidos.',
+                'auth/wrong-password': 'E-mail ou senha inválidos.',
+                'auth/user-not-found': 'E-mail ou senha inválidos.',
+                'auth/email-already-in-use': 'Este e-mail já tem uma conta. Use Entrar ou Esqueceu a senha.',
+                'auth/weak-password': 'A senha precisa ter pelo menos seis caracteres.',
+                'auth/popup-closed-by-user': 'A janela do Google foi fechada.',
+                'auth/popup-blocked': 'Permita a abertura da janela do Google e tente novamente.',
+                'auth/account-exists-with-different-credential': 'Entre pelo método que já usa para este e-mail.',
+                'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+                'auth/network-request-failed': 'Falha na conexão. Confira a internet e tente novamente.',
+                'auth/operation-not-allowed': 'Este método de login está indisponível.',
+                'auth/unauthorized-domain': 'O login com Google está indisponível neste endereço.',
+            };
+            showError(messages[error.code] ?? error.message);
+        } finally {
+            busy = false;
+            button.disabled = false;
+            if (loading) {
+                btnLogin.classList.remove('loading');
+                btnText.textContent = 'Entrar';
+            }
+        }
+    }
+
+    function lerEmail() {
+        if (emailInput.validity.valid) return emailInput.value.trim();
+        showError('Informe um e-mail válido.');
+        emailInput.setAttribute('aria-invalid', 'true');
+        emailInput.focus();
+        return null;
+    }
+
+    function lembrar(email) {
+        if (document.getElementById('rememberEmail').checked) localStorage.setItem('edulab_saved_email', email);
+        else localStorage.removeItem('edulab_saved_email');
+    }
+
+    loginForm.addEventListener('submit', event => {
+        event.preventDefault();
+        if (busy) return;
+        clearFieldErrors();
+        const email = lerEmail();
+        if (!email) return;
+        const password = passwordInput.value;
+        if (!password) {
+            showError('Informe sua senha.');
+            passwordInput.setAttribute('aria-invalid', 'true');
+            passwordInput.focus();
+            return;
+        }
+        const button = event.submitter ?? btnLogin;
+        const cadastrar = button.id === 'login-cadastrar';
+        resendButton.hidden = true;
+
+        executar(button, async () => {
+            if (demoEmail(email)) {
+                if (cadastrar) throw new Error('Para criar uma conta, informe seu e-mail pessoal ou institucional.');
+                const result = await ERS.login(email, password);
+                if (!result.ok) throw new Error('E-mail ou senha da demonstração inválidos.');
+                lembrar(email);
+                location.assign(result.user.role === 'professor' ? 'pages/professor.html' : 'pages/proatec.html');
+                return;
+            }
+
+            const auth = await autenticacao();
+            if (cadastrar) {
+                if (password.length < 6) throw new Error('A senha precisa ter pelo menos seis caracteres.');
+                await auth.cadastrar(email, password);
+                mensagem('Enviamos um link de confirmação. Confirme seu e-mail e depois entre na conta.');
+                passwordInput.value = '';
+                resendButton.hidden = false;
+                return;
+            }
+            if (await auth.entrar(email, password, api)) {
+                lembrar(email);
+                location.assign('pages/conta.html');
+                return;
+            }
+            mensagem('Confirme seu e-mail antes de entrar.');
+            resendButton.hidden = false;
+        });
+    });
+
+    googleButton.addEventListener('click', () => executar(googleButton, async () => {
+        await (await autenticacao()).entrarGoogle(api);
+        location.assign('pages/conta.html');
+    }));
+
+    resetButton.addEventListener('click', () => executar(resetButton, async () => {
+        const email = lerEmail();
+        if (!email) return;
+        if (demoEmail(email)) {
+            mensagem('Para recuperar o acesso de desenvolvimento, selecione novamente o perfil abaixo.');
+            return;
+        }
+        await (await autenticacao()).redefinir(email);
+        mensagem('Se o endereço tiver uma conta, você receberá as instruções para redefinir a senha.');
+    }));
+
+    resendButton.addEventListener('click', () => executar(resendButton, async () => {
+        await (await autenticacao()).reenviar();
+        mensagem('Enviamos outro link de confirmação.');
+    }));
 
     function showError(msg) {
         if (!errorBox) return;
@@ -192,6 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     [emailInput,passwordInput].forEach(input=>input?.addEventListener('input',()=>{
         clearFieldErrors();
+        if (input === emailInput) {
+            mensagem();
+            resendButton.hidden = true;
+        }
         if(errorBox)errorBox.style.display='none';
         roleTabs.forEach(t=>{t.classList.remove('active');t.setAttribute('aria-pressed','false');});
         if(feedbackPill)feedbackPill.style.display='none';
@@ -202,13 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const helpDialog=document.getElementById('access-help-dialog');
     document.querySelectorAll('[data-access-help]').forEach(button=>button.addEventListener('click',()=>helpDialog?.showModal()));
-
-    function resetButton() {
-        if (!btnLogin) return;
-        btnLogin.classList.remove('loading');
-        btnLogin.disabled = false;
-        if (btnText) btnText.textContent = 'Entrar';
-    }
 
     // Carrega e-mail lembrado anteriormente se existir
     const savedEmail = localStorage.getItem('edulab_saved_email');
