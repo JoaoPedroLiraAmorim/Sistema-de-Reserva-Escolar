@@ -427,10 +427,16 @@ function addStudentRow(num, etiqueta = '', aluno = '') {
     tr.innerHTML = `
         <td style="text-align: center; font-weight: 600; color: var(--color-text-muted);" class="row-index">${rowNum}</td>
         <td>
-            <input type="text" class="form-control input-etiqueta" placeholder="Ex: NT-0${rowNum}" value="${ERS.escapeHtml(etiqueta)}">
+            <label>
+                <span class="student-field-label">Nº da Etiqueta</span>
+                <input type="text" class="form-control input-etiqueta" placeholder="Ex: NT-0${rowNum}" value="${ERS.escapeHtml(etiqueta)}">
+            </label>
         </td>
         <td>
-            <input type="text" class="form-control input-aluno" placeholder="Nome completo do aluno" value="${ERS.escapeHtml(aluno)}">
+            <label>
+                <span class="student-field-label">Nome do Aluno</span>
+                <input type="text" class="form-control input-aluno" placeholder="Nome completo do aluno" value="${ERS.escapeHtml(aluno)}">
+            </label>
         </td>
         <td style="text-align: center;">
             <button type="button" class="btn-remove-row" title="Remover linha" aria-label="Remover">

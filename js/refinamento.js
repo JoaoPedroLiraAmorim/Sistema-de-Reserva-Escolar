@@ -104,6 +104,7 @@
     const isTeacherDay = () => teacherAgenda && (phoneAgenda.matches || agendaMode === 'day');
     const getAgendaDays = () => [...document.querySelectorAll('#calendarHead th[data-date]')].map(el => el.dataset.date);
     const fullDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' });
+    const agendaColumnDate = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
     const shortWeekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' });
 
     function selectAgendaDay(date) {
@@ -221,6 +222,9 @@
         const dayLabel = $('#v2-selected-day');
         const label = fullDate.format(new Date(selectedAgendaDay + 'T12:00:00'));
         if (dayLabel.textContent !== label) dayLabel.textContent = label;
+        $('#calendarTable').setAttribute('aria-label', daily ? `Agenda do professor: ${label}` : 'Grade de horários da agenda do professor');
+        // O professor sempre consulta a grade de horários, inclusive no celular.
+        $('.calendar-wrapper-card').hidden = false;
         const rail = $('#teacher-week-days');
         if (rail.firstElementChild?.dataset.date !== days[0]) {
             rail.replaceChildren(...days.map(date => {
@@ -251,6 +255,8 @@
         document.querySelectorAll('#calendarTable [data-date]').forEach(cell => {
             const { date, start, end } = cell.dataset;
             cell.hidden = daily && date !== selectedAgendaDay;
+            const heading = cell.querySelector('.day-header-resources');
+            if (heading) heading.textContent = agendaColumnDate.format(new Date(date + 'T12:00:00'));
             const cards = [...cell.querySelectorAll('.calendar-event-card[data-res-id]')];
             cards.forEach(card => {
                 const booking = reservations.get(card.dataset.resId);

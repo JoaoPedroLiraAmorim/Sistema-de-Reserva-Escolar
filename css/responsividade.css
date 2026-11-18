@@ -73,6 +73,7 @@ html,
 body {
   max-width: 100%;
   overflow-x: clip;
+  overscroll-behavior-x: none;
 }
 
 body,
@@ -206,6 +207,17 @@ label,
 .student-registration-table,
 .records-table {
   min-width: 520px;
+}
+
+/* Os rótulos continuam acessíveis na tabela desktop e aparecem nos blocos mobile. */
+.student-field-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .calendar-table th,
@@ -832,6 +844,83 @@ label,
     min-width: 520px;
   }
 
+  /* Cada notebook ocupa um bloco: nenhum campo depende de arrastar para o lado. */
+  .student-registration-table-wrapper {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .student-registration-table {
+    display: block;
+    min-width: 0;
+  }
+
+  .student-registration-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .student-registration-table tbody {
+    display: block;
+  }
+
+  .student-registration-table .student-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--responsive-touch-size);
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .student-row + .student-row {
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .student-registration-table .student-row td {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .student-row .row-index {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: start;
+  }
+
+  .student-row .row-index::before { content: 'Notebook '; }
+
+  .student-row td:nth-child(2),
+  .student-row td:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .student-row td:last-child {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .student-field-label {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    margin-bottom: 4px;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .student-row input.form-control { min-width: 0; }
+  .student-row .btn-remove-row { width: var(--responsive-touch-size); }
+  .reg-actions-row { flex-wrap: wrap; gap: 10px; }
+
   .modal-backdrop {
     align-items: flex-end;
     padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
@@ -1302,6 +1391,45 @@ label,
 
 @media (max-width: 768px), (max-width: 900px) and (max-height: 560px) and (orientation: landscape) {
   .teacher-page .v2-segment { display: none; }
+
+  /* Agenda diária ampla: horários fixos à esquerda e espaço para cada aula. */
+  .v2-teacher-day #v2-selected-day {
+    font-size: clamp(16px, 4.5vw, 19px);
+    line-height: 1.4;
+  }
+
+  .v2-teacher-day #teacher-week-days button { min-height: 54px; gap: 3px; font-size: 12px; }
+  .v2-teacher-day #teacher-week-days strong { font-size: 18px; }
+  .v2-teacher-day .calendar-table .time-col-header { width: 68px !important; }
+  .v2-teacher-day .calendar-table thead th { padding-block: 14px !important; }
+  .v2-teacher-day .day-header-resources { font-size: 15px; font-weight: 650; }
+  .v2-teacher-day .calendar-table td[data-date] { height: 112px; padding: 12px !important; }
+  .v2-teacher-day .calendar-table .time-col-cell { padding: 16px 6px !important; vertical-align: top !important; }
+  .v2-teacher-day .calendar-table .time-start { font-size: 16px !important; }
+  .v2-teacher-day .calendar-table .time-end { font-size: 13px !important; margin-top: 5px; }
+  .v2-teacher-day .teacher-slot-info { min-height: 86px; gap: 8px; font-size: 13px; }
+  .v2-teacher-day .teacher-slot-info p { flex-basis: 100%; line-height: 1.5; }
+  .v2-teacher-day .teacher-slot-book { min-width: 110px; font-size: 14px; }
+
+  .v2-teacher-day .calendar-events-container > .calendar-event-card {
+    padding: 12px !important;
+    gap: 6px !important;
+  }
+
+  .v2-teacher-day .calendar-events-container > .calendar-event-card:not(.event-block) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .v2-teacher-day .calendar-events-container .v2-event-time { grid-column: 1; grid-row: 1; font-size: 12px; }
+  .v2-teacher-day .calendar-events-container .event-teacher { grid-column: 1; grid-row: 2; font-size: 14px !important; }
+  .v2-teacher-day .calendar-events-container .event-desc { grid-column: 1; grid-row: 3; font-size: 13px !important; }
+  .v2-teacher-day .calendar-events-container .event-room { grid-column: 1; grid-row: 4; font-size: 13px !important; }
+  .v2-teacher-day .calendar-events-container .event-mine-label { grid-column: 1; grid-row: 5; justify-self: start; }
+
+  .v2-teacher-day .calendar-events-container .event-block .event-teacher { grid-row: auto; }
+  .v2-teacher-day .calendar-events-container .event-block .event-desc { grid-row: auto; }
+  .v2-teacher-day .calendar-events-container .event-block .event-room { grid-row: auto; }
 
   .teacher-main-content > .agenda-action-header > .agenda-header-right > .btn-teacher-new-res {
     display: inline-flex;

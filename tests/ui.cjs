@@ -29,8 +29,9 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
         const visit = async file => { await page.goto(new URL(file, baseUrl + '/').href); await page.waitForTimeout(80); };
         const login = async role => page.evaluate(role => ERS.login(role + '@demo.com', '123456'), role);
         const noOverflow = async label => {
-            const d = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));
+            const d = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
             assert.ok(d.scroll <= d.width + 1, label + ': página ultrapassa a tela');
+            assert.ok(d.body <= d.width + 1, label + ': corpo ultrapassa a tela');
         };
         const screenshot = async name => {
             if (!artifacts) return;
@@ -50,11 +51,14 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
             assert.equal(await page.locator('[data-res-tab]').count(), 0);
             assert.equal(await page.locator('#my-reservations-section').isVisible(), false);
             assert.equal(await page.locator('#calendarTable').isVisible(), true);
+            assert.equal(await page.locator('#v2-day-list, [data-agenda-mode="list"]').count(), 0, 'professor consulta a agenda, sem visualização em lista');
             assert.equal(await visibleDayColumns().count(), width <= 1100 ? 1 : 6);
             if (width <= 768 || width === 844) {
                 assert.equal(await page.locator('[data-agenda-mode="grid"]').isVisible(), false);
                 const tableFits = await page.locator('.calendar-scroll-area').evaluate(el => el.scrollWidth <= el.clientWidth);
                 assert.equal(tableFits, true, 'a grade diária cabe no celular');
+                const slotHeight = await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el => el.getBoundingClientRect().height);
+                assert.ok(slotHeight >= 112, 'a agenda diária tem espaço para cada aula');
                 const newButton = await page.locator('#btnOpenNewReservation').boundingBox();
                 assert.ok(newButton.height >= 44 && newButton.height <= 48 && newButton.width < width / 2, `botão compacto em ${width}: ${JSON.stringify(newButton)}`);
             }
@@ -79,6 +83,30 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
             const footer = await page.locator('#new-reservation-form > .modal-footer').boundingBox();
             assert.ok(footer.y >= 0 && footer.y + footer.height <= height + 2, 'rodapé acessível em ' + width);
             if (width === 844) await screenshot('reserva-horizontal');
+            await page.keyboard.press('Escape');
+
+            await page.evaluate(() => openRegisterStudentsModal(ERS.getReservations()[0].id));
+            const registration = page.locator('#register-students-modal');
+            await registration.waitFor({ state: 'visible' });
+            await noOverflow('registro de alunos ' + width);
+            const registrationFooter = await registration.locator('.modal-footer').boundingBox();
+            assert.ok(registrationFooter.y >= 0 && registrationFooter.y + registrationFooter.height <= height + 2, 'ações do registro acessíveis em ' + width);
+            if (width <= 768) {
+                for (const selector of ['.modal-body', '.student-registration-table-wrapper']) {
+                    assert.equal(await registration.locator(selector).evaluate(el => el.scrollWidth <= el.clientWidth + 1), true, selector + ' sem rolagem lateral em ' + width);
+                }
+                const count = await registration.locator('.student-row').count();
+                await page.locator('#btnAddStudentRow').click();
+                const added = registration.locator('.student-row').last();
+                await added.getByRole('textbox', { name: /Etiqueta do notebook/ }).fill('NT-TESTE');
+                await added.getByRole('textbox', { name: /Aluno do notebook/ }).fill('Aluno de teste com nome completo');
+                await added.getByRole('button', { name: 'Remover', exact: true }).click();
+                assert.equal(await registration.locator('.student-row').count(), count);
+                if (width === 390) {
+                    await registration.locator('.modal-body').evaluate(el => { el.scrollTop = 0; });
+                    await screenshot('registro-alunos-celular');
+                }
+            }
             await page.keyboard.press('Escape');
         }
         await page.setViewportSize({ width: 390, height: 844 });
@@ -119,6 +147,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Pro
         assert.equal(await selectedDay(), saved.data);
         await page.locator('#v2-only-mine').check();
         const savedEvent = page.locator(`#calendarTable [data-res-id="${saved.id}"]:visible`);
+        await screenshot('agenda-dia-celular');
         await savedEvent.click();
         assert.equal(await page.locator('#res-detail-modal').isVisible(), true);
         await page.keyboard.press('Escape');
