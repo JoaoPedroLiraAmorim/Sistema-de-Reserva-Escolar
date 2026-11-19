@@ -15,8 +15,8 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
  for(const f of fs.readdirSync(path.join(root,'migrations')).filter(f=>f.endsWith('.sql')).sort()) sql.exec(fs.readFileSync(path.join(root,'migrations',f),'utf8'));
  const DB = {prepare(query) { const s=sql.prepare(query); const bind = params => ({bind:(...p)=>bind(p),first:async()=>s.get(...params)??null,all:async()=>({results:s.all(...params)}),run:async()=>({meta:s.run(...params)})});return bind([]);},async batch(items) {sql.exec('BEGIN');try{const result=[];for(const item of items)result.push(await item.all());sql.exec('COMMIT');return result;}catch(e){sql.exec('ROLLBACK');throw e;}}};
  const tokens = {};
- for(const [id,papel] of [['p1','professor'],['p2','professor'],['c1','coordenacao']]) {
-  sql.prepare('INSERT INTO contas (id,email,papel,identidade_externa) VALUES (?,?,?,?)').run(id,id+'@exemplo.com',papel,'firebase:test:'+id);
+ for(const [id,papel,nome] of [['p1','professor','Lúcia Braga'],['p2','professor',null],['c1','coordenacao',null]]) {
+  sql.prepare('INSERT INTO contas (id,email,papel,identidade_externa,nome) VALUES (?,?,?,?,?)').run(id,id+'@exemplo.com',papel,'firebase:test:'+id,nome);
   tokens[id]=randomBytes(32).toString('base64url');
   sql.prepare('INSERT INTO sessoes VALUES (?,?,?)').run(createHash('sha256').update(tokens[id]).digest('base64url'),id,Math.floor(Date.now()/1000)+3600);
  }
@@ -39,7 +39,13 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    const req=route.request(),url=new URL(req.url());
    if(url.origin!==base)return route.abort();
    if(req.method()==='POST'&&url.pathname.startsWith('/api/'))writes.push(url.pathname);
-   if(url.pathname==='/js/firebase-conta.js')return route.fulfill({contentType:'application/javascript',body:`export function prepararLogin(){return {cadastrar:async()=>{},reenviar:async()=>{},redefinir:async()=>{},entrar:async(email,senha,api)=>{await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;},entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}
+   if(url.pathname==='/js/firebase-conta.js')return route.fulfill({contentType:'application/javascript',body:`export function prepararLogin(){return {
+    cadastrar:async(email,senha,nome)=>{window.__cadastro={email,nome};return true;},
+    reenviar:async()=>{},redefinir:async()=>{},
+    entrar:async(email,senha,api)=>{
+     if(email===window.__cadastro?.email&&!window.__emailVerificado)return false;
+     await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;
+    },entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}
    export function prepararConfirmacao(config) {
     if(config.projectId!=='demo-alceu') throw Error('Projeto inesperado');
     return {conferir:async(code,mode)=>{
@@ -63,10 +69,32 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   const screenshot=async name=>{if(!process.env.UI_ARTIFACT_DIR)return;fs.mkdirSync(process.env.UI_ARTIFACT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.UI_ARTIFACT_DIR,name+'.png'),fullPage:true});};
   await page.setViewportSize({width:390,height:844});await visit('index.html');
   assert.equal(await page.locator('[data-demo-role]').count(),2,'oferece dois acessos demo explícitos');
+  await page.getByRole('button',{name:'Entrar com Google',exact:true}).waitFor();
+  assert.ok(await page.locator('#login-google img').evaluate(img=>img.complete&&img.naturalWidth>0),'exibe o ícone do Google');
+  await page.getByRole('button',{name:'Criar conta',exact:true}).click();
+  await page.getByRole('heading',{name:'Crie sua conta.'}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Entrar com Google',exact:true}).isVisible(),false);
+  await page.setViewportSize({width:320,height:740});await noOverflow('cadastro 320');
+  await page.getByRole('button',{name:'Voltar para entrar',exact:true}).click();
+  assert.equal(await page.getByLabel('Nome',{exact:true}).isVisible(),false);
+  await page.getByRole('button',{name:'Criar conta',exact:true}).click();
+  await page.getByRole('button',{name:'Criar conta',exact:true}).click();
+  await page.getByRole('alert').filter({hasText:'Informe seu nome'}).waitFor();
+  await page.getByLabel('Nome',{exact:true}).fill('  Lúcia   Braga  ');
   await page.getByLabel('E-mail',{exact:true}).fill('professor@exemplo.com');await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');
-  await page.getByRole('button',{name:'Criar conta',exact:true}).click();await page.getByText('Enviamos um link de confirmação.',{exact:false}).waitFor();
+  await screenshot('cadastro-celular');
+  await page.getByRole('button',{name:'Criar conta',exact:true}).click();
+  await page.getByRole('heading',{name:'Bem-vindo de volta.'}).waitFor();
+  await page.getByText('Enviamos um link de confirmação.',{exact:false}).waitFor();
+  assert.deepEqual(await page.evaluate(()=>window.__cadastro),{email:'professor@exemplo.com',nome:'Lúcia Braga'});
+  assert.equal(await page.getByLabel('Senha',{exact:true}).inputValue(),'');
+  await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');await page.getByRole('button',{name:'Entrar',exact:true}).click();
+  await page.getByText('Confirme seu e-mail antes de entrar.',{exact:true}).waitFor();
+  assert.equal(writes.includes('/api/conta/entrar'),false);
+  await page.evaluate(()=>{window.__emailVerificado=true;});
   await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');await page.getByRole('button',{name:'Entrar',exact:true}).click();
   await page.waitForURL('**/pages/professor.html');await page.locator('.teacher-day-controls').waitFor({state:'visible'});
+  await page.getByText('Olá, Lúcia Braga',{exact:true}).waitFor({state:'attached'});
   assert.equal(await page.locator('#calendarTable').isVisible(),true);
   assert.equal(await page.evaluate(()=>localStorage.getItem('ers_session')),null,'não cria sessão local');
   assert.equal(await page.evaluate(()=>localStorage.getItem('ers_seeded_v6')),null,'não popula dados fictícios');

@@ -28,6 +28,42 @@ body.login-page{height:auto;min-height:100dvh;background:#fff;overflow-x:hidden}
     font-size: 13px;
     text-align: center;
 }
+.login-page [hidden] {
+    display: none;
+}
+.login-page .btn-google {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid #747775;
+    border-radius: 4px;
+    background: #fff;
+    color: #1f1f1f;
+    font: 500 14px/20px "Google Sans", Arial, sans-serif;
+    cursor: pointer;
+}
+.login-page .btn-google img {
+    flex: none;
+    object-fit: contain;
+}
+.login-page .btn-google:hover:not(:disabled) {
+    background: #f5f8ff;
+}
+.login-page .btn-google:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+@media (max-width: 360px) {
+    .login-page .login-opcoes { grid-template-columns: 1fr; }
+}
+.login-page #login-voltar {
+    min-height: 44px;
+    margin-top: 8px;
+    font-size: 13px;
+}
 .login-page .login-status {
     margin-bottom: 10px;
     color: #314f7f;
@@ -35,4 +71,3 @@ body.login-page{height:auto;min-height:100dvh;background:#fff;overflow-x:hidden}
     line-height: 1.5;
 }
 .login-page .login-reenviar { min-height: 44px; margin-bottom: 4px; font-size: 13px; }
-.login-page .login-reenviar[hidden] { display: none; }

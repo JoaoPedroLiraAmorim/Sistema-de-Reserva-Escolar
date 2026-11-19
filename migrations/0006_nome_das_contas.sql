@@ -1,0 +1,1 @@
+ALTER TABLE contas ADD COLUMN nome TEXT CHECK (nome IS NULL OR length(nome) BETWEEN 1 AND 120);

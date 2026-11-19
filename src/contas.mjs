@@ -9,6 +9,10 @@ const agora = () => Math.floor(Date.now() / 1000);
 const token = () => base64url.encode(crypto.getRandomValues(new Uint8Array(32)));
 const tokenValido = value => typeof value === 'string' && /^[\w-]{43}$/.test(value);
 
+export function nomeDaConta(nome, email) {
+    return nome || email.split('@')[0];
+}
+
 async function hash(value) {
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
     return base64url.encode(new Uint8Array(digest));
@@ -44,9 +48,10 @@ function cookies(url) {
 export async function sessao(request, db, url) {
     const value = cookies(url).ler(request);
     if (!tokenValido(value)) return null;
-    return db.prepare(`SELECT c.id, c.email, c.papel FROM sessoes s
+    const conta = await db.prepare(`SELECT c.id, c.email, c.papel, c.nome FROM sessoes s
         JOIN contas c ON c.id = s.conta_id
         WHERE s.hash = ? AND s.expira > ? AND c.ativa = 1`).bind(await hash(value), agora()).first();
+    return conta && { ...conta, nome: nomeDaConta(conta.nome, conta.email) };
 }
 
 async function abrirSessao(request, db, url, contaId) {
@@ -84,15 +89,20 @@ async function identidadeFirebase(config, idToken) {
     if (claims.email_verified !== true || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         throw new HttpError(403, 'Confirme seu e-mail para entrar.');
     }
-    return { id: `firebase:${config.projectId}:${claims.sub}`, email };
+    const nome = typeof claims.name === 'string' ? claims.name.replace(/\s+/g, ' ').trim() : '';
+    return {
+        id: `firebase:${config.projectId}:${claims.sub}`,
+        email,
+        nome: nome && nome.length <= 120 && !/\p{Cc}/u.test(nome) ? nome : null,
+    };
 }
 
 async function vincularConta(db, identidade) {
     // O papel inicial é decidido aqui, mesmo quando o cliente envia outro papel.
-    await db.prepare(`INSERT INTO contas (id, email, papel, identidade_externa)
-        VALUES (?, ?, 'professor', ?) ON CONFLICT DO NOTHING`)
-        .bind(crypto.randomUUID(), identidade.email, identidade.id).run();
-    const conta = await db.prepare('SELECT id, email, ativa FROM contas WHERE identidade_externa = ?')
+    await db.prepare(`INSERT INTO contas (id, email, papel, identidade_externa, nome)
+        VALUES (?, ?, 'professor', ?, ?) ON CONFLICT DO NOTHING`)
+        .bind(crypto.randomUUID(), identidade.email, identidade.id, identidade.nome).run();
+    const conta = await db.prepare('SELECT id, email, ativa, nome FROM contas WHERE identidade_externa = ?')
         .bind(identidade.id).first();
     if (!conta) throw new HttpError(409, 'Este e-mail já está vinculado a outra conta. Procure a coordenação.');
     if (conta.ativa !== 1) throw new HttpError(403, 'Esta conta está desativada.');
@@ -101,6 +111,10 @@ async function vincularConta(db, identidade) {
             AND NOT EXISTS (SELECT 1 FROM contas WHERE email = ? AND id <> ?)`)
             .bind(identidade.email, conta.id, identidade.email, conta.id).run();
         if (alteracao.meta.changes !== 1) throw new HttpError(409, 'Este e-mail já está vinculado a outra conta.');
+    }
+    if (!conta.nome && identidade.nome) {
+        await db.prepare('UPDATE contas SET nome = ? WHERE id = ? AND nome IS NULL AND ativa = 1')
+            .bind(identidade.nome, conta.id).run();
     }
     return conta.id;
 }

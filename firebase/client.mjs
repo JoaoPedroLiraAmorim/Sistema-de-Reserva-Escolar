@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import {
     ActionCodeOperation, applyActionCode, browserPopupRedirectResolver, checkActionCode, createUserWithEmailAndPassword, GoogleAuthProvider,
-    confirmPasswordReset, initializeAuth, inMemoryPersistence, sendEmailVerification, sendPasswordResetEmail, verifyPasswordResetCode,
+    confirmPasswordReset, deleteUser, initializeAuth, inMemoryPersistence, sendEmailVerification, sendPasswordResetEmail, updateProfile, verifyPasswordResetCode,
     signInWithEmailAndPassword, signInWithPopup, signOut,
 } from 'firebase/auth';
 
@@ -35,9 +35,16 @@ export function prepararLogin(config) {
                 throw new Error('Escolha uma conta Google com e-mail verificado.');
             }
         },
-        async cadastrar(email, senha) {
+        async cadastrar(email, senha, nome) {
             const { user } = await createUserWithEmailAndPassword(auth, email, senha);
-            await sendEmailVerification(user);
+            try {
+                await updateProfile(user, { displayName: nome });
+            } catch (error) {
+                // Descarta apenas a conta recém-criada se o nome não for salvo.
+                await deleteUser(user).catch(() => signOut(auth).catch(() => {}));
+                throw error;
+            }
+            return sendEmailVerification(user).then(() => true, () => false);
         },
         async reenviar() {
             if (!auth.currentUser || auth.currentUser.emailVerified) throw new Error('Entre com seu e-mail e senha para reenviar.');

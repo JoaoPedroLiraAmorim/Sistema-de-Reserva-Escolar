@@ -37,16 +37,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const emailInput = document.getElementById('email');
+    const nameInput = document.getElementById('nome');
     const errorBox = document.getElementById('login-error');
 
     const loginForm = document.getElementById('login-form');
+    const title = document.getElementById('login-title');
+    const description = document.getElementById('login-description');
+    const nameGroup = document.getElementById('cadastro-nome');
+    const preferences = document.getElementById('login-preferencias');
+    const options = document.getElementById('login-opcoes');
+    const demo = document.querySelector('.login-demo');
+    const footer = document.querySelector('.form-footer');
     const btnLogin = document.getElementById('btn-login');
     const btnText = btnLogin.querySelector('.btn-text');
+    const registerButton = document.getElementById('login-cadastrar');
+    const backButton = document.getElementById('login-voltar');
     const googleButton = document.getElementById('login-google');
     const resetButton = document.getElementById('login-redefinir');
     const resendButton = document.getElementById('login-reenviar');
     const status = document.getElementById('login-status');
     let busy = false;
+    let registering = false;
+
+    function atualizarBotao(carregando = false) {
+        btnLogin.classList.toggle('loading', carregando);
+        btnText.textContent = registering
+            ? (carregando ? 'Criando conta...' : 'Criar conta')
+            : (carregando ? 'Entrando...' : 'Entrar');
+    }
+
+    function mostrarCadastro(ativo) {
+        registering = ativo;
+        title.textContent = ativo ? 'Crie sua conta.' : 'Bem-vindo de volta.';
+        description.textContent = ativo
+            ? 'Informe seu nome, e-mail e senha para começar.'
+            : 'Acesse sua conta para preparar a próxima aula.';
+        nameGroup.hidden = !ativo;
+        nameInput.disabled = !ativo;
+        [preferences, options, demo, footer].forEach(element => { element.hidden = ativo; });
+        backButton.hidden = !ativo;
+        passwordInput.autocomplete = ativo ? 'new-password' : 'current-password';
+        passwordInput.value = '';
+        if (passwordInput.type === 'text') togglePasswordBtn.click();
+        document.getElementById('caps-hint').hidden = true;
+        if (!ativo) nameInput.value = '';
+        resendButton.hidden = true;
+        mensagem();
+        clearFieldErrors();
+        errorBox.style.display = 'none';
+        atualizarBotao();
+        title.focus();
+    }
+
+    registerButton.addEventListener('click', () => {
+        if (!busy) mostrarCadastro(true);
+    });
+    backButton.addEventListener('click', () => {
+        if (!busy) mostrarCadastro(false);
+    });
 
     document.querySelectorAll('[data-demo-role]').forEach(button => button.addEventListener('click', () => executar(button, async () => {
         window.ERS_DEMO = true;
@@ -106,10 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorBox.style.display = 'none';
         mensagem();
         const loading = button === btnLogin;
-        if (loading) {
-            btnLogin.classList.add('loading');
-            btnText.textContent = 'Entrando...';
-        }
+        if (loading) atualizarBotao(true);
         try {
             await action();
         } catch (error) {
@@ -131,10 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             busy = false;
             button.disabled = false;
-            if (loading) {
-                btnLogin.classList.remove('loading');
-                btnText.textContent = 'Entrar';
-            }
+            if (loading) atualizarBotao();
         }
     }
 
@@ -155,26 +197,33 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         if (busy) return;
         clearFieldErrors();
+        const name = nameInput.value.replace(/\s+/g, ' ').trim();
+        if (registering && (!name || name.length > nameInput.maxLength || /\p{Cc}/u.test(name))) {
+            showError('Informe seu nome com até 120 caracteres.');
+            nameInput.setAttribute('aria-invalid', 'true');
+            nameInput.focus();
+            return;
+        }
         const email = lerEmail();
         if (!email) return;
         const password = passwordInput.value;
-        if (!password) {
-            showError('Informe sua senha.');
+        if (!password || (registering && password.length < 6)) {
+            showError(registering ? 'A senha precisa ter pelo menos seis caracteres.' : 'Informe sua senha.');
             passwordInput.setAttribute('aria-invalid', 'true');
             passwordInput.focus();
             return;
         }
-        const button = event.submitter ?? btnLogin;
-        const cadastrar = button.id === 'login-cadastrar';
         resendButton.hidden = true;
 
-        executar(button, async () => {
+        executar(btnLogin, async () => {
             const auth = await autenticacao();
-            if (cadastrar) {
-                if (password.length < 6) throw new Error('A senha precisa ter pelo menos seis caracteres.');
-                await auth.cadastrar(email, password);
-                mensagem('Enviamos um link de confirmação. Confirme seu e-mail e depois entre na conta.');
-                passwordInput.value = '';
+            if (registering) {
+                const enviado = await auth.cadastrar(email, password, name);
+                emailInput.value = email;
+                mostrarCadastro(false);
+                mensagem(enviado
+                    ? 'Enviamos um link de confirmação. Confirme seu e-mail e depois entre na conta.'
+                    : 'Conta criada. Reenvie a confirmação e confirme seu e-mail antes de entrar.');
                 resendButton.hidden = false;
                 return;
             }
@@ -210,17 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const msgSpan = errorBox.querySelector('.error-text') || errorBox;
         msgSpan.textContent = msg;
         errorBox.style.display = 'flex';
+        if (registering) nameInput.setAttribute('aria-describedby', 'login-error');
         emailInput?.setAttribute('aria-describedby','login-error');
         passwordInput?.setAttribute('aria-describedby','login-error caps-hint');
     }
 
     function clearFieldErrors() {
+        nameInput.removeAttribute('aria-invalid');
+        nameInput.removeAttribute('aria-describedby');
         emailInput?.removeAttribute('aria-invalid');
         passwordInput?.removeAttribute('aria-invalid');
         emailInput?.removeAttribute('aria-describedby');
         passwordInput?.setAttribute('aria-describedby','caps-hint');
     }
-    [emailInput,passwordInput].forEach(input=>input?.addEventListener('input',()=>{
+    [nameInput,emailInput,passwordInput].forEach(input=>input?.addEventListener('input',()=>{
         clearFieldErrors();
         if (input === emailInput) {
             mensagem();

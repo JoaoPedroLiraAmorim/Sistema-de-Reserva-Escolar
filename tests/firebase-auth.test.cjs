@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
+const { readdirSync, readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
 
@@ -13,8 +13,9 @@ const worker = import('../src/worker.mjs').then(module => module.default);
 function banco(t) {
     const sql = new DatabaseSync(':memory:');
     t.after(() => sql.close());
-    for (const file of ['0001_criar_salas', '0002_contas_e_reservas', '0003_identidade_firebase']) {
-        sql.exec(readFileSync(join(__dirname, '..', 'migrations', file + '.sql'), 'utf8'));
+    const migrations = join(__dirname, '..', 'migrations');
+    for (const file of readdirSync(migrations).filter(name => name.endsWith('.sql')).sort()) {
+        sql.exec(readFileSync(join(migrations, file), 'utf8'));
     }
     const DB = {
         prepare(query) {
@@ -73,9 +74,9 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
         return Response.json({ keys: [key] });
     });
 
-    function emitir({ uid = 'professor', email = 'professor@exemplo.com', verificado = true, provider = 'password',
+    function emitir({ uid = 'professor', email = 'professor@exemplo.com', name, verificado = true, provider = 'password',
         aud = projectId, authTime = Math.floor(Date.now() / 1000) } = {}) {
-        return new SignJWT({ email, email_verified: verificado, auth_time: authTime, firebase: { sign_in_provider: provider } })
+        return new SignJWT({ email, name, email_verified: verificado, auth_time: authTime, firebase: { sign_in_provider: provider } })
             .setProtectedHeader({ alg: 'RS256', kid: 'firebase-test' })
             .setIssuer('https://securetoken.google.com/' + aud).setAudience(aud).setSubject(uid)
             .setIssuedAt().setExpirationTime('5m').sign(privateKey);
@@ -93,9 +94,9 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
     assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM contas').get().n, 0);
 
     const entrar = async (claims, cookie) => call(authPath, config, {
-        idToken: await emitir(claims), papel: 'coordenacao',
+        idToken: await emitir(claims), papel: 'coordenacao', nome: 'Nome enviado fora do token',
     }, { cookie });
-    const login = await entrar();
+    const login = await entrar({ name: '  Ana   Cláudia Lima  ' });
     assert.equal(login.status, 200);
     const authCookie = login.headers.get('Set-Cookie');
     assert.match(authCookie, /^__Host-alceu_sessao=\S+; Path=\/; Max-Age=28800; HttpOnly; SameSite=Lax; Secure$/);
@@ -103,16 +104,29 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
     const sessao = async session => (await (await call('/api/conta/sessao', config, null, { cookie: session })).json()).conta;
     const conta = await sessao(cookie);
     assert.equal(conta.papel, 'professor');
+    assert.equal(conta.nome, 'Ana Cláudia Lima');
+    assert.equal(sql.prepare('SELECT nome FROM contas WHERE id = ?').get(conta.id).nome, 'Ana Cláudia Lima');
     assert.equal((await call('/api/agenda/acao', config, { acao: 'addRoom', args: ['Laboratório'] }, { cookie })).status, 403);
     assert.equal((await entrar({ uid: 'outra-identidade' })).status, 409);
 
     sql.prepare("UPDATE contas SET papel = 'coordenacao' WHERE id = ?").run(conta.id);
-    const retorno = await entrar({ provider: 'google.com' }, cookie);
+    const retorno = await entrar({ provider: 'google.com', name: 'Outro nome' }, cookie);
     const outraSessao = retorno.headers.get('Set-Cookie').split(';')[0];
     assert.equal(await sessao(cookie), null, 'A sessão anterior foi revogada.');
     assert.equal((await sessao(outraSessao)).papel, 'coordenacao');
+    assert.equal((await sessao(outraSessao)).nome, 'Ana Cláudia Lima');
     assert.equal((await call('/api/agenda/acao', config, { acao: 'addRoom', args: ['Laboratório'] }, { cookie: outraSessao })).status, 200);
 
     await call('/api/conta/sair', config, {}, { cookie: outraSessao });
     assert.equal(await sessao(outraSessao), null);
+
+    sql.prepare(`INSERT INTO contas (id, email, papel, identidade_externa)
+        VALUES ('legada', 'legada@exemplo.com', 'professor', ?)`).run(`firebase:${projectId}:legada`);
+    const legado = { uid: 'legada', email: 'legada@exemplo.com' };
+    const semNome = await entrar(legado);
+    assert.equal((await sessao(semNome.headers.get('Set-Cookie').split(';')[0])).nome, 'legada');
+    const comNome = await entrar({ ...legado, name: 'Lúcia Braga' });
+    const contaLegada = await sessao(comNome.headers.get('Set-Cookie').split(';')[0]);
+    assert.equal(contaLegada.id, 'legada');
+    assert.equal(contaLegada.nome, 'Lúcia Braga');
 });
