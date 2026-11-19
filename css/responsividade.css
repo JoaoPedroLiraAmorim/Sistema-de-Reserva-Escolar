@@ -1557,3 +1557,29 @@ label,
   #new-reservation-modal .modal-header p { display: none; }
   #new-reservation-form > .modal-footer { padding: 8px 20px !important; }
 }
+
+/* A reserva fica ancorada à tela; somente o conteúdo rola verticalmente. */
+html:has(#new-reservation-modal:not(.hidden)),
+body:has(#new-reservation-modal:not(.hidden)) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+#new-reservation-modal {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+#new-reservation-modal .modal,
+#new-reservation-form,
+#new-reservation-form .booking-section,
+#new-reservation-form .form-col {
+  min-width: 0;
+}
+#new-reservation-form > .modal-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior: none;
+}
+#new-reservation-form .booking-section {
+  max-width: 100%;
+}

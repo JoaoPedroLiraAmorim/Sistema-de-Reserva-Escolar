@@ -87,6 +87,13 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    }
    if(width<=768||width===844){assert.equal(await page.locator('.calendar-scroll-area').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);assert.ok(await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el=>el.getBoundingClientRect().height)>=112);}
    await page.locator('#btnOpenNewReservation').click();
+   const reservationBody=page.locator('#new-reservation-form>.modal-body');
+   assert.equal(await reservationBody.evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'reserva sem conteúdo horizontal em '+width);
+   const before=await page.locator('#new-reservation-modal .modal').boundingBox();
+   await reservationBody.evaluate(el=>{el.scrollLeft=100;el.scrollTop=100;});
+   assert.equal(await reservationBody.evaluate(el=>el.scrollLeft),0,'reserva não desliza lateralmente em '+width);
+   assert.deepEqual(await page.locator('#new-reservation-modal .modal').boundingBox(),before,'modal permanece ancorado ao rolar');
+   assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).overflow),'hidden','página ao fundo bloqueada');
    let footer=await page.locator('#new-reservation-form>.modal-footer').boundingBox();assert.ok(footer.y>=0&&footer.y+footer.height<=height+2);
    await page.keyboard.press('Escape');await page.evaluate(()=>openRegisterStudentsModal('active'));
    const reg=page.locator('#register-students-modal');await reg.waitFor({state:'visible'});

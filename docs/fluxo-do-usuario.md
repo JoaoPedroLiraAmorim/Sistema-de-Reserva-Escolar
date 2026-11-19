@@ -100,3 +100,14 @@ Para animação futura, revelar cada etapa por clique e destacar a passagem da C
 9. Base do documento
 Elaborado a partir do README e dos fluxos presentes nos arquivos de Professor, armazenamento local e bloqueios do projeto Alceu Reservas. O texto descreve o comportamento demonstrativo identificado e separa as decisões ainda pendentes.
 
+
+
+## Ideia mapeada: Nova reserva na navbar do professor (não implementada)
+
+- Desktop: colocar “+ Nova reserva” no lado direito da navbar, antes do perfil.
+- Celular: manter uma ação compacta “+ Reservar” no topo, com área de toque de pelo menos 44 px, sem encobrir o título ou o menu.
+- A ação abre o mesmo formulário atual, preservando a agenda e seus filtros.
+- Ao implementar, retirar o botão equivalente do conteúdo para evitar duplicação; manter as ações de reservar um horário da agenda.
+- Validar o espaço disponível em telas de 320 px e a navegação por teclado antes de aprovar a mudança.
+
+Esta proposta é apenas um mapeamento. A posição atual do botão foi preservada.
