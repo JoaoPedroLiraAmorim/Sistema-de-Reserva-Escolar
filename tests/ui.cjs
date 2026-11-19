@@ -102,6 +102,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    await page.setViewportSize({width,height});await visit('pages/professor.html');await noOverflow('professor '+width);
    assert.equal(await page.locator('#v2-day-list,[data-agenda-mode="list"]').count(),0);
    assert.equal(await page.locator('#v2-room-filter,#v2-only-mine').count(),0,'professor sem filtros de sala ou de minhas reservas');
+   if(width>=1920) assert.equal(await page.locator('.teacher-main-content').evaluate(el=>Math.abs(el.getBoundingClientRect().width-el.parentElement.clientWidth)<=1),true,'professor ocupa a largura disponível no desktop');
    const daily=width<=1100;
    assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:5);
    assert.equal(await page.locator('#calendarHead th[data-date]').count(),5,'semana letiva tem cinco dias');
@@ -154,9 +155,21 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await page.locator('#mobileMyResBtn').click();assert.equal(await page.locator('.my-res-item').count(),2,'reservas persistem após recarregar');
   await page.locator('#mobileAgendaBtn').click();await screenshot('professor-real-celular');
   await login('c1');
-  for(const [width,height] of [[320,740],[820,1180],[1366,768]]) {
+  for(const [width,height] of [[320,740],[820,1180],[1366,768],[1920,1080],[2560,1440]]) {
    await page.setViewportSize({width,height});
-   for(const file of ['proatec','agendaProatec','equipamentos','salas','bloqueios','relatorio']){await visit('pages/'+file+'.html');await noOverflow(file+' '+width);}
+   for(const file of ['proatec','agendaProatec','equipamentos','salas','bloqueios','relatorio']) {
+    for(const collapsed of width>=1920?[false,true]:[null]) {
+    if(collapsed!==null) await page.evaluate(value=>localStorage.setItem('escola_sidebar_collapsed',String(value)),collapsed);
+    await visit('pages/'+file+'.html');await noOverflow(file+' '+width);
+    if(width>=1920) {
+     const bounds=await page.evaluate(()=>{const main=document.querySelector('.main-wrapper').getBoundingClientRect(),sidebar=document.querySelector('.sidebar').getBoundingClientRect();return {main:main.width,content:document.querySelector('.dashboard-content').getBoundingClientRect().width,left:main.left,sidebarRight:sidebar.right,right:main.right,viewport:innerWidth};});
+     assert.ok(Math.abs(bounds.main-bounds.content)<=1,file+' preenche a largura disponível em '+width);
+     assert.ok(Math.abs(bounds.left-bounds.sidebarRight)<=1,file+' fica alinhado com a lateral do menu');
+     assert.ok(Math.abs(bounds.right-bounds.viewport)<=1,file+' alcança a margem direita disponível');
+     if(file==='proatec'&&width===1920) await screenshot('coordenacao-desktop-'+(collapsed?'recolhido':'expandido'));
+    }
+    }
+   }
   }
   await page.setViewportSize({width:390,height:844});await visit('pages/salas.html');
   await page.locator('#btnAddRoom').click();await page.locator('#room-name-input').fill('<img src=x onerror=alert(1)>');await page.locator('#add-room-form button[type=submit]').click();

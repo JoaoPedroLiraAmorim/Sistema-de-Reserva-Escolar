@@ -170,7 +170,7 @@ label,
 .dashboard-content,
 .teacher-main-content {
   width: 100%;
-  max-width: 1600px;
+  max-width: 100%;
 }
 
 /* Calendários semanais permanecem completos e usam rolagem dentro do próprio quadro. */
