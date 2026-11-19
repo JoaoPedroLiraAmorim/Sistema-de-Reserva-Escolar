@@ -115,6 +115,11 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    }
    if(width<=768||width===844){assert.equal(await page.locator('.calendar-scroll-area').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);assert.ok(await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el=>el.getBoundingClientRect().height)>=112);}
    await page.locator('#btnOpenNewReservation').click();
+   if(width<=768||height<=560) {
+    const modalBox=await page.locator('#new-reservation-modal .modal').boundingBox();
+    assert.ok(modalBox.x>=15&&modalBox.x+modalBox.width<=width-15,'modal mantém margens laterais em '+width);
+    assert.ok(modalBox.height<=height*.85+2,'nova reserva não ocupa a tela inteira em '+width);
+   }
    let footer=await page.locator('#new-reservation-form>.modal-footer').boundingBox();assert.ok(footer.y>=0&&footer.y+footer.height<=height+2);
    await page.keyboard.press('Escape');await page.evaluate(()=>openRegisterStudentsModal('active'));
    const reg=page.locator('#register-students-modal');await reg.waitFor({state:'visible'});
@@ -149,14 +154,36 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await page.setViewportSize({width:390,height:844});await visit('pages/salas.html');
   await page.locator('#btnAddRoom').click();await page.locator('#room-name-input').fill('<img src=x onerror=alert(1)>');await page.locator('#add-room-form button[type=submit]').click();
   await page.locator('#add-room-modal').waitFor({state:'hidden'});assert.equal(await page.locator('#rooms-grid img').count(),0,'nome da sala não executa HTML');
+  await login('p1');await visit('pages/professor.html');await page.evaluate(()=>openReservationDetail('active'));
+  await page.getByRole('button',{name:'Reportar defeito',exact:true}).click();
+  await page.getByLabel('Número da etiqueta',{exact:true}).fill('NT-1');
+  await page.getByLabel('Descrição do defeito',{exact:true}).fill('A tela não liga. <img src=x onerror=alert(1)>');
+  await page.getByRole('button',{name:'Enviar relato',exact:true}).click();
+  await page.locator('#report-defect-modal').waitFor({state:'hidden'});
+  assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM defeitos_reportados').get().n,1);
+  assert.equal(await page.locator('#reservation-defect-reports img').count(),0,'relato não executa HTML');
+  assert.equal(sql.prepare("SELECT funcionando FROM equipamentos WHERE id='n1'").get().funcionando,10,'relato não altera estoque');
+  await login('c1');await visit('pages/proatec.html');
+  assert.equal(await page.locator('.sidebar-nav [data-defect-count]').textContent(),'1','Relatórios destaca relato novo');
+  await visit('pages/relatorio.html');await page.locator('[data-report-tab="defeitos"]').click();
+  assert.equal(await page.locator('#defects-list .defect-report').count(),1);
+  await page.getByRole('button',{name:'Marcar como lido',exact:true}).click();
+  await page.waitForFunction(()=>window.ERS_DATA.defects.every(d=>d.lidoEm));
+  assert.equal(await page.locator('[data-report-tab="defeitos"] [data-defect-count]').isVisible(),false,'contador baixa após leitura explícita');
+  assert.equal(await page.locator('#defects-list .defect-report').count(),1,'relato lido mantém histórico');
+  await screenshot('defeitos-reportados-celular');
   await page.evaluate(async()=>{const r=await ERS.confirmPickup('active');if(!r.ok)throw Error(r.message);});
   await login('p1');await visit('pages/professor.html');await page.evaluate(()=>openRegisterStudentsModal('active'));
   const reg=page.locator('#register-students-modal');await reg.locator('.student-row').first().getByRole('textbox',{name:/Etiqueta do notebook/}).fill('NT-1');
   await reg.locator('.student-row').first().getByRole('textbox',{name:/Aluno do notebook/}).fill('Aluno de teste');
+  assert.equal(await reg.locator('.defect-assignment-warning:visible').count(),1,'etiqueta relatada antes do vínculo mostra alerta');
   await reg.locator('button[type=submit]').click();await reg.waitFor({state:'hidden'});
   assert.equal(JSON.parse(sql.prepare("SELECT alunos FROM reservas WHERE id='active'").get().alunos)[0].aluno,'Aluno de teste');
   await login('c1');await visit('pages/relatorio.html');assert.equal(await page.evaluate(()=>ERS.getReservations().find(r=>r.id==='active').alunosNotebooks[0].aluno),'Aluno de teste');
+  await page.evaluate(()=>RelatorioModule.openRecordsModal('active'));
+  assert.equal(await page.locator('#records-table-container .defect-warning').count(),1,'coordenação vê alerta no registro do aluno');
   await login('p2');await visit('pages/professor.html');assert.deepEqual(await page.evaluate(()=>ERS.getReservations().find(r=>r.id==='active').alunosNotebooks),[]);
+  assert.deepEqual(await page.evaluate(()=>window.ERS_DATA.defects),[],'outro professor não acessa relatos nem nomes de alunos');
   await page.locator('.btn-header-logout').click();await page.waitForURL('**/index.html');
   await page.getByRole('button',{name:'Entrar com Google'}).click();await page.waitForURL('**/pages/professor.html');
   const savedCount = sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n;

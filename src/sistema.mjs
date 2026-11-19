@@ -1,5 +1,6 @@
 import { HttpError, json, readJson } from './http.mjs';
 import { nomeDaConta, sessao } from './contas.mjs';
+import { obterDefeitos, alterarDefeito } from './defeitos.mjs';
 
 const clock = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const coord = conta => conta.papel === 'coordenacao';
@@ -7,8 +8,14 @@ const horaValida = value => typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-
 const dataValida = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
     Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const minutos = hora => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3));
-const dentroDaJanela = (data, inicio, limite, agora) => data > agora.slice(0, 10) ||
-    (data === agora.slice(0, 10) && minutos(agora.slice(11)) <= minutos(inicio) + limite);
+function horarioLocal(instante = new Date()) {
+    const hora = clock.format(instante);
+    return { data: hora.slice(0, 10), ms: minutos(hora.slice(11)) * 60000 + instante.getUTCSeconds() * 1000 + instante.getUTCMilliseconds() };
+}
+const dentroDaJanela = (data, inicio, limite, agora) => data > agora.data ||
+    (data === agora.data && agora.ms <= (minutos(inicio) + limite) * 60000);
+const antesDoFim = (data, fim, agora) => data > agora.data ||
+    (data === agora.data && agora.ms < minutos(fim) * 60000);
 const sobreposicaoBloqueio = (bloqueio, reserva) => `${bloqueio}.data <= ${reserva}.data AND COALESCE(${bloqueio}.data_fim, ${bloqueio}.data) >= ${reserva}.data AND ${bloqueio}.inicio < ${reserva}.fim AND ${bloqueio}.fim > ${reserva}.inicio`;
 function exigir(value, message, status = 400) { if (!value) throw new HttpError(status, message); }
 function texto(value, max = 100) { return typeof value === 'string' && value.trim().length <= max ? value.trim() : ''; }
@@ -39,7 +46,7 @@ async function dadosReserva(db, b) {
 export async function estado(db, conta) {
     const hoje = clock.format(new Date()).slice(0, 10);
     const results = await db.batch([
-        db.prepare('SELECT id, nome, ativa FROM salas ORDER BY nome COLLATE NOCASE'),
+        db.prepare("SELECT id, nome, ativa FROM salas WHERE lower(replace(trim(nome), 'Ç', 'ç')) NOT IN ('espaço maker', 'espaco maker') ORDER BY nome COLLATE NOCASE"),
         db.prepare('SELECT id, marca, funcionando, defeito FROM equipamentos ORDER BY marca COLLATE NOCASE'),
         db.prepare(`SELECT r.id, r.conta_id, r.data, r.inicio, r.fim, r.notebooks, r.marca, r.turma, r.situacao, r.criado_em,
             r.data_original, r.inicio_original, r.retirada_em, s.nome AS sala,
@@ -66,18 +73,20 @@ export async function estado(db, conta) {
         blocks: results[3].results.map(b => ({ id: b.id, data: b.data, dataFim: b.data_fim ?? b.data, inicio: b.inicio, fim: b.fim,
             todosHorarios: b.inicio === '00:00' && b.fim === '24:00', motivo: b.motivo, criadoPor: nomeDaConta(b.nome, b.email), criadoEm: b.criado_em })),
         professors: results[4].results.map(c => ({ id: c.id, nome: nomeDaConta(c.nome, c.email) })),
+        defects: await obterDefeitos(db, conta),
     };
 }
 
 export async function alterar(db, conta, acao, args) {
+    if (['reportNotebookDefect', 'markDefectRead'].includes(acao)) return alterarDefeito(db, conta, acao, args);
     const [first, second] = args;
     if (acao === 'createReservation') {
         const b = first || {};
         const dados = await dadosReserva(db, b);
         const professorId = coord(conta) && b.professorId ? texto(b.professorId) : conta.id;
         exigir(await db.prepare("SELECT id FROM contas WHERE id = ? AND ativa = 1 AND papel = 'professor'").bind(professorId).first(), 'Selecione um professor ativo.');
-        const agora = clock.format(new Date());
-        exigir(dentroDaJanela(b.data, b.inicio, 15, agora) && `${b.data} ${b.fim}` > agora,
+        const agora = horarioLocal();
+        exigir(dentroDaJanela(b.data, b.inicio, 15, agora) && antesDoFim(b.data, b.fim, agora),
             'A reserva pode ser criada até 15 minutos após o início e antes do fim do horário.');
         const id = crypto.randomUUID();
         await db.prepare('INSERT INTO reservas (id, conta_id, sala_id, data, inicio, fim, notebooks, marca, turma, data_original, inicio_original) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
@@ -91,10 +100,11 @@ export async function alterar(db, conta, acao, args) {
         exigir(!r.retirada_em, 'A retirada já foi confirmada para esta reserva.', 409);
         const b = second || {};
         const dados = await dadosReserva(db, b);
-        const agora = clock.format(new Date());
-        exigir(dentroDaJanela(r.data_original ?? r.data, r.inicio_original ?? r.inicio, 10, agora) && `${r.data} ${r.fim}` > agora,
-            'O prazo para editar terminou. A edição é permitida até 10 minutos após o início original.');
-        exigir(dentroDaJanela(b.data, b.inicio, 10, agora) && `${b.data} ${b.fim}` > agora,
+        const agora = horarioLocal();
+        exigir(dentroDaJanela(r.data_original ?? r.data, r.inicio_original ?? r.inicio, 10, agora) &&
+            dentroDaJanela(r.data, r.inicio, 10, agora) && antesDoFim(r.data, r.fim, agora),
+            'O prazo para editar terminou. A edição é permitida até 10 minutos após o início original ou atual, valendo o primeiro prazo a vencer.');
+        exigir(dentroDaJanela(b.data, b.inicio, 10, agora) && antesDoFim(b.data, b.fim, agora),
             'Para editar, escolha um horário dentro do prazo de 10 minutos após o início e antes do fim.');
         const result = await db.prepare(`UPDATE reservas SET sala_id = ?, data = ?, inicio = ?, fim = ?, notebooks = ?, marca = ?, turma = ?,
             data_original = COALESCE(data_original, data), inicio_original = COALESCE(inicio_original, inicio)
@@ -119,10 +129,11 @@ export async function alterar(db, conta, acao, args) {
         if (acao === 'confirmPickup') {
             exigir(coord(conta), 'Apenas a coordenação confirma a retirada.', 403);
             const result = await db.prepare(`UPDATE reservas SET retirada_em = COALESCE(retirada_em, ?), retirada_por = COALESCE(retirada_por, ?)
-                WHERE id = ? AND situacao = 'confirmada' AND notebooks > 0 AND data = ? AND inicio = ? AND fim = ? AND NOT EXISTS (
+                WHERE id = ? AND situacao = 'confirmada' AND data = ? AND inicio = ? AND fim = ?
+                AND notebooks = ? AND marca = ? AND sala_id IS ? AND turma = ? AND NOT EXISTS (
                 SELECT 1 FROM bloqueios b WHERE ${sobreposicaoBloqueio('b', 'reservas')})`)
-                .bind(new Date().toISOString(), conta.id, r.id, r.data, r.inicio, r.fim).run();
-            exigir(result.meta.changes, 'Reserva cancelada ou bloqueada. Atualize a agenda.', 409);
+                .bind(new Date().toISOString(), conta.id, r.id, r.data, r.inicio, r.fim, r.notebooks, r.marca, r.sala_id, r.turma).run();
+            exigir(result.meta.changes, 'A reserva mudou. Atualize a agenda antes de confirmar a retirada.', 409);
         } else {
             exigir(r.retirada_em, 'Aguarde a confirmação da retirada pela coordenação.');
             exigir(Array.isArray(second) && second.length > 0 && second.length <= r.notebooks, 'Confira a quantidade de alunos e notebooks da reserva.');
@@ -139,6 +150,7 @@ export async function alterar(db, conta, acao, args) {
     exigir(coord(conta), 'Apenas a coordenação pode gerenciar recursos e bloqueios.', 403);
     if (acao === 'addRoom') {
         const name = texto(first); exigir(name, 'Informe o nome da sala.');
+        exigir(name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() !== 'espaco maker', 'Esta sala não faz parte da escola.');
         const result = await db.prepare('INSERT INTO salas (id, nome) VALUES (?, ?) ON CONFLICT(nome) DO NOTHING').bind(crypto.randomUUID(), name).run();
         exigir(result.meta.changes, 'Já existe uma sala com este nome.', 409);
     } else if (acao === 'toggleRoom') {
@@ -183,7 +195,14 @@ export async function rotaReservas(request, env, url) {
     let result;
     try { result = await alterar(env.DB, conta, body.acao, body.args); }
     catch (error) {
-        const messages = { SALA_INDISPONIVEL: 'Sala inativa ou inexistente.', PERIODO_BLOQUEADO: 'Período bloqueado pela coordenação.', SALA_OCUPADA: 'Esta sala já está reservada neste horário.', ESTOQUE_INSUFICIENTE: 'Notebooks insuficientes para este horário.', MARCA_INSUFICIENTE: 'Notebooks insuficientes da marca escolhida.' };
+        const messages = {
+            SALA_REMOVIDA: 'Esta sala não faz parte da escola.',
+            SALA_INDISPONIVEL: 'Sala inativa ou inexistente.',
+            PERIODO_BLOQUEADO: 'Período bloqueado pela coordenação.',
+            SALA_OCUPADA: 'Esta sala já está reservada neste horário.',
+            ESTOQUE_INSUFICIENTE: 'Notebooks insuficientes para este horário.',
+            MARCA_INSUFICIENTE: 'Notebooks insuficientes da marca escolhida.',
+        };
         for (const [code, message] of Object.entries(messages)) if (String(error.message).includes(code)) throw new HttpError(409, message);
         throw error;
     }

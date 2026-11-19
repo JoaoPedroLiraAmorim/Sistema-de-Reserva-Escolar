@@ -7,13 +7,16 @@ const { randomBytes, createHash } = require('node:crypto');
 const worker = import('../src/worker.mjs').then(m => m.default);
 const origin = 'https://edulab.test';
 
-function fixture(t) {
+function fixture(t, { beforeRun } = {}) {
     const sql = new DatabaseSync(':memory:'); t.after(() => sql.close());
     for (const f of readdirSync(join(__dirname, '../migrations')).filter(f => f.endsWith('.sql')).sort()) sql.exec(readFileSync(join(__dirname, '../migrations', f), 'utf8'));
     const DB = { prepare(query) {
         const s = sql.prepare(query);
         const bound = params => ({ bind: (...p) => bound(p), first: async () => s.get(...params) ?? null,
-            all: async () => ({ results: s.all(...params) }), run: async () => ({ meta: s.run(...params) }) });
+            all: async () => ({ results: s.all(...params) }), async run() {
+                if (beforeRun) await beforeRun(query);
+                return { meta: s.run(...params) };
+            } });
         return bound([]);
     }, async batch(items) {
         sql.exec('BEGIN');
@@ -77,7 +80,7 @@ test('servidor rejeita reservas no sábado e domingo', async t => {
     assert.equal(f.sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n, 0);
 });
 
-test('criação usa hora de São Paulo, inclui o minuto 15 e exclui o fim', async t => {
+test('criação usa hora de São Paulo, inclui exatamente 15 minutos e exclui o fim', async t => {
     t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:15:00Z') });
     const f = fixture(t);
     const b = { ...f.booking, data: '2026-10-27', sala: null, notebooks: 1 };
@@ -86,11 +89,11 @@ test('criação usa hora de São Paulo, inclui o minuto 15 e exclui o fim', asyn
     assert.equal((await f.action('p1', 'createReservation', { ...b, fim: '07:15' })).status, 400);
     const criadaAtrasada = (await f.state('p1')).reservations.find(r => r.professorId === 'p1');
     assert.equal((await f.action('p1', 'updateReservation', criadaAtrasada.id, f.booking)).status, 400);
-    t.mock.timers.setTime(Date.parse('2026-10-27T10:16:00Z'));
+    t.mock.timers.setTime(Date.parse('2026-10-27T10:15:00.001Z'));
     assert.equal((await f.action('p1', 'createReservation', b)).status, 400);
 });
 
-test('edição própria inclui o minuto 10, preserva o início original e registra antes/depois', async t => {
+test('edição própria inclui exatamente 10 minutos, preserva o início original e registra antes/depois', async t => {
     t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:09:00Z') });
     const f = fixture(t);
     const b = { ...f.booking, data: '2026-10-27', notebooks: 10, marca: 'Dell', turma: '3º B' };
@@ -111,8 +114,19 @@ test('edição própria inclui o minuto 10, preserva o início original e regist
     assert.equal(JSON.parse(audit[0].antes).turma, '3º B');
     assert.equal(JSON.parse(audit[0].depois).turma, '2º A');
     assert.equal(JSON.parse(audit[1].depois).notebooks, 0);
-    t.mock.timers.setTime(Date.parse('2026-10-27T10:11:00Z'));
+    t.mock.timers.setTime(Date.parse('2026-10-27T10:10:00.001Z'));
     assert.equal((await f.action('p1', 'updateReservation', id, f.booking)).status, 400);
+});
+
+test('remarcar para mais cedo antecipa o prazo para editar', async t => {
+    t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:20:00Z') });
+    const f = fixture(t);
+    const b = { ...f.booking, data: '2026-10-27', inicio: '11:00', fim: '11:50' };
+    const { result: { id } } = await (await f.action('p1', 'createReservation', b)).json();
+    assert.equal((await f.action('p1', 'updateReservation', id, { ...b, inicio: '07:15', fim: '08:05' })).status, 200);
+    t.mock.timers.setTime(Date.parse('2026-10-27T10:25:00.001Z'));
+    assert.equal((await f.action('p1', 'updateReservation', id, { ...b, inicio: '13:00', fim: '13:50' })).status, 400);
+    assert.equal(f.sql.prepare('SELECT inicio FROM reservas WHERE id = ?').get(id).inicio, '07:15');
 });
 
 test('edições concorrentes reservam estoque apenas uma vez e retirada impede nova edição', async t => {
@@ -130,6 +144,31 @@ test('edições concorrentes reservam estoque apenas uma vez e retirada impede n
     assert.equal(f.sql.prepare('SELECT COUNT(*) AS n FROM reservas_alteracoes').get().n, 1);
     assert.equal((await f.action('c1', 'confirmPickup', ids[0])).status, 200);
     assert.equal((await f.action('p1', 'updateReservation', ids[0], f.booking)).status, 409);
+});
+
+test('retirada recusa a reserva alterada depois da leitura mesmo quando o horário continua igual', async t => {
+    t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:05:00Z') });
+    const retiradaLida = Promise.withResolvers();
+    const continuarRetirada = Promise.withResolvers();
+    const f = fixture(t, { beforeRun: async query => {
+        if (query.startsWith('UPDATE reservas SET retirada_em')) {
+            retiradaLida.resolve();
+            await continuarRetirada.promise;
+        }
+    } });
+    const b = { ...f.booking, data: '2026-10-27', notebooks: 1 };
+    const { result: { id } } = await (await f.action('p1', 'createReservation', b)).json();
+    const retirada = f.action('c1', 'confirmPickup', id);
+    await Promise.race([retiradaLida.promise, retirada.then(() => assert.fail('A retirada deveria aguardar para gravar'))]);
+    try {
+        assert.equal((await f.action('p1', 'updateReservation', id, { ...b, notebooks: 5 })).status, 200);
+    } finally {
+        continuarRetirada.resolve();
+    }
+    assert.equal((await retirada).status, 409);
+    const { notebooks, retiradaConfirmada } = (await f.state('c1')).reservations[0];
+    assert.equal(notebooks, 5);
+    assert.equal(retiradaConfirmada, false);
 });
 
 test('bloqueios e estoque são compartilhados, sem importar dados locais', async t => {

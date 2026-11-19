@@ -243,6 +243,7 @@ window.RelatorioModule = (function() {
         // 2. Tabela de Registros de Notebooks e Alunos
         const container = document.getElementById('records-table-container');
         if (container) {
+            container.dataset.reservaId = resId;
             const hasRecords = Array.isArray(r.alunosNotebooks) && r.alunosNotebooks.length > 0;
 
             if (hasRecords) {
@@ -296,13 +297,14 @@ window.RelatorioModule = (function() {
             }
         }
 
-        backdrop.classList.remove('hidden');
+        window.Defeitos?.renderRecordWarnings();
+        openModal('records-modal');
     }
 
     function closeRecordsModal() {
         const backdrop = document.getElementById('records-modal');
         if (backdrop) {
-            backdrop.classList.add('hidden');
+            closeModal('records-modal');
         }
     }
 

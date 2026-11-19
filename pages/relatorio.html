@@ -30,6 +30,7 @@
     </script>
     <script src="../js/sidebar.js"></script>
 <link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/defeitos.css">
     <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body data-page="relatorio">
@@ -46,7 +47,7 @@
                         <div class="header-top-row">
                             <h2>Reservas e registros de uso</h2>
                         </div>
-                        <p>Acompanhe as reservas ativas. Reservas e registros são excluídos ao término.</p>
+                        <p>Acompanhe as reservas, registros de uso e defeitos reportados.</p>
                     </div>
 
                     <!-- Filtros de exibição -->
@@ -71,11 +72,20 @@
                     </div>
                 </header>
 
+                <div class="report-subtabs" role="group" aria-label="Tipo de relatório">
+                    <button type="button" class="btn-secondary active" id="report-tab-reservations" aria-pressed="true" aria-controls="report-reservations-panel" data-report-tab="reservas">Reservas e registros</button>
+                    <button type="button" class="btn-secondary" id="report-tab-defects" aria-pressed="false" aria-controls="report-defects-panel" data-report-tab="defeitos">Defeitos reportados <span class="defect-count" data-defect-count hidden>0</span></button>
+                </div>
+                <section id="report-reservations-panel" aria-labelledby="report-tab-reservations">
                 <!-- Resumo Estatístico -->
                 <div id="report-stats" class="report-stats-grid"></div>
 
                 <!-- Lista de Relatórios -->
                 <section class="reports-list" id="reports-list"></section>
+                </section>
+                <section id="report-defects-panel" aria-labelledby="report-tab-defects" hidden>
+                    <div id="defects-list" aria-live="polite"></div>
+                </section>
             </main>
         </div>
     </div>
@@ -106,9 +116,6 @@
                 <div class="records-table-container" id="records-table-container"></div>
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="RelatorioModule.closeRecordsModal()">Fechar</button>
-            </div>
         </div>
     </div>
 
@@ -120,6 +127,7 @@
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+    <script src="../js/defeitos.js"></script>
     <script src="../js/relatorio.js"></script>
 <script src="../js/refinamento.js"></script>
 </body>

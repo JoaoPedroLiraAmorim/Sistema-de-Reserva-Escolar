@@ -139,7 +139,8 @@
         if (event.key === 'Escape' && modal.id !== 'system-confirm-modal') {
             event.preventDefault();
             event.stopImmediatePropagation();
-            window.closeModal?.(modal.id);
+            if (modal.id === 'report-defect-modal' && window.Defeitos) window.Defeitos.closeReport();
+            else window.closeModal?.(modal.id);
         }
     }, true);
 

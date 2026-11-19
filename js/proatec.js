@@ -69,7 +69,7 @@ window.ProatecModule = (function() {
         // 1. Lista cronológica (apenas indicativo de status — confirmação exclusiva no card)
         list.innerHTML = todayRes.map((r, i) => {
             let statusBadge = '';
-            const blocked = ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim));
+            const blocked = ERS.isReservationBlocked(r);
             if (blocked) {
                 statusBadge = '<span class="badge badge-blocked">Bloqueada</span>';
             } else if (r.notebooks > 0) {
@@ -100,7 +100,7 @@ window.ProatecModule = (function() {
 
         // 2. Card de Retirada (Regra de Negócio: só pode confirmar quando der o horário, nunca antes!)
         const nbReservations = todayRes.filter(r => r.notebooks > 0 && r.situacao !== 'cancelada' &&
-            !ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim)));
+            !ERS.isReservationBlocked(r));
         const readyReservations = nbReservations.filter(r => !r.retiradaConfirmada && ERS.isPickupTimeReady(r));
 
         if (readyReservations.length > 1) {

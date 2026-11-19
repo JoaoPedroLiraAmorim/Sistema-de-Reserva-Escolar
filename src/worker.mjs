@@ -48,7 +48,7 @@ export default {
             }
             try {
                 const { results } = await env.DB.prepare(
-                    'SELECT id, nome, ativa FROM salas ORDER BY nome COLLATE NOCASE, id'
+                    "SELECT id, nome, ativa FROM salas WHERE lower(replace(trim(nome), 'Ç', 'ç')) NOT IN ('espaço maker', 'espaco maker') ORDER BY nome COLLATE NOCASE, id"
                 ).all();
                 const response = json({ salas: results.map(sala => ({ ...sala, ativa: sala.ativa === 1 })) });
                 return request.method === 'HEAD'

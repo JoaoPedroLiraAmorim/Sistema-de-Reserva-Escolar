@@ -84,8 +84,8 @@
     }
 
     /** Retorna 'YYYY-MM-DD' para hoje */
-    function today() {
-        return window.ERS_REAL || window.ERS_DEMO ? schoolClock.format(new Date()).slice(0, 10) : dateKey(new Date());
+    function today(now = new Date()) {
+        return window.ERS_REAL || window.ERS_DEMO ? schoolClock.format(now).slice(0, 10) : dateKey(now);
     }
 
     /** Retorna 'YYYY-MM-DD' para N dias a partir de hoje (ou de baseDate) */
@@ -161,7 +161,6 @@
             { id: 'r1', nome: 'Aquário',         ativa: true },
             { id: 'r2', nome: 'Sala de Leitura', ativa: true },
             { id: 'r3', nome: 'Sala de Vídeo',   ativa: true },
-            { id: 'r4', nome: 'Espaço Maker',    ativa: true },
         ]);
 
         // Notebooks (por marca com unidades disponíveis e defeitos para demonstração)
@@ -316,20 +315,6 @@
                 ]
             },
             {
-                id: 'mock-res-8',
-                professorId: 'u8',
-                professorNome: 'Profª. Camila Rodrigues',
-                data: dTer,
-                inicio: '10:35',
-                fim: '11:25',
-                sala: 'Espaço Maker',
-                marca: 'Acer',
-                notebooks: 14,
-                turma: '3C Eletro',
-                situacao: 'confirmada',
-                retiradaConfirmada: false
-            },
-            {
                 id: 'mock-res-9',
                 professorId: 'u6',
                 professorNome: 'Profª. Maria Santos',
@@ -384,20 +369,6 @@
                 marca: 'Acer',
                 notebooks: 10,
                 turma: '1C Log',
-                situacao: 'confirmada',
-                retiradaConfirmada: false
-            },
-            {
-                id: 'mock-res-13',
-                professorId: 'u7',
-                professorNome: 'Prof. Ricardo Neves',
-                data: dQua,
-                inicio: '09:30',
-                fim: '10:20',
-                sala: 'Espaço Maker',
-                marca: 'Lenovo',
-                notebooks: 18,
-                turma: '2A Robótica',
                 situacao: 'confirmada',
                 retiradaConfirmada: false
             },
@@ -517,20 +488,6 @@
                 situacao: 'confirmada',
                 retiradaConfirmada: false
             },
-            {
-                id: 'mock-res-22',
-                professorId: 'u6',
-                professorNome: 'Profª. Maria Santos',
-                data: dSex,
-                inicio: '15:30',
-                fim: '16:20',
-                sala: 'Espaço Maker',
-                marca: 'Lenovo',
-                notebooks: 18,
-                turma: '1A Info',
-                situacao: 'confirmada',
-                retiradaConfirmada: false
-            }
         ];
 
         save(KEYS.RESERVATIONS, [...existingRes, ...mockReservations]);
@@ -654,7 +611,8 @@
     // ─────────────────────────────────────────────────────────────
     //  SALAS
     // ─────────────────────────────────────────────────────────────
-    function getRooms() { return load(KEYS.ROOMS) || []; }
+    const isRemovedRoom = nome => String(nome || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'espaco maker';
+    function getRooms() { return (load(KEYS.ROOMS) || []).filter(r => !isRemovedRoom(r.nome)); }
 
     function getActiveRooms() { return getRooms().filter(r => r.ativa); }
 
@@ -670,6 +628,7 @@
     }
 
     function addRoom(nome) {
+        if (isRemovedRoom(nome)) return { ok: false, message: 'Esta sala não faz parte da escola.' };
         const rooms = getRooms();
         if (rooms.find(r => r.nome.toLowerCase() === nome.toLowerCase())) return { ok: false, message: 'Sala já cadastrada.' };
         rooms.push({ id: genId(), nome, ativa: true });
@@ -843,8 +802,8 @@
         if (window.ERS_REAL) return reservations;
         const currentDate = today();
         const currentTime = getCurrentTime();
-        const active = reservations.filter(r => r.data > currentDate ||
-            (r.data === currentDate && r.fim > currentTime));
+        const active = reservations.filter(r => !isRemovedRoom(r.sala) && (r.data > currentDate ||
+            (r.data === currentDate && r.fim > currentTime)));
         // Exclusão ao término autorizada: os registros de uso pertencem à reserva.
         if (active.length !== reservations.length) save(KEYS.RESERVATIONS, active);
         return active;
@@ -966,7 +925,7 @@
         const list = getReservations();
         const r = list.find(r => r.id === id);
         if (!canEditReservation(r, getSession()?.userId)) {
-            return { ok: false, message: 'A edição exige uma reserva própria confirmada, sem retirada e dentro do prazo de 10 minutos após o início original.' };
+            return { ok: false, message: 'A edição exige uma reserva própria confirmada, sem retirada e dentro do prazo de 10 minutos após o início original ou atual, valendo o primeiro prazo a vencer.' };
         }
 
         const depois = { data, inicio, fim, sala: sala || null, notebooks, marca: (notebooks && marca) || 'Qualquer marca', turma };
@@ -987,35 +946,42 @@
     }
 
     /** Retorna o horário atual no formato HH:MM (suporta mock em window._ers_mock_time) */
-    function getCurrentTime() {
+    function getCurrentTime(now = new Date()) {
         if (typeof window !== 'undefined' && window._ers_mock_time) {
             return window._ers_mock_time;
         }
-        if (window.ERS_REAL || window.ERS_DEMO) return schoolClock.format(new Date()).slice(11);
-        const now = new Date();
+        if (window.ERS_REAL || window.ERS_DEMO) return schoolClock.format(now).slice(11);
         const h = String(now.getHours()).padStart(2, '0');
         const m = String(now.getMinutes()).padStart(2, '0');
         return `${h}:${m}`;
     }
 
-    function withinStartWindow(data, inicio, limite, hoje, agora) {
-        const minutes = hora => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3));
-        return data > hoje || (data === hoje && minutes(agora) <= minutes(inicio) + limite);
+    const minutes = hora => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3));
+
+    function reservationClock() {
+        const now = new Date();
+        const offset = window._ers_mock_time ? 0 : now.getUTCSeconds() * 1000 + now.getUTCMilliseconds();
+        return { data: today(now), ms: minutes(getCurrentTime(now)) * 60000 + offset };
+    }
+
+    function withinStartWindow(data, inicio, limite, agora) {
+        return data > agora.data || (data === agora.data && agora.ms <= (minutes(inicio) + limite) * 60000);
+    }
+
+    function withinReservationWindow({ data, inicio, fim }, limite, agora) {
+        return withinStartWindow(data, inicio, limite, agora) && (data > agora.data || agora.ms < minutes(fim) * 60000);
     }
 
     function isReservationWithinWindow({ data, inicio, fim }, limite) {
         if (!data || !inicio || !fim || inicio >= fim) return false;
-        const hoje = today();
-        const agora = getCurrentTime();
-        return withinStartWindow(data, inicio, limite, hoje, agora) && (data > hoje || fim > agora);
+        return withinReservationWindow({ data, inicio, fim }, limite, reservationClock());
     }
 
     function canEditReservation(r, userId) {
         if (!r || !userId || r.professorId !== userId || r.situacao !== 'confirmada' || r.retiradaConfirmada) return false;
-        const hoje = today();
-        const agora = getCurrentTime();
-        return withinStartWindow(r.dataOriginal ?? r.data, r.inicioOriginal ?? r.inicio, 10, hoje, agora) &&
-            (r.data > hoje || (r.data === hoje && r.fim > agora));
+        const agora = reservationClock();
+        return withinStartWindow(r.dataOriginal ?? r.data, r.inicioOriginal ?? r.inicio, 10, agora) &&
+            withinReservationWindow(r, 10, agora);
     }
 
     /** Verifica se o horário de início da reserva já chegou hoje */

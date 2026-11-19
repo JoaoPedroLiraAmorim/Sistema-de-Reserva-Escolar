@@ -15,14 +15,19 @@ Os botões **Professor demo** e **Coordenação demo** permitem experimentar a m
 ## Dados e permissões
 
 - A sessão usa cookie HttpOnly e dura oito horas. O perfil é conferido pelo servidor em cada operação.
-- Novas contas entram como Professor. Confirmar o e-mail é necessário para entrar com senha.
+- Novas contas entram como Professor. O cadastro pede nome, e-mail e senha, envia a verificação e retorna ao login. Confirmar o e-mail é necessário para entrar com senha. O nome usado na sessão vem da identidade Firebase verificada.
 - Professores reservam recursos para si e cancelam suas reservas. A Coordenação pode reservar para professores ativos, cancelar reservas e gerenciar salas, estoque e bloqueios.
 - Apenas a Coordenação confirma retiradas, durante o horário da reserva. O registro de alunos exige a retirada confirmada, fica limitado à quantidade de notebooks e é visível somente ao professor responsável e à Coordenação.
 - Salas, marcas e quantidades devem ser cadastradas pela Coordenação. A integração não importa os exemplos antigos do navegador nem cria estoque fictício.
 - Os dados do sistema ficam no SQL. O navegador guarda apenas preferências como menu e e-mail lembrado. A interface mantém um cache em memória e consulta atualizações a cada 15 segundos.
 - Horários e validações do servidor usam America/Sao_Paulo. Conflitos de sala, bloqueios e estoque são verificados na gravação, inclusive em pedidos concorrentes.
+- A criação é permitida até 15 minutos após o início, inclusive, enquanto a aula não terminou. A edição de reserva própria exige ausência de retirada e respeita até 10 minutos após os inícios original, atual e de destino. Vale o primeiro prazo a vencer; alterar o horário não renova a tolerância. Alterações ficam registradas no banco.
+- Bloqueios aceitam intervalo inclusivo de datas e todos os horários. O motivo é opcional. Reservas afetadas continuam no histórico, sinalizadas como bloqueadas, sem cancelamento automático.
+- Durante sua aula com notebooks, o professor pode abrir os detalhes da reserva e reportar um defeito por etiqueta e descrição, inclusive antes da confirmação da retirada. O relato guarda autor, horário do servidor e contexto da aula, é privado entre professores e fica visível à Coordenação em **Relatórios → Defeitos reportados**. O contador indica relatos não lidos; **Marcar como lido** baixa o contador e preserva o relato.
+- Os registros de aluno mostram um alerta quando a etiqueta possui relato na mesma reserva, independentemente de o aluno ter sido vinculado antes ou depois. O relato não atribui responsabilidade ao aluno nem muda automaticamente as quantidades do estoque; a Coordenação confirma os ajustes no controle de equipamentos existente.
+- Espaço Maker foi retirado dos catálogos e da demonstração. A migração 0008 desativa eventual cadastro antigo, impede recadastro/reativação e preserva reservas históricas vinculadas.
 - A migração 0004 preserva as reservas existentes em reservas_salas. A tabela antiga permanece como origem histórica; as novas gravações usam reservas. Nenhuma conta ou reserva existente é apagada.
-- O histórico permanece no banco. A agenda e os relatórios da interface consultam o dia atual e datas futuras; uma consulta histórica completa ainda não está disponível na interface.
+- O histórico permanece no banco. A agenda e os relatórios de reservas consultam o dia atual e datas futuras; uma consulta histórica completa de reservas ainda não está disponível na interface. A subaba de defeitos mantém também os relatos de aulas passadas.
 
 ## E-mails e confirmação de conta
 
@@ -78,7 +83,9 @@ npm run test:ui
 npm run check:worker
 ~~~
 
-Os testes de interface usam o código real do Worker e SQLite em memória, com o login Firebase substituído por identidades fictícias de teste. Cobrem cadastro/login na interface principal, oito viewports, telas da Coordenação, persistência, retiradas, privacidade dos alunos e logout. Nenhum dado de teste é enviado à publicação.
+Os testes de interface usam o código real do Worker e SQLite em memória, com o login Firebase substituído por identidades fictícias de teste. Cobrem cadastro/login na interface principal, oito viewports, telas da Coordenação, persistência, retiradas, relatos de defeito, contador/leitura, alertas por etiqueta, privacidade dos alunos e logout. Os testes de regras cobrem os instantes exatos das tolerâncias, concorrência e estoque. Nenhum dado de teste é enviado à publicação.
+
+As migrações 0005–0008 precisam ser aplicadas junto com a versão que usa as novas regras, os nomes e os relatos. Elas não são aplicadas automaticamente pelo build. A preparação dessas alterações não publica o Worker nem altera o banco remoto.
 
 Com npm run dev aberto:
 

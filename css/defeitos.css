@@ -1,0 +1,18 @@
+.defect-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; min-height: 22px; padding: 2px 6px; border-radius: var(--radius-full); background: var(--color-error); color: #fff; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.defect-count[hidden], #report-reservations-panel[hidden], #report-defects-panel[hidden], .reports-filter-group[hidden], .defect-warning[hidden] { display: none !important; }
+.report-subtabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.report-subtabs button { display: inline-flex; align-items: center; gap: 8px; }
+.report-subtabs button[aria-pressed="true"] { background: var(--color-primary) !important; color: #fff !important; border-color: var(--color-primary) !important; }
+#defects-list { display: grid; gap: 16px; }
+.defect-report { display: grid; gap: 10px; min-width: 0; padding: 18px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-white); overflow-wrap: anywhere; }
+.defect-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.defect-description { white-space: pre-wrap; }
+.defect-timestamp { color: var(--color-text-secondary); font-size: 13px; }
+.defect-warning { color: #92400e; background: var(--color-warning-bg); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 13px; overflow-wrap: anywhere; }
+.defect-report > button { justify-self: start; }
+.defect-detail { display: grid; gap: 12px; margin-top: 20px; }
+.defect-empty { padding: 24px 0; color: var(--color-text-secondary); }
+#report-defect-form .modal-body { display: flex; flex-direction: column; gap: 12px; }
+#report-defect-modal { padding: 16px; }
+#report-defect-modal > .modal { width: min(100%, 520px); max-height: 85dvh; border-radius: var(--radius-xl); }
+@media (max-width: 480px) { .defect-report { padding: 14px; } .report-subtabs { display: grid; grid-template-columns: 1fr; } }

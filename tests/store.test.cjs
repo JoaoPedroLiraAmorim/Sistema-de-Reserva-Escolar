@@ -14,10 +14,11 @@ function fixture() {
     save('ers_users', [{ id: 'u1', nome: 'Professor', role: 'professor' }]);
     const timers = [];
     const events = [];
+    let now = new Date(2026, 9, 26, 6, 0);
     const context = {
         console, Event,
         Date: class extends Date {
-            constructor(...args) { super(...(args.length ? args : [2026, 9, 26, 6, 0])); }
+            constructor(...args) { super(...(args.length ? args : [now.getTime()])); }
         },
         localStorage: { getItem: key => items.get(key) ?? null, setItem: (key, value) => items.set(key, value), removeItem: key => items.delete(key) },
         window: { addEventListener() {}, dispatchEvent: event => events.push(event.type) },
@@ -26,7 +27,7 @@ function fixture() {
     };
     vm.createContext(context);
     vm.runInContext(fs.readFileSync(require.resolve('../js/store.js'), 'utf8'), context);
-    return { store: context.window.ERS, save, items, timers, events, window: context.window };
+    return { store: context.window.ERS, save, items, timers, events, setClock: value => { now = value; } };
 }
 
 const reservation = overrides => ({ professorId: 'u1', professorNome: 'Professor', data: '2026-10-27', inicio: '07:00', fim: '07:50', notebooks: 1, ...overrides });
@@ -66,7 +67,8 @@ test('exclusão ocorre no término e preserva reservas ainda em andamento ou fut
         reservation({ id: 'ontem', data: '2026-10-25', alunosNotebooks: [{ aluno: 'Exemplo' }] }),
         reservation({ id: 'terminou', data: '2026-10-26', inicio: '05:00', fim: '06:00' }),
         reservation({ id: 'andamento', data: '2026-10-26', inicio: '05:00', fim: '06:10' }),
-        reservation({ id: 'futura' })
+        reservation({ id: 'futura' }),
+        reservation({ id: 'sala-removida', sala: 'Espaço Maker' })
     ]);
     assert.deepEqual(Array.from(store.getReservations(), r => r.id), ['andamento', 'futura']);
     assert.deepEqual(JSON.parse(items.get('ers_reservations')).map(r => r.id), ['andamento', 'futura']);
@@ -93,10 +95,10 @@ test('não aceita início passado ou quantidade fracionária', () => {
 });
 
 test('demo permite criação até o minuto 15, mas edição própria só até o minuto 10 original', () => {
-    const { store, save, window } = fixture();
+    const { store, save, setClock } = fixture();
     save('ers_session', { userId: 'u1', role: 'professor' });
     const b = reservation({ data: '2026-10-26', notebooks: 16, marca: 'Dell', turma: '3º B' });
-    window._ers_mock_time = '07:10';
+    setClock(new Date(2026, 9, 26, 7, 10));
     const { reservation: r } = store.createReservation(b);
     assert.equal(store.canEditReservation(r, 'u1'), true);
     assert.equal(store.canEditReservation(r, 'u2'), false);
@@ -105,13 +107,25 @@ test('demo permite criação até o minuto 15, mas edição própria só até o 
     assert.equal(atualizada.historicoAlteracoes[0].antes.turma, '3º B');
     assert.equal(atualizada.historicoAlteracoes[0].depois.turma, '2º A');
     assert.equal(store.updateReservation(r.id, { ...b, data: '2026-10-27' }).ok, true);
-    window._ers_mock_time = '07:15';
+    setClock(new Date(2026, 9, 26, 7, 10, 0, 1));
     assert.equal(store.updateReservation(r.id, { ...b, data: '2026-10-28' }).ok, false);
+    setClock(new Date(2026, 9, 26, 7, 15));
     const { reservation: tardia } = store.createReservation(b);
     assert.equal(store.canEditReservation(tardia, 'u1'), false);
     assert.equal(store.createReservation({ ...b, fim: '07:15', notebooks: 1, marca: 'Lenovo' }).ok, false);
-    window._ers_mock_time = '07:16';
+    setClock(new Date(2026, 9, 26, 7, 15, 0, 1));
     assert.equal(store.createReservation({ ...b, notebooks: 1, marca: 'Lenovo' }).ok, false);
+});
+
+test('demo antecipa o prazo de edição se o início for remarcado para mais cedo', () => {
+    const { store, save, setClock } = fixture();
+    save('ers_session', { userId: 'u1', role: 'professor' });
+    const b = reservation({ data: '2026-10-26', inicio: '11:00', fim: '11:50' });
+    setClock(new Date(2026, 9, 26, 7, 20));
+    const { reservation: r } = store.createReservation(b);
+    assert.equal(store.updateReservation(r.id, { ...b, inicio: '07:15', fim: '08:05' }).ok, true);
+    setClock(new Date(2026, 9, 26, 7, 25, 0, 1));
+    assert.equal(store.updateReservation(r.id, { ...b, inicio: '13:00', fim: '13:50' }).ok, false);
 });
 
 test('demo aplica bloqueio integral no intervalo todo e mantém as reservas confirmadas', () => {
