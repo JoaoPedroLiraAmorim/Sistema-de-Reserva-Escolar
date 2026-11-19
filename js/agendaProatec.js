@@ -22,6 +22,7 @@ window.AgendaProatecModule = (function() {
     function init(session) {
         currentSession = session || AUTH.getSession();
         if (!currentSession) return;
+        window.BloqueiosModule?.init(currentSession);
 
         // Mostrar botão de bloqueio para Coordenação
         const btnBlock = document.getElementById('btnOpenBlock');
@@ -69,20 +70,6 @@ window.AgendaProatecModule = (function() {
                 // Avoid reopening the native picker when restoring dialog focus.
             }
 
-            const blkDateInput = document.getElementById('blk-date');
-            if (blkDateInput) {
-                blkDateInput.min = ERS.today();
-                const openBlkCalendar = () => {
-                    try {
-                        if (typeof blkDateInput.showPicker === 'function') {
-                            blkDateInput.showPicker();
-                        }
-                    } catch (e) {}
-                };
-                blkDateInput.addEventListener('click', openBlkCalendar);
-                blkDateInput.addEventListener('focus', openBlkCalendar);
-            }
-
             // Botão Nova Reserva
             document.getElementById('btnOpenNewReservation')?.addEventListener('click', () => {
                 const dInput = document.getElementById('res-date');
@@ -104,20 +91,6 @@ window.AgendaProatecModule = (function() {
                 openModal('new-reservation-modal');
             });
 
-            // Botão Criar Bloqueio dentro da agenda
-            document.getElementById('btnOpenBlock')?.addEventListener('click', () => {
-                const bInput = document.getElementById('blk-date');
-                if (bInput) {
-                    bInput.min = ERS.today();
-                    if (!bInput.value || bInput.value < ERS.today()) {
-                        bInput.value = ERS.today();
-                    }
-                }
-                const errEl = document.getElementById('blk-error');
-                if (errEl) errEl.style.display = 'none';
-                openModal('block-modal');
-            });
-
             // Disponibilidade em tempo real ao mudar campos
             document.getElementById('res-quantity')?.addEventListener('input', updateAvailInfo);
             document.getElementById('res-brand')?.addEventListener('change', updateAvailInfo);
@@ -127,7 +100,6 @@ window.AgendaProatecModule = (function() {
 
             // Submissão dos Formulários e Ações de Bloqueio
             document.getElementById('new-reservation-form')?.addEventListener('submit', handleCreateReservation);
-            document.getElementById('block-form')?.addEventListener('submit', handleCreateBlock);
             document.getElementById('btn-delete-blk')?.addEventListener('click', handleDeleteBlock);
         }
 
@@ -231,8 +203,8 @@ window.AgendaProatecModule = (function() {
                     ERS.timesOverlap(slot.start, slot.end, r.inicio, r.fim)
                 );
 
-                const blocks = ERS.getBlocks().filter(b =>
-                    b.data === dk && ERS.timesOverlap(slot.start, slot.end, b.inicio, b.fim)
+                const blocks = ERS.getBlocksByDate(dk).filter(b =>
+                    ERS.timesOverlap(slot.start, slot.end, b.inicio, b.fim)
                 );
 
                 let html = '';
@@ -244,17 +216,18 @@ window.AgendaProatecModule = (function() {
                             data-blk-id="${b.id}" onclick="openBlockDetail('${b.id}')">
                             <span class="event-teacher">🔒 Bloqueado</span>
                             <span class="event-desc">${ERS.escapeHtml(b.motivo)}</span>
-                            <span class="event-room"><span class="material-symbols-outlined">block</span> ${b.inicio}–${b.fim}</span>
+                            <span class="event-room"><span class="material-symbols-outlined">block</span> ${BloqueiosModule.formatBlockHours(b)}</span>
                         </div>`;
                     });
                     html += `</div>`;
                 }
 
-                if (slotReservations.length > 0 && !blocks.length) {
+                if (slotReservations.length > 0) {
                     html += `<div class="calendar-events-container">`;
                     slotReservations.forEach(r => {
                         const isCancelled = r.situacao === 'cancelada';
                         const colorClass = isCancelled ? 'error' : 'primary';
+                        const blocked = ERS.isReservationBlocked(r);
 
                         const descParts = [];
                         if (r.notebooks) {
@@ -269,6 +242,7 @@ window.AgendaProatecModule = (function() {
                         html += `<div class="calendar-event-card ${colorClass}"
                             data-res-id="${r.id}" onclick="openReservationDetail('${r.id}')">
                             <span class="event-teacher">${ERS.escapeHtml(r.professorNome)}</span>
+                            ${blocked ? '<span class="reservation-blocked-label">Indisponível por bloqueio</span>' : ''}
                             <span class="event-desc">${ERS.escapeHtml(descText)}</span>
                             <span class="event-room">
                                 <span class="material-symbols-outlined">${r.sala ? 'meeting_room' : 'laptop'}</span>
@@ -364,6 +338,10 @@ window.AgendaProatecModule = (function() {
             if (errEl) { errEl.textContent = 'O horário de início deve ser anterior ao horário de término.'; errEl.style.display = 'block'; }
             return;
         }
+        if (!ERS.isReservationWithinWindow({ data, inicio, fim }, 15)) {
+            if (errEl) { errEl.textContent = 'A reserva pode ser criada até 15 minutos após o início e antes do fim do horário.'; errEl.style.display = 'block'; }
+            return;
+        }
 
         // 4. Validação de Recurso
         if (!sala && qtd <= 0) {
@@ -390,43 +368,6 @@ window.AgendaProatecModule = (function() {
         ERS.showToast('Reserva criada com sucesso!', 'success');
         renderCalendar();
         if (window.ProatecModule?.render) window.ProatecModule.render();
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    //  CRIAR BLOQUEIO
-    // ─────────────────────────────────────────────────────────────
-    async function handleCreateBlock(e) {
-        e.preventDefault();
-        const errEl = document.getElementById('blk-error');
-        if (errEl) errEl.style.display = 'none';
-
-        const data   = document.getElementById('blk-date')?.value;
-        const inicio = document.getElementById('blk-start')?.value;
-        const fim    = document.getElementById('blk-end')?.value;
-        const motivo = document.getElementById('blk-motivo')?.value.trim();
-
-        if (!data || data < ERS.today()) {
-            if (errEl) { errEl.textContent = 'A data do bloqueio não pode ser anterior a hoje.'; errEl.style.display = 'block'; }
-            return;
-        }
-
-        if (!inicio || !fim || inicio >= fim) {
-            if (errEl) { errEl.textContent = 'O horário de início deve ser anterior ao horário de término.'; errEl.style.display = 'block'; }
-            return;
-        }
-
-        const creator = currentSession ? currentSession.nome : (currentSession?.role === 'coordenacao' ? 'Coordenação' : 'Coordenação');
-        const result = await ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
-        if (!result.ok) {
-            if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
-            return;
-        }
-
-        closeModal('block-modal');
-        document.getElementById('block-form')?.reset();
-        ERS.showToast('Bloqueio criado. Novas reservas nesse período serão impedidas.', 'success');
-        renderCalendar();
-        if (window.BloqueiosModule?.render) window.BloqueiosModule.render();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -536,9 +477,9 @@ window.AgendaProatecModule = (function() {
         if (body) {
             body.innerHTML = `
                 <div class="detail-list">
-                    <div><strong>Data:</strong> ${ERS.formatDate(b.data)}</div>
-                    <div><strong>Horário:</strong> ${b.inicio} às ${b.fim}</div>
-                    <div><strong>Motivo:</strong> ${ERS.escapeHtml(b.motivo)}</div>
+                    <div><strong>Datas</strong> ${BloqueiosModule.formatBlockDates(b)}</div>
+                    <div><strong>Horário</strong> ${BloqueiosModule.formatBlockHours(b)}</div>
+                    ${b.motivo ? `<div><strong>Motivo</strong> ${ERS.escapeHtml(b.motivo)}</div>` : ''}
                     <div><strong>Criado por:</strong> ${ERS.escapeHtml(b.criadoPor || 'Sistema')}</div>
                     ${b.criadoEm ? `<div><strong>Registrado em:</strong> ${new Date(b.criadoEm).toLocaleString('pt-BR')}</div>` : ''}
                 </div>
@@ -555,7 +496,7 @@ window.AgendaProatecModule = (function() {
         const ok = await showConfirmModal({
             title: 'Remover Bloqueio',
             message: b 
-                ? `Deseja realmente remover o bloqueio de <strong>${ERS.escapeHtml(b.motivo)}</strong> no dia <strong>${ERS.formatDate(b.data)}</strong> (${b.inicio} às ${b.fim})? Os horários voltarão a ficar disponíveis para reserva.`
+                ? `Deseja realmente remover o bloqueio de <strong>${BloqueiosModule.formatBlockDates(b)}</strong>? Os horários voltarão a ficar disponíveis para reserva.`
                 : 'Deseja realmente remover este bloqueio? Os horários voltarão a ficar disponíveis.',
             icon: 'lock_open',
             type: 'danger',

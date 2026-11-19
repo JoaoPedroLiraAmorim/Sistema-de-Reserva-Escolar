@@ -68,6 +68,26 @@
 .btn-delete-block .material-symbols-outlined { font-size: 14px; }
 .btn-delete-block:hover { background: #fef2f2; }
 
+#btnOpenBlock:hover,
+#block-form .btn-danger:hover {
+    background: #8c2424 !important;
+    border-color: #8c2424 !important;
+    color: #fff !important;
+}
+
+.block-all-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.block-all-times input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+#blk-hours[hidden] { display: none; }
+.reservation-blocked-label { color: #933529; font-size: 12px; font-weight: 600; }
+
 /* Estado vazio */
 .empty-state {
     text-align: center;

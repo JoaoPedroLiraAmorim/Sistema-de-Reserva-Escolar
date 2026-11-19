@@ -53,10 +53,10 @@
         })();
         pending.set(key, promise); return promise;
     }
-    for (const action of ['createReservation', 'cancelReservation', 'confirmPickup', 'saveStudentAssignments', 'addRoom', 'toggleRoom', 'createBlock', 'deleteBlock', 'addNotebooks', 'registerNotebookDefect', 'registerNotebookAvailability']) {
+    for (const action of ['createReservation', 'updateReservation', 'cancelReservation', 'confirmPickup', 'saveStudentAssignments', 'addRoom', 'toggleRoom', 'createBlock', 'deleteBlock', 'addNotebooks', 'registerNotebookDefect', 'registerNotebookAvailability']) {
         ERS[action] = (...args) => mutate(action, args);
     }
-    for (const action of ['updateReservation', 'updateNotebookStatus', 'updateNotebookBrandCounts', 'deleteNotebookBrand', 'resetDemoData']) {
+    for (const action of ['updateNotebookStatus', 'updateNotebookBrandCounts', 'deleteNotebookBrand', 'resetDemoData']) {
         ERS[action] = async () => ({ ok: false, message: 'Operação indisponível.' });
     }
     ERS.logout = async () => {

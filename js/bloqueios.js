@@ -18,19 +18,17 @@ window.BloqueiosModule = (function() {
 
             const openBlockBtn = document.getElementById('btnOpenBlockPage') || document.getElementById('btnOpenBlock');
             openBlockBtn?.addEventListener('click', () => {
-                const dateEl = document.getElementById('blk-date');
-                if (dateEl) dateEl.value = ERS.today();
+                setDateBounds();
+                setHoursVisibility();
                 const errEl = document.getElementById('blk-error');
                 if (errEl) errEl.style.display = 'none';
                 openModal('block-modal');
             });
 
-            // Se o form ainda não teve handler registrado
-            const form = document.getElementById('block-form');
-            if (form && !form.dataset.boundBloqueios) {
-                form.dataset.boundBloqueios = 'true';
-                form.addEventListener('submit', handleCreateBlock);
-            }
+            document.getElementById('block-form')?.addEventListener('submit', handleCreateBlock);
+            document.getElementById('blk-date')?.addEventListener('change', setDateBounds);
+            document.getElementById('blk-all-times')?.addEventListener('change', setHoursVisibility);
+            window.addEventListener('ers:reservations-updated', renderBlocks);
         }
 
         renderBlocks();
@@ -40,7 +38,7 @@ window.BloqueiosModule = (function() {
     //  LISTA DE BLOQUEIOS
     // ─────────────────────────────────────────────────────────────
     function renderBlocks() {
-        const blocks = ERS.getBlocks()
+        const blocks = [...ERS.getBlocks()]
             .sort((a, b) => a.data.localeCompare(b.data) || a.inicio.localeCompare(b.inicio));
         const list = document.getElementById('block-list');
         if (!list) return;
@@ -62,15 +60,15 @@ window.BloqueiosModule = (function() {
                     <span class="material-symbols-outlined">block</span>
                 </div>
                 <div class="block-body">
-                    <div class="block-title">${ERS.escapeHtml(b.motivo)}</div>
+                    <div class="block-title">${ERS.escapeHtml(b.motivo || 'Bloqueio de reservas')}</div>
                     <div class="block-meta">
                         <span class="block-meta-item">
                             <span class="material-symbols-outlined">calendar_today</span>
-                            ${ERS.formatDate(b.data)}
+                            ${formatBlockDates(b)}
                         </span>
                         <span class="block-meta-item">
                             <span class="material-symbols-outlined">schedule</span>
-                            ${b.inicio} – ${b.fim}
+                            ${formatBlockHours(b)}
                         </span>
                         <span class="block-meta-item">
                             <span class="material-symbols-outlined">person</span>
@@ -107,28 +105,55 @@ window.BloqueiosModule = (function() {
     // ─────────────────────────────────────────────────────────────
     //  CRIAR BLOQUEIO
     // ─────────────────────────────────────────────────────────────
+    function setDateBounds() {
+        const start = document.getElementById('blk-date');
+        const end = document.getElementById('blk-date-end');
+        start.min = ERS.today();
+        if (start.value < start.min) start.value = start.min;
+        end.min = start.value;
+        if (end.value < end.min) end.value = end.min;
+    }
+
+    function setHoursVisibility() {
+        const allHours = document.getElementById('blk-all-times').checked;
+        document.getElementById('blk-hours').hidden = allHours;
+        document.getElementById('blk-start').disabled = allHours;
+        document.getElementById('blk-end').disabled = allHours;
+    }
+
+    function formatBlockDates(b) {
+        const start = ERS.formatDate(b.data);
+        return b.dataFim && b.dataFim !== b.data ? `${start} a ${ERS.formatDate(b.dataFim)}` : start;
+    }
+
+    function formatBlockHours(b) {
+        return b.todosHorarios ? 'Todos os horários' : `${b.inicio} – ${b.fim}`;
+    }
+
     async function handleCreateBlock(e) {
         e.preventDefault();
         const errEl = document.getElementById('blk-error');
         if (errEl) errEl.style.display = 'none';
 
         const data   = document.getElementById('blk-date')?.value;
+        const dataFim = document.getElementById('blk-date-end')?.value;
+        const todosHorarios = document.getElementById('blk-all-times').checked;
         const inicio = document.getElementById('blk-start')?.value;
         const fim    = document.getElementById('blk-end')?.value;
         const motivo = document.getElementById('blk-motivo')?.value.trim();
 
-        if (!data || data < ERS.today()) {
-            if (errEl) { errEl.textContent = 'A data do bloqueio não pode ser anterior a hoje.'; errEl.style.display = 'block'; }
+        if (!data || !dataFim || data < ERS.today() || dataFim < data) {
+            if (errEl) { errEl.textContent = 'Informe um intervalo de datas válido, a partir de hoje.'; errEl.style.display = 'block'; }
             return;
         }
 
-        if (!inicio || !fim || inicio >= fim) {
+        if (!todosHorarios && (!inicio || !fim || inicio >= fim)) {
             if (errEl) { errEl.textContent = 'O horário de início deve ser anterior ao horário de término.'; errEl.style.display = 'block'; }
             return;
         }
 
         const creator = currentSession ? currentSession.nome : 'Coordenação';
-        const result = await ERS.createBlock({ data, inicio, fim, motivo, criadoPor: creator });
+        const result = await ERS.createBlock({ data, dataFim, todosHorarios, inicio, fim, motivo, criadoPor: creator });
         if (!result.ok) {
             if (errEl) { errEl.textContent = result.message; errEl.style.display = 'block'; }
             return;
@@ -156,7 +181,9 @@ window.BloqueiosModule = (function() {
     return {
         init,
         render: renderBlocks,
-        deleteBlock
+        deleteBlock,
+        formatBlockDates,
+        formatBlockHours
     };
 })();
 

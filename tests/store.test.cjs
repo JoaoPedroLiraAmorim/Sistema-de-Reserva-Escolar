@@ -26,7 +26,7 @@ function fixture() {
     };
     vm.createContext(context);
     vm.runInContext(fs.readFileSync(require.resolve('../js/store.js'), 'utf8'), context);
-    return { store: context.window.ERS, save, items, timers, events };
+    return { store: context.window.ERS, save, items, timers, events, window: context.window };
 }
 
 const reservation = overrides => ({ professorId: 'u1', professorNome: 'Professor', data: '2026-10-27', inicio: '07:00', fim: '07:50', notebooks: 1, ...overrides });
@@ -90,4 +90,40 @@ test('não aceita início passado ou quantidade fracionária', () => {
     const { store } = fixture();
     assert.equal(store.createReservation(reservation({ data: '2026-10-26', inicio: '05:00' })).ok, false);
     assert.equal(store.createReservation(reservation({ notebooks: 1.5 })).ok, false);
+});
+
+test('demo permite criação até o minuto 15, mas edição própria só até o minuto 10 original', () => {
+    const { store, save, window } = fixture();
+    save('ers_session', { userId: 'u1', role: 'professor' });
+    const b = reservation({ data: '2026-10-26', notebooks: 16, marca: 'Dell', turma: '3º B' });
+    window._ers_mock_time = '07:10';
+    const { reservation: r } = store.createReservation(b);
+    assert.equal(store.canEditReservation(r, 'u1'), true);
+    assert.equal(store.canEditReservation(r, 'u2'), false);
+    assert.equal(store.updateReservation(r.id, { ...b, inicio: '06:59' }).ok, false);
+    const { reservation: atualizada } = store.updateReservation(r.id, { ...b, turma: '2º A' });
+    assert.equal(atualizada.historicoAlteracoes[0].antes.turma, '3º B');
+    assert.equal(atualizada.historicoAlteracoes[0].depois.turma, '2º A');
+    assert.equal(store.updateReservation(r.id, { ...b, data: '2026-10-27' }).ok, true);
+    window._ers_mock_time = '07:15';
+    assert.equal(store.updateReservation(r.id, { ...b, data: '2026-10-28' }).ok, false);
+    const { reservation: tardia } = store.createReservation(b);
+    assert.equal(store.canEditReservation(tardia, 'u1'), false);
+    assert.equal(store.createReservation({ ...b, fim: '07:15', notebooks: 1, marca: 'Lenovo' }).ok, false);
+    window._ers_mock_time = '07:16';
+    assert.equal(store.createReservation({ ...b, notebooks: 1, marca: 'Lenovo' }).ok, false);
+});
+
+test('demo aplica bloqueio integral no intervalo todo e mantém as reservas confirmadas', () => {
+    const { store } = fixture();
+    const { reservation: r } = store.createReservation(reservation());
+    const { block } = store.createBlock({ data: '2026-10-26', dataFim: '2026-10-28', todosHorarios: true });
+    assert.equal(block.motivo, '');
+    assert.equal(store.getBlocksByDate('2026-10-28').length, 1);
+    assert.equal(store.getBlocksByDate('2026-10-29').length, 0);
+    assert.equal(store.createReservation(reservation({ data: '2026-10-28' })).ok, false);
+    assert.equal(store.getReservations()[0].situacao, 'confirmada');
+    assert.equal(store.isReservationBlocked(r), true);
+    assert.equal(store.deleteBlock(block.id).ok, true);
+    assert.equal(store.isReservationBlocked(r), false);
 });

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/agenda.css">
+    <link rel="stylesheet" href="../css/bloqueios.css">
 
     <!-- Anti-flicker da Sidebar (Executado antes da renderização) -->
     <script>
@@ -179,7 +180,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary">Confirmar reserva</button>
                 </div>
             </form>
@@ -200,7 +200,6 @@
             </div>
             <div class="modal-body" id="res-detail-body"></div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
                 <button type="button" class="btn-primary btn-danger" id="btn-cancel-res">
                     <span class="material-symbols-outlined">cancel</span>
                     Cancelar Reserva
@@ -223,11 +222,21 @@
             </div>
             <form id="block-form">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="blk-date">Data do bloqueio</label>
-                        <input type="date" id="blk-date" class="form-control" required style="cursor: pointer;">
-                    </div>
                     <div class="form-row">
+                        <div class="form-col form-group">
+                            <label for="blk-date">Data inicial</label>
+                            <input type="date" id="blk-date" class="form-control" required>
+                        </div>
+                        <div class="form-col form-group">
+                            <label for="blk-date-end">Data final</label>
+                            <input type="date" id="blk-date-end" class="form-control" required>
+                        </div>
+                    </div>
+                    <label class="block-all-times">
+                        <input type="checkbox" id="blk-all-times">
+                        <span>Todos os horários</span>
+                    </label>
+                    <div class="form-row" id="blk-hours">
                         <div class="form-col form-group">
                             <label for="blk-start">Horário de início</label>
                             <div class="select-wrapper">
@@ -280,13 +289,12 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="blk-motivo">Motivo</label>
-                        <input type="text" id="blk-motivo" class="form-control" placeholder="Ex: Manutenção preventiva, Conselho de Classe" required>
+                        <label for="blk-motivo">Motivo (opcional)</label>
+                        <input type="text" id="blk-motivo" class="form-control" maxlength="500" placeholder="Ex. Manutenção preventiva">
                     </div>
                     <div id="blk-error" class="login-error-msg"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary btn-danger">Criar bloqueio</button>
                 </div>
             </form>
@@ -307,7 +315,6 @@
             </div>
             <div class="modal-body" id="block-detail-body"></div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
                 <button type="button" class="btn-primary btn-danger" id="btn-delete-blk">
                     <span class="material-symbols-outlined">delete</span>
                     Remover Bloqueio
@@ -324,6 +331,7 @@
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+    <script src="../js/bloqueios.js"></script>
     <script src="../js/agendaProatec.js"></script>
 <script src="../js/refinamento.js"></script>
 </body>

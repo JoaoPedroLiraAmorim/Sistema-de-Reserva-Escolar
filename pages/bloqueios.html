@@ -77,11 +77,21 @@
             </div>
             <form id="block-form">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="blk-date">Data</label>
-                        <input type="date" id="blk-date" class="form-control" required style="cursor: pointer;">
-                    </div>
                     <div class="form-row">
+                        <div class="form-col form-group">
+                            <label for="blk-date">Data inicial</label>
+                            <input type="date" id="blk-date" class="form-control" required>
+                        </div>
+                        <div class="form-col form-group">
+                            <label for="blk-date-end">Data final</label>
+                            <input type="date" id="blk-date-end" class="form-control" required>
+                        </div>
+                    </div>
+                    <label class="block-all-times">
+                        <input type="checkbox" id="blk-all-times">
+                        <span>Todos os horários</span>
+                    </label>
+                    <div class="form-row" id="blk-hours">
                         <div class="form-col form-group">
                             <label for="blk-start">Início</label>
                             <div class="select-wrapper">
@@ -134,13 +144,12 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="blk-motivo">Motivo</label>
-                        <input type="text" id="blk-motivo" class="form-control" placeholder="Ex: Manutenção preventiva dos equipamentos" required>
+                        <label for="blk-motivo">Motivo (opcional)</label>
+                        <input type="text" id="blk-motivo" class="form-control" maxlength="500" placeholder="Ex. Manutenção preventiva">
                     </div>
                     <div id="blk-error" class="login-error-msg"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary btn-danger">
                         <span class="material-symbols-outlined">block</span>
                         <span>Criar bloqueio</span>

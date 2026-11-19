@@ -1,70 +1,108 @@
 import { HttpError, json, readJson } from './http.mjs';
-import { sessao } from './contas.mjs';
+import { nomeDaConta, sessao } from './contas.mjs';
 
 const clock = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-const nome = email => email.split('@')[0];
 const coord = conta => conta.papel === 'coordenacao';
+const horaValida = value => typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
+const dataValida = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+const minutos = hora => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3));
+const dentroDaJanela = (data, inicio, limite, agora) => data > agora.slice(0, 10) ||
+    (data === agora.slice(0, 10) && minutos(agora.slice(11)) <= minutos(inicio) + limite);
+const sobreposicaoBloqueio = (bloqueio, reserva) => `${bloqueio}.data <= ${reserva}.data AND COALESCE(${bloqueio}.data_fim, ${bloqueio}.data) >= ${reserva}.data AND ${bloqueio}.inicio < ${reserva}.fim AND ${bloqueio}.fim > ${reserva}.inicio`;
 function exigir(value, message, status = 400) { if (!value) throw new HttpError(status, message); }
 function texto(value, max = 100) { return typeof value === 'string' && value.trim().length <= max ? value.trim() : ''; }
-function periodo(b, futuro = true) {
+
+async function dadosReserva(db, b) {
     const { data, inicio, fim } = b;
-    exigir(typeof data === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data) && Number.isFinite(Date.parse(data)) && new Date(data).toISOString().slice(0, 10) === data &&
-        typeof inicio === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(inicio) && typeof fim === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(fim) && inicio < fim, 'Informe uma data e horários válidos.');
-    if (futuro) exigir(`${data} ${inicio}` > clock.format(new Date()), 'Escolha uma data e um horário futuros.');
+    const notebooks = b.notebooks ?? 0;
+    exigir(dataValida(data) && horaValida(inicio) && horaValida(fim) && inicio < fim, 'Informe uma data e horários válidos.');
+    const weekday = new Date(data + 'T12:00:00Z').getUTCDay();
+    exigir(weekday !== 0 && weekday !== 6, 'As reservas são de segunda a sexta-feira. Escolha um dia letivo.');
+    exigir(Number.isInteger(notebooks) && notebooks >= 0 && notebooks <= 1000, 'Informe uma quantidade inteira de até 1000 notebooks.');
+    let salaId = null;
+    if (b.sala) {
+        const sala = await db.prepare('SELECT id FROM salas WHERE nome = ? AND ativa = 1').bind(texto(b.sala)).first();
+        exigir(sala, 'Selecione uma sala ativa.');
+        salaId = sala.id;
+    }
+    exigir(salaId || notebooks > 0, 'Selecione uma sala ou notebooks.');
+    let marca = notebooks && b.marca !== 'Qualquer marca' ? texto(b.marca) : '';
+    if (marca) {
+        const equipamento = await db.prepare('SELECT marca FROM equipamentos WHERE marca = ? COLLATE NOCASE').bind(marca).first();
+        exigir(equipamento, 'Selecione uma marca cadastrada.');
+        marca = equipamento.marca;
+    }
+    return [salaId, data, inicio, fim, notebooks, marca, texto(b.turma)];
 }
 
 export async function estado(db, conta) {
+    const hoje = clock.format(new Date()).slice(0, 10);
     const results = await db.batch([
         db.prepare('SELECT id, nome, ativa FROM salas ORDER BY nome COLLATE NOCASE'),
         db.prepare('SELECT id, marca, funcionando, defeito FROM equipamentos ORDER BY marca COLLATE NOCASE'),
         db.prepare(`SELECT r.id, r.conta_id, r.data, r.inicio, r.fim, r.notebooks, r.marca, r.turma, r.situacao, r.criado_em,
-            r.retirada_em, s.nome AS sala, c.email AS professor_email, p.email AS retirada_email,
+            r.data_original, r.inicio_original, r.retirada_em, s.nome AS sala,
+            c.nome AS professor_nome, c.email AS professor_email, p.nome AS retirada_nome, p.email AS retirada_email,
+            EXISTS (SELECT 1 FROM bloqueios b WHERE ${sobreposicaoBloqueio('b', 'r')}) AS bloqueada,
             CASE WHEN r.conta_id = ? OR ? = 1 THEN r.alunos ELSE '[]' END AS alunos_visiveis
             FROM reservas r JOIN contas c ON c.id = r.conta_id LEFT JOIN salas s ON s.id = r.sala_id
             LEFT JOIN contas p ON p.id = r.retirada_por WHERE r.data >= ? ORDER BY r.data, r.inicio, r.id`)
-            .bind(conta.id, Number(coord(conta)), clock.format(new Date()).slice(0, 10)),
-        db.prepare(`SELECT b.*, c.email FROM bloqueios b JOIN contas c ON c.id = b.conta_id WHERE b.data >= ? ORDER BY b.data, b.inicio`)
-            .bind(clock.format(new Date()).slice(0, 10)),
-        coord(conta) ? db.prepare("SELECT id, email FROM contas WHERE ativa = 1 AND papel = 'professor' ORDER BY email") : db.prepare('SELECT id, email FROM contas WHERE id = ?').bind(conta.id),
+            .bind(conta.id, Number(coord(conta)), hoje),
+        db.prepare(`SELECT b.*, c.nome, c.email FROM bloqueios b JOIN contas c ON c.id = b.conta_id
+            WHERE COALESCE(b.data_fim, b.data) >= ? ORDER BY b.data, b.inicio`).bind(hoje),
+        coord(conta) ? db.prepare("SELECT id, nome, email FROM contas WHERE ativa = 1 AND papel = 'professor' ORDER BY COALESCE(nome, email)") : db.prepare('SELECT id, nome, email FROM contas WHERE id = ?').bind(conta.id),
     ]);
     return {
-        session: { userId: conta.id, email: conta.email, nome: nome(conta.email), role: conta.papel, avatarLetter: nome(conta.email)[0].toUpperCase() },
+        session: { userId: conta.id, email: conta.email, nome: conta.nome, role: conta.papel, avatarLetter: Array.from(conta.nome)[0].toUpperCase() },
         rooms: results[0].results.map(r => ({ ...r, ativa: Boolean(r.ativa) })),
         notebooks: results[1].results.map(r => ({ ...r, total: r.funcionando + r.defeito })),
-        reservations: results[2].results.map(r => ({ id: r.id, professorId: r.conta_id, professorNome: nome(r.professor_email), sala: r.sala,
+        reservations: results[2].results.map(r => ({ id: r.id, professorId: r.conta_id, professorNome: nomeDaConta(r.professor_nome, r.professor_email), sala: r.sala,
             data: r.data, inicio: r.inicio, fim: r.fim, notebooks: r.notebooks, marca: r.marca || 'Qualquer marca', turma: r.turma, situacao: r.situacao, criadoEm: r.criado_em,
-            retiradaConfirmada: Boolean(r.retirada_em), retiradaConfirmadaEm: r.retirada_em, retiradaConfirmadaPor: r.retirada_email ? nome(r.retirada_email) : '',
+            dataOriginal: r.data_original ?? r.data, inicioOriginal: r.inicio_original ?? r.inicio,
+            bloqueada: r.situacao === 'confirmada' && Boolean(r.bloqueada),
+            retiradaConfirmada: Boolean(r.retirada_em), retiradaConfirmadaEm: r.retirada_em, retiradaConfirmadaPor: r.retirada_email ? nomeDaConta(r.retirada_nome, r.retirada_email) : '',
             alunosNotebooks: JSON.parse(r.alunos_visiveis), alunosRegistrados: r.alunos_visiveis !== '[]' })),
-        blocks: results[3].results.map(b => ({ id: b.id, data: b.data, inicio: b.inicio, fim: b.fim, motivo: b.motivo, criadoPor: nome(b.email), criadoEm: b.criado_em })),
-        professors: results[4].results.map(c => ({ id: c.id, nome: nome(c.email) })),
+        blocks: results[3].results.map(b => ({ id: b.id, data: b.data, dataFim: b.data_fim ?? b.data, inicio: b.inicio, fim: b.fim,
+            todosHorarios: b.inicio === '00:00' && b.fim === '24:00', motivo: b.motivo, criadoPor: nomeDaConta(b.nome, b.email), criadoEm: b.criado_em })),
+        professors: results[4].results.map(c => ({ id: c.id, nome: nomeDaConta(c.nome, c.email) })),
     };
 }
 
 export async function alterar(db, conta, acao, args) {
     const [first, second] = args;
     if (acao === 'createReservation') {
-        const b = first || {}; periodo(b);
-        const weekday = new Date(b.data + 'T12:00:00Z').getUTCDay();
-        exigir(weekday !== 0 && weekday !== 6, 'As reservas são de segunda a sexta-feira. Escolha um dia letivo.');
-        const notebooks = b.notebooks ?? 0;
-        exigir(Number.isInteger(notebooks) && notebooks >= 0 && notebooks <= 1000, 'Informe uma quantidade inteira de até 1000 notebooks.');
-        let salaId = null;
-        if (b.sala) {
-            const sala = await db.prepare('SELECT id FROM salas WHERE nome = ? AND ativa = 1').bind(texto(b.sala)).first();
-            exigir(sala, 'Selecione uma sala ativa.'); salaId = sala.id;
-        }
-        exigir(salaId || notebooks > 0, 'Selecione uma sala ou notebooks.');
+        const b = first || {};
+        const dados = await dadosReserva(db, b);
         const professorId = coord(conta) && b.professorId ? texto(b.professorId) : conta.id;
         exigir(await db.prepare("SELECT id FROM contas WHERE id = ? AND ativa = 1 AND papel = 'professor'").bind(professorId).first(), 'Selecione um professor ativo.');
+        const agora = clock.format(new Date());
+        exigir(dentroDaJanela(b.data, b.inicio, 15, agora) && `${b.data} ${b.fim}` > agora,
+            'A reserva pode ser criada até 15 minutos após o início e antes do fim do horário.');
         const id = crypto.randomUUID();
-        let marca = notebooks && b.marca !== 'Qualquer marca' ? texto(b.marca) : '';
-        if (marca) {
-            const equipamento = await db.prepare('SELECT marca FROM equipamentos WHERE marca = ? COLLATE NOCASE').bind(marca).first();
-            exigir(equipamento, 'Selecione uma marca cadastrada.'); marca = equipamento.marca;
-        }
-        await db.prepare('INSERT INTO reservas (id, conta_id, sala_id, data, inicio, fim, notebooks, marca, turma) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-            .bind(id, professorId, salaId, b.data, b.inicio, b.fim, notebooks, marca, texto(b.turma)).run();
+        await db.prepare('INSERT INTO reservas (id, conta_id, sala_id, data, inicio, fim, notebooks, marca, turma, data_original, inicio_original) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .bind(id, professorId, ...dados, b.data, b.inicio).run();
         return { ok: true, id };
+    }
+    if (acao === 'updateReservation') {
+        const r = await db.prepare(`SELECT * FROM reservas WHERE id = ? AND conta_id = ? AND situacao = 'confirmada'`)
+            .bind(texto(first), conta.id).first();
+        exigir(r, 'Reserva própria confirmada não encontrada.', 404);
+        exigir(!r.retirada_em, 'A retirada já foi confirmada para esta reserva.', 409);
+        const b = second || {};
+        const dados = await dadosReserva(db, b);
+        const agora = clock.format(new Date());
+        exigir(dentroDaJanela(r.data_original ?? r.data, r.inicio_original ?? r.inicio, 10, agora) && `${r.data} ${r.fim}` > agora,
+            'O prazo para editar terminou. A edição é permitida até 10 minutos após o início original.');
+        exigir(dentroDaJanela(b.data, b.inicio, 10, agora) && `${b.data} ${b.fim}` > agora,
+            'Para editar, escolha um horário dentro do prazo de 10 minutos após o início e antes do fim.');
+        const result = await db.prepare(`UPDATE reservas SET sala_id = ?, data = ?, inicio = ?, fim = ?, notebooks = ?, marca = ?, turma = ?,
+            data_original = COALESCE(data_original, data), inicio_original = COALESCE(inicio_original, inicio)
+            WHERE id = ? AND conta_id = ? AND situacao = 'confirmada' AND retirada_em IS NULL
+            AND sala_id IS ? AND data = ? AND inicio = ? AND fim = ? AND notebooks = ? AND marca = ? AND turma = ?`)
+            .bind(...dados, r.id, conta.id, r.sala_id, r.data, r.inicio, r.fim, r.notebooks, r.marca, r.turma).run();
+        exigir(result.meta.changes, 'A reserva mudou. Atualize a agenda antes de editar.', 409);
+        return { ok: true, id: r.id };
     }
     if (['cancelReservation', 'confirmPickup', 'saveStudentAssignments'].includes(acao)) {
         const r = await db.prepare("SELECT * FROM reservas WHERE id = ? AND situacao = 'confirmada'").bind(texto(first)).first();
@@ -75,14 +113,15 @@ export async function alterar(db, conta, acao, args) {
         }
         const now = clock.format(new Date());
         exigir(r.data === now.slice(0, 10) && r.inicio <= now.slice(11) && r.fim > now.slice(11), 'O registro só está disponível durante o horário da reserva.');
-        exigir(!await db.prepare('SELECT id FROM bloqueios WHERE data = ? AND inicio < ? AND fim > ?').bind(r.data, r.fim, r.inicio).first(), 'Reserva indisponível por bloqueio.');
+        exigir(!await db.prepare(`SELECT 1 FROM reservas r WHERE r.id = ? AND EXISTS (
+            SELECT 1 FROM bloqueios b WHERE ${sobreposicaoBloqueio('b', 'r')})`).bind(r.id).first(), 'Reserva indisponível por bloqueio.');
         exigir(r.notebooks > 0, 'Esta reserva não possui notebooks.');
         if (acao === 'confirmPickup') {
             exigir(coord(conta), 'Apenas a coordenação confirma a retirada.', 403);
             const result = await db.prepare(`UPDATE reservas SET retirada_em = COALESCE(retirada_em, ?), retirada_por = COALESCE(retirada_por, ?)
-                WHERE id = ? AND situacao = 'confirmada' AND NOT EXISTS (
-                SELECT 1 FROM bloqueios b WHERE b.data = reservas.data AND b.inicio < reservas.fim AND b.fim > reservas.inicio)`)
-                .bind(new Date().toISOString(), conta.id, r.id).run();
+                WHERE id = ? AND situacao = 'confirmada' AND notebooks > 0 AND data = ? AND inicio = ? AND fim = ? AND NOT EXISTS (
+                SELECT 1 FROM bloqueios b WHERE ${sobreposicaoBloqueio('b', 'reservas')})`)
+                .bind(new Date().toISOString(), conta.id, r.id, r.data, r.inicio, r.fim).run();
             exigir(result.meta.changes, 'Reserva cancelada ou bloqueada. Atualize a agenda.', 409);
         } else {
             exigir(r.retirada_em, 'Aguarde a confirmação da retirada pela coordenação.');
@@ -91,7 +130,7 @@ export async function alterar(db, conta, acao, args) {
             exigir(alunos.every(a => a.etiqueta && a.aluno) && new Set(alunos.map(a => a.etiqueta.toLowerCase())).size === alunos.length, 'Informe alunos e etiquetas únicas.');
             const result = await db.prepare(`UPDATE reservas SET alunos = ? WHERE id = ? AND situacao = 'confirmada'
                 AND retirada_em IS NOT NULL AND NOT EXISTS (
-                SELECT 1 FROM bloqueios b WHERE b.data = reservas.data AND b.inicio < reservas.fim AND b.fim > reservas.inicio)`)
+                SELECT 1 FROM bloqueios b WHERE ${sobreposicaoBloqueio('b', 'reservas')})`)
                 .bind(JSON.stringify(alunos), r.id).run();
             exigir(result.meta.changes, 'Reserva cancelada ou bloqueada. Atualize a agenda.', 409);
         }
@@ -106,9 +145,16 @@ export async function alterar(db, conta, acao, args) {
         const result = await db.prepare('UPDATE salas SET ativa = 1 - ativa WHERE id = ?').bind(texto(first)).run();
         exigir(result.meta.changes, 'Sala não encontrada.', 404);
     } else if (acao === 'createBlock') {
-        const b = first || {}; periodo(b, false);
-        exigir(b.data >= clock.format(new Date()).slice(0, 10) && texto(b.motivo, 500), 'Informe uma data atual ou futura e o motivo.');
-        await db.prepare('INSERT INTO bloqueios (id, conta_id, data, inicio, fim, motivo) VALUES (?, ?, ?, ?, ?, ?)').bind(crypto.randomUUID(), conta.id, b.data, b.inicio, b.fim, texto(b.motivo, 500)).run();
+        const b = first || {};
+        const dataFim = b.dataFim ?? b.data;
+        exigir(dataValida(b.data) && dataValida(dataFim) && b.data <= dataFim && b.data >= clock.format(new Date()).slice(0, 10),
+            'Informe um intervalo de datas válido, a partir de hoje.');
+        const inicio = b.todosHorarios === true ? '00:00' : b.inicio;
+        const fim = b.todosHorarios === true ? '24:00' : b.fim;
+        exigir(b.todosHorarios === true || (horaValida(inicio) && horaValida(fim) && inicio < fim), 'Informe horários válidos para o bloqueio.');
+        exigir(b.motivo == null || (typeof b.motivo === 'string' && b.motivo.trim().length <= 500), 'Informe um motivo de até 500 caracteres.');
+        await db.prepare('INSERT INTO bloqueios (id, conta_id, data, data_fim, inicio, fim, motivo) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            .bind(crypto.randomUUID(), conta.id, b.data, dataFim, inicio, fim, texto(b.motivo, 500)).run();
     } else if (acao === 'deleteBlock') {
         const result = await db.prepare('DELETE FROM bloqueios WHERE id = ?').bind(texto(first)).run();
         exigir(result.meta.changes, 'Bloqueio não encontrado.', 404);

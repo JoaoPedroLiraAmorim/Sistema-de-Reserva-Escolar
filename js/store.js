@@ -46,6 +46,10 @@
         tarde: TIME_SLOTS.slice(6, 12),
         noite: TIME_SLOTS.slice(12),
     };
+    const schoolClock = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+        Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+    const validTime = value => typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 
     // ─────────────────────────────────────────────────────────────
     //  UTILITÁRIOS
@@ -81,7 +85,7 @@
 
     /** Retorna 'YYYY-MM-DD' para hoje */
     function today() {
-        return window.ERS_REAL ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Sao_Paulo' }).format(new Date()) : dateKey(new Date());
+        return window.ERS_REAL || window.ERS_DEMO ? schoolClock.format(new Date()).slice(0, 10) : dateKey(new Date());
     }
 
     /** Retorna 'YYYY-MM-DD' para N dias a partir de hoje (ou de baseDate) */
@@ -875,10 +879,9 @@
         const dk = dateKey(data);
 
         // 1. Verificar bloqueios
-        const blocks = getBlocks();
-        const bloqueio = blocks.find(b => b.data === dk && timesOverlap(inicio, fim, b.inicio, b.fim));
+        const bloqueio = getBlocksByDate(dk).find(b => timesOverlap(inicio, fim, b.inicio, b.fim));
         if (bloqueio) {
-            return { ok: false, message: `Período bloqueado pela Coordenação: "${bloqueio.motivo}" (${bloqueio.inicio}–${bloqueio.fim}).` };
+            return { ok: false, message: `Período bloqueado pela Coordenação${bloqueio.motivo ? `: ${bloqueio.motivo}` : ''}.` };
         }
 
         const resDia = getReservationsByDate(dk);
@@ -903,30 +906,42 @@
         return { ok: true };
     }
 
-    function createReservation({ professorId, professorNome, data, inicio, fim, sala, notebooks, marca = '', turma }) {
-        if (!data || data < today() || (data === today() && inicio <= getCurrentTime())) {
-            return { ok: false, message: 'Escolha uma data e um horário futuros.' };
+    function validateReservation({ data, inicio, fim, sala, notebooks }, limite) {
+        if (!validDate(data) || !validTime(inicio) || !validTime(fim) || inicio >= fim) {
+            return { ok: false, message: 'Informe uma data e horários válidos.' };
         }
-        if (!inicio || !fim) return { ok: false, message: 'Informe o horário de início e fim.' };
-        if (inicio >= fim)   return { ok: false, message: 'O horário de início deve ser anterior ao fim.' };
-        if (!Number.isInteger(notebooks || 0) || notebooks < 0) {
-            return { ok: false, message: 'Informe uma quantidade inteira de notebooks.' };
+        if ([0, 6].includes(new Date(data + 'T12:00:00Z').getUTCDay())) {
+            return { ok: false, message: 'As reservas são de segunda a sexta-feira. Escolha um dia letivo.' };
         }
-        if (!sala && (!notebooks || notebooks <= 0)) {
+        if (!isReservationWithinWindow({ data, inicio, fim }, limite)) {
+            return { ok: false, message: `Escolha um horário dentro do prazo de ${limite} minutos após o início e antes do fim.` };
+        }
+        if (!Number.isInteger(notebooks) || notebooks < 0 || notebooks > 1000) {
+            return { ok: false, message: 'Informe uma quantidade inteira de até 1000 notebooks.' };
+        }
+        if (!sala && notebooks <= 0) {
             return { ok: false, message: 'Selecione ao menos uma sala ou uma quantidade de notebooks.' };
         }
+        if (sala && !getActiveRooms().some(r => r.nome === sala)) {
+            return { ok: false, message: 'Selecione uma sala ativa.' };
+        }
+        return { ok: true };
+    }
 
-        const conflict = checkConflicts({ data, inicio, fim, sala: sala || null, notebooks: notebooks || 0, marca });
+    function createReservation({ professorId, professorNome, data, inicio, fim, sala, notebooks = 0, marca = '', turma }) {
+        const validation = validateReservation({ data, inicio, fim, sala, notebooks }, 15);
+        if (!validation.ok) return validation;
+        const conflict = checkConflicts({ data, inicio, fim, sala, notebooks, marca });
         if (!conflict.ok) return conflict;
 
         const reservation = {
             id: genId(),
             professorId, professorNome,
-            data: dateKey(data),
-            inicio, fim,
+            data, inicio, fim,
+            dataOriginal: data, inicioOriginal: inicio,
             sala: sala || null,
-            marca: marca || 'Qualquer marca',
-            notebooks: notebooks || 0,
+            marca: (notebooks && marca) || 'Qualquer marca',
+            notebooks,
             turma: turma || '',
             situacao: 'confirmada',
             criadoEm: new Date().toISOString(),
@@ -947,40 +962,67 @@
         return { ok: true };
     }
 
-    function updateReservation(id, updates) {
+    function updateReservation(id, { data, inicio, fim, sala = null, notebooks = 0, marca = '', turma = '' }) {
         const list = getReservations();
         const r = list.find(r => r.id === id);
-        if (!r) return { ok: false, message: 'Reserva não encontrada.' };
+        if (!canEditReservation(r, getSession()?.userId)) {
+            return { ok: false, message: 'A edição exige uma reserva própria confirmada, sem retirada e dentro do prazo de 10 minutos após o início original.' };
+        }
 
-        const dados = { ...r, ...updates };
-        const conflict = checkConflicts({
-            data: dados.data, inicio: dados.inicio, fim: dados.fim,
-            sala: dados.sala, notebooks: dados.notebooks, marca: dados.marca, excludeId: id,
-        });
+        const depois = { data, inicio, fim, sala: sala || null, notebooks, marca: (notebooks && marca) || 'Qualquer marca', turma };
+        const validation = validateReservation(depois, 10);
+        if (!validation.ok) return validation;
+        const conflict = checkConflicts({ ...depois, excludeId: id });
         if (!conflict.ok) return conflict;
 
-        Object.assign(r, updates);
+        const antes = Object.fromEntries(Object.keys(depois).map(key => [key, r[key]]));
+        if (Object.keys(depois).some(key => antes[key] !== depois[key])) {
+            r.historicoAlteracoes = [...(r.historicoAlteracoes || []), { antes, depois, contaId: r.professorId, alteradaEm: new Date().toISOString() }];
+        }
+        r.dataOriginal ??= r.data;
+        r.inicioOriginal ??= r.inicio;
+        Object.assign(r, depois);
         save(KEYS.RESERVATIONS, list);
         return { ok: true, reservation: r };
     }
 
     /** Retorna o horário atual no formato HH:MM (suporta mock em window._ers_mock_time) */
     function getCurrentTime() {
-        if (window.ERS_REAL) return new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
         if (typeof window !== 'undefined' && window._ers_mock_time) {
             return window._ers_mock_time;
         }
+        if (window.ERS_REAL || window.ERS_DEMO) return schoolClock.format(new Date()).slice(11);
         const now = new Date();
         const h = String(now.getHours()).padStart(2, '0');
         const m = String(now.getMinutes()).padStart(2, '0');
         return `${h}:${m}`;
     }
 
+    function withinStartWindow(data, inicio, limite, hoje, agora) {
+        const minutes = hora => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3));
+        return data > hoje || (data === hoje && minutes(agora) <= minutes(inicio) + limite);
+    }
+
+    function isReservationWithinWindow({ data, inicio, fim }, limite) {
+        if (!data || !inicio || !fim || inicio >= fim) return false;
+        const hoje = today();
+        const agora = getCurrentTime();
+        return withinStartWindow(data, inicio, limite, hoje, agora) && (data > hoje || fim > agora);
+    }
+
+    function canEditReservation(r, userId) {
+        if (!r || !userId || r.professorId !== userId || r.situacao !== 'confirmada' || r.retiradaConfirmada) return false;
+        const hoje = today();
+        const agora = getCurrentTime();
+        return withinStartWindow(r.dataOriginal ?? r.data, r.inicioOriginal ?? r.inicio, 10, hoje, agora) &&
+            (r.data > hoje || (r.data === hoje && r.fim > agora));
+    }
+
     /** Verifica se o horário de início da reserva já chegou hoje */
     function isPickupTimeReady(res) {
         if (!res || !res.data || !res.inicio) return false;
         if (res.data !== today()) return false;
-        if (res.fim <= getCurrentTime() || getBlocks().some(b => b.data === res.data && timesOverlap(b.inicio, b.fim, res.inicio, res.fim))) return false;
+        if (res.fim <= getCurrentTime() || isReservationBlocked(res)) return false;
         const curTime = getCurrentTime();
         return curTime >= res.inicio;
     }
@@ -990,7 +1032,7 @@
         const r = list.find(r => r.id === id);
         if (!r) return { ok: false, message: 'Reserva não encontrada.' };
         if (r.situacao === 'cancelada') return { ok: false, message: 'Não é possível confirmar a retirada de uma reserva cancelada.' };
-        if (getBlocks().some(b => b.data === r.data && timesOverlap(b.inicio, b.fim, r.inicio, r.fim))) {
+        if (isReservationBlocked(r)) {
             return { ok: false, message: 'Esta reserva está indisponível por bloqueio da coordenação.' };
         }
 
@@ -1014,7 +1056,7 @@
         const list = getReservations();
         const r = list.find(r => r.id === id);
         if (!r) return { ok: false, message: 'Reserva não encontrada.' };
-        if (getBlocks().some(b => b.data === r.data && timesOverlap(b.inicio, b.fim, r.inicio, r.fim))) {
+        if (isReservationBlocked(r)) {
             return { ok: false, message: 'Esta reserva está indisponível por bloqueio da coordenação.' };
         }
 
@@ -1030,11 +1072,29 @@
     // ─────────────────────────────────────────────────────────────
     function getBlocks() { return load(KEYS.BLOCKS) || []; }
 
-    function createBlock({ data, inicio, fim, motivo, criadoPor }) {
-        if (!data || !inicio || !fim || !motivo) return { ok: false, message: 'Preencha todos os campos do bloqueio.' };
-        if (inicio >= fim) return { ok: false, message: 'O horário de início deve ser anterior ao fim.' };
+    function getBlocksByDate(data) {
+        return getBlocks().filter(b => b.data <= data && (b.dataFim ?? b.data) >= data);
+    }
 
-        const block = { id: genId(), data: dateKey(data), inicio, fim, motivo, criadoPor, criadoEm: new Date().toISOString() };
+    function isReservationBlocked(r) {
+        return r.situacao !== 'cancelada' && getBlocksByDate(r.data).some(b => timesOverlap(r.inicio, r.fim, b.inicio, b.fim));
+    }
+
+    function createBlock({ data, dataFim = data, inicio, fim, todosHorarios = false, motivo = '', criadoPor }) {
+        if (!validDate(data) || !validDate(dataFim) || data < today() || data > dataFim) {
+            return { ok: false, message: 'Informe um intervalo de datas válido, a partir de hoje.' };
+        }
+        if (todosHorarios === true) {
+            inicio = '00:00';
+            fim = '24:00';
+        } else if (!validTime(inicio) || !validTime(fim) || inicio >= fim) {
+            return { ok: false, message: 'Informe horários válidos para o bloqueio.' };
+        }
+        if (typeof motivo !== 'string' || motivo.trim().length > 500) {
+            return { ok: false, message: 'Informe um motivo de até 500 caracteres.' };
+        }
+
+        const block = { id: genId(), data, dataFim, inicio, fim, todosHorarios: todosHorarios === true, motivo: motivo.trim(), criadoPor, criadoEm: new Date().toISOString() };
         const list = getBlocks();
         list.push(block);
         save(KEYS.BLOCKS, list);
@@ -1158,9 +1218,10 @@
         // Reservas
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts, getAvailability,
+        isReservationWithinWindow, canEditReservation, isReservationBlocked,
         confirmPickup, saveStudentAssignments,
         // Bloqueios
-        getBlocks, createBlock, deleteBlock,
+        getBlocks, getBlocksByDate, createBlock, deleteBlock,
         // Utils
         showToast, formatDate, dateKey, today, dayOffset, escapeHtml,
         getMonday, getWeekDays, timesOverlap, getCurrentTime, isPickupTimeReady,

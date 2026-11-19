@@ -77,6 +77,61 @@ test('servidor rejeita reservas no sábado e domingo', async t => {
     assert.equal(f.sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n, 0);
 });
 
+test('criação usa hora de São Paulo, inclui o minuto 15 e exclui o fim', async t => {
+    t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:15:00Z') });
+    const f = fixture(t);
+    const b = { ...f.booking, data: '2026-10-27', sala: null, notebooks: 1 };
+    assert.equal((await f.action('p1', 'createReservation', b)).status, 200);
+    assert.equal((await f.action('c1', 'createReservation', { ...b, professorId: 'p2' })).status, 200);
+    assert.equal((await f.action('p1', 'createReservation', { ...b, fim: '07:15' })).status, 400);
+    const criadaAtrasada = (await f.state('p1')).reservations.find(r => r.professorId === 'p1');
+    assert.equal((await f.action('p1', 'updateReservation', criadaAtrasada.id, f.booking)).status, 400);
+    t.mock.timers.setTime(Date.parse('2026-10-27T10:16:00Z'));
+    assert.equal((await f.action('p1', 'createReservation', b)).status, 400);
+});
+
+test('edição própria inclui o minuto 10, preserva o início original e registra antes/depois', async t => {
+    t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:09:00Z') });
+    const f = fixture(t);
+    const b = { ...f.booking, data: '2026-10-27', notebooks: 10, marca: 'Dell', turma: '3º B' };
+    const { result: { id } } = await (await f.action('p1', 'createReservation', b)).json();
+    assert.equal((await f.action('p2', 'updateReservation', id, b)).status, 404);
+    assert.equal((await f.action('c1', 'updateReservation', id, b)).status, 404);
+    t.mock.timers.setTime(Date.parse('2026-10-27T10:10:00Z'));
+    assert.equal((await f.action('p1', 'updateReservation', id, { ...b, inicio: '06:59' })).status, 400);
+    assert.equal((await f.action('p1', 'updateReservation', id, { ...b, turma: '2º A' })).status, 200);
+    assert.equal((await f.action('p1', 'updateReservation', id, f.booking)).status, 200);
+    const reservation = (await f.state('p1')).reservations.find(r => r.id === id);
+    assert.equal(reservation.data, f.booking.data);
+    assert.equal(reservation.dataOriginal, b.data);
+    assert.equal(reservation.inicioOriginal, b.inicio);
+    const audit = f.sql.prepare('SELECT conta_id, antes, depois FROM reservas_alteracoes ORDER BY id').all();
+    assert.equal(audit.length, 2);
+    assert.equal(audit[0].conta_id, 'p1');
+    assert.equal(JSON.parse(audit[0].antes).turma, '3º B');
+    assert.equal(JSON.parse(audit[0].depois).turma, '2º A');
+    assert.equal(JSON.parse(audit[1].depois).notebooks, 0);
+    t.mock.timers.setTime(Date.parse('2026-10-27T10:11:00Z'));
+    assert.equal((await f.action('p1', 'updateReservation', id, f.booking)).status, 400);
+});
+
+test('edições concorrentes reservam estoque apenas uma vez e retirada impede nova edição', async t => {
+    t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:05:00Z') });
+    const f = fixture(t);
+    const b = { ...f.booking, data: '2026-10-27', sala: null, marca: 'Dell', notebooks: 4 };
+    const ids = [];
+    for (const professor of ['p1', 'p2']) {
+        const { result } = await (await f.action(professor, 'createReservation', b)).json();
+        ids.push(result.id);
+    }
+    const res = await Promise.all(ids.map((id, i) => f.action(`p${i + 1}`, 'updateReservation', id, { ...b, notebooks: 6 })));
+    assert.deepEqual(res.map(r => r.status).sort(), [200, 409]);
+    assert.equal(f.sql.prepare('SELECT SUM(notebooks) AS n FROM reservas').get().n, 10);
+    assert.equal(f.sql.prepare('SELECT COUNT(*) AS n FROM reservas_alteracoes').get().n, 1);
+    assert.equal((await f.action('c1', 'confirmPickup', ids[0])).status, 200);
+    assert.equal((await f.action('p1', 'updateReservation', ids[0], f.booking)).status, 409);
+});
+
 test('bloqueios e estoque são compartilhados, sem importar dados locais', async t => {
     const f = fixture(t);
     assert.equal((await f.action('c1', 'createBlock', { ...f.booking, motivo: 'Manutenção' })).status, 200);
@@ -89,6 +144,30 @@ test('bloqueios e estoque são compartilhados, sem importar dados locais', async
     assert.equal((await f.state('p1')).notebooks[0].funcionando, 7);
     assert.equal((await f.action('p1', 'addNotebooks', 'Dell', 100)).status, 403);
     assert.equal((await f.action('c1', 'registerNotebookAvailability', 'n1', 6)).status, 409);
+});
+
+test('intervalo inclusivo de bloqueio integral preserva a reserva e deixa de sinalizá-la quando removido', async t => {
+    t.mock.timers.enable({ apis: ['Date'], now: new Date('2026-10-27T10:05:00Z') });
+    const f = fixture(t);
+    const b = { ...f.booking, data: '2026-10-27', notebooks: 2 };
+    const { result } = await (await f.action('p1', 'createReservation', b)).json();
+    assert.equal((await f.action('c1', 'createBlock', { data: b.data, dataFim: '2026-10-29', todosHorarios: true })).status, 200);
+    const state = await f.state('p1');
+    assert.equal(state.blocks.length, 1);
+    assert.equal(state.blocks[0].motivo, '');
+    assert.equal(state.blocks[0].todosHorarios, true);
+    assert.equal(state.blocks[0].dataFim, '2026-10-29');
+    assert.equal(state.reservations[0].situacao, 'confirmada');
+    assert.equal(state.reservations[0].bloqueada, true);
+    assert.equal((await f.action('c1', 'confirmPickup', result.id)).status, 400);
+    assert.equal((await f.action('p1', 'updateReservation', result.id, f.booking)).status, 409);
+    for (const day of ['2026-10-28', '2026-10-29']) {
+        assert.equal((await f.action('p2', 'createReservation', { ...f.booking, data: day })).status, 409);
+    }
+    assert.equal((await f.action('p2', 'createReservation', { ...f.booking, data: '2026-10-30' })).status, 200);
+    assert.equal((await f.action('c1', 'createBlock', { data: '2026-10-30', dataFim: '2026-10-29', todosHorarios: true })).status, 400);
+    assert.equal((await f.action('c1', 'deleteBlock', state.blocks[0].id)).status, 200);
+    assert.equal((await f.state('p1')).reservations[0].bloqueada, false);
 });
 
 test('retirada exige coordenação e alunos ficam privados entre professores', async t => {
