@@ -184,16 +184,6 @@ document.addEventListener('ers:ready', () => {
     }
 
     // ---------------------------------------------------------
-    // 2. Modais: Abertura rápida pelo botão padrão
-    // ---------------------------------------------------------
-    const btnOpenNewReservation = document.getElementById('btnOpenNewReservation');
-    if (btnOpenNewReservation) {
-        btnOpenNewReservation.addEventListener('click', () => {
-            openModal('new-reservation-modal');
-        });
-    }
-
-    // ---------------------------------------------------------
     // 3. Modais: Fechamento por clique no fundo escuro ou botões de fechar
     // ---------------------------------------------------------
     document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
@@ -204,9 +194,9 @@ document.addEventListener('ers:ready', () => {
         });
     });
 
-    // Fechamento automático para qualquer botão com data-close-modal ou .btn-close ou .btn-cancel-modal
+    // Fechamento automático pelos botões de fechar dos diálogos.
     document.addEventListener('click', (e) => {
-        const closeBtn = e.target.closest('[data-close-modal], .btn-close, .btn-cancel-modal');
+        const closeBtn = e.target.closest('[data-close-modal], .btn-close');
         if (closeBtn) {
             const targetId = closeBtn.getAttribute('data-close-modal');
             if (targetId) {
@@ -215,17 +205,6 @@ document.addEventListener('ers:ready', () => {
                 const backdrop = closeBtn.closest('.modal-backdrop');
                 if (backdrop) backdrop.classList.add('hidden');
             }
-        }
-    });
-
-    // ---------------------------------------------------------
-    // 4. Modais: Fechamento pela tecla Escape
-    // ---------------------------------------------------------
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach(modal => {
-                modal.classList.add('hidden');
-            });
         }
     });
 
@@ -283,7 +262,10 @@ function showConfirmModal(options = {}) {
             modalEl.id = 'system-confirm-modal';
             modalEl.className = 'modal-backdrop hidden';
             modalEl.innerHTML = `
-                <div class="modal modal-confirm" role="dialog" aria-modal="true" aria-labelledby="sys-confirm-title">
+                <div class="modal modal-confirm" role="dialog" aria-modal="true" aria-labelledby="sys-confirm-title" aria-describedby="sys-confirm-msg">
+                    <button type="button" class="btn-close confirm-close" id="sys-confirm-close" aria-label="Fechar">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                     <div class="modal-confirm-body">
                         <div class="modal-confirm-icon-wrapper" id="sys-confirm-icon-wrapper">
                             <span class="material-symbols-outlined" id="sys-confirm-icon">help</span>
@@ -306,6 +288,8 @@ function showConfirmModal(options = {}) {
         const msgEl       = modalEl.querySelector('#sys-confirm-msg');
         const btnCancel   = modalEl.querySelector('#sys-confirm-btn-cancel');
         const btnOk       = modalEl.querySelector('#sys-confirm-btn-ok');
+        const btnClose    = modalEl.querySelector('#sys-confirm-close');
+        const trigger     = document.activeElement;
 
         iconWrapper.className = `modal-confirm-icon-wrapper ${type}`;
         iconEl.textContent = icon;
@@ -336,6 +320,8 @@ function showConfirmModal(options = {}) {
             modalEl.removeEventListener('click', handleBackdropClick);
             btnCancel.onclick = null;
             btnOk.onclick = null;
+            btnClose.onclick = null;
+            if (trigger?.isConnected) trigger.focus();
         };
 
         const handleConfirm = () => {
@@ -363,11 +349,12 @@ function showConfirmModal(options = {}) {
 
         btnOk.onclick = handleConfirm;
         btnCancel.onclick = handleCancel;
+        btnClose.onclick = handleCancel;
         modalEl.addEventListener('click', handleBackdropClick);
         document.addEventListener('keydown', handleKeyDown);
 
         modalEl.classList.remove('hidden');
-        btnOk.focus();
+        btnCancel.focus();
     });
 }
 

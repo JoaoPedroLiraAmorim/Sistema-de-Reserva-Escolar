@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../css/professor.css">
     <link rel="stylesheet" href="../css/professor-extra.css">
 <link rel="stylesheet" href="../css/refinamento.css">
+    <link rel="stylesheet" href="../css/defeitos.css">
     <link rel="stylesheet" href="../css/responsividade.css">
 </head>
 <body class="teacher-page">
@@ -55,29 +56,29 @@
                     <p>Encontre um horário e reserve notebooks ou uma sala.</p>
                 </div>
                 <div class="agenda-header-right">
+                    <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Nova reserva</span>
+                    </button>
                     <!-- Chip de reserva ativa -->
                     <div class="active-res-chip hidden" id="active-chip">
                         <span class="chip-dot"></span>
                         <span class="material-symbols-outlined chip-icon">timer</span>
                         <div class="chip-body">
-                            <span class="chip-label" id="active-chip-status">Reserva hoje</span>
+                            <span class="chip-label" role="status" id="active-chip-status">Reserva hoje</span>
                             <span class="chip-text" id="active-chip-text">—</span>
                         </div>
                         <button type="button" class="btn-chip-action" id="btnRegisterNotebooks" style="display: none;">
                             <span class="material-symbols-outlined">assignment_ind</span>
-                            <span id="btnRegisterNotebooksText">Registrar Alunos</span>
+                            <span id="btnRegisterNotebooksText">Registrar aula</span>
                         </button>
                     </div>
-                    <button type="button" class="btn-teacher-new-res" id="btnOpenNewReservation">
-                        <span class="material-symbols-outlined">add</span>
-                        <span>Nova reserva</span>
-                    </button>
                 </div>
             </section>
 
             <div class="teacher-view-tabs" role="tablist" aria-label="Reservas do professor">
                 <button type="button" id="tab-agenda" role="tab" aria-selected="true" aria-controls="teacher-agenda-panel" data-teacher-view="agenda">Agenda de recursos</button>
-                <button type="button" id="tab-reservas" role="tab" aria-selected="false" aria-controls="my-reservations-section" tabindex="-1" data-teacher-view="reservas">Próximas reservas <span id="upcoming-count">0</span></button>
+                <button type="button" id="tab-reservas" role="tab" aria-selected="false" aria-controls="my-reservations-section" tabindex="-1" data-teacher-view="reservas">Suas próximas reservas <span id="upcoming-count">0</span></button>
             </div>
             <div id="teacher-agenda-panel" role="tabpanel" aria-labelledby="tab-agenda">
             <!-- Controles do Calendário -->
@@ -112,8 +113,7 @@
             </div>
             <!-- Somente reservas futuras e em andamento. -->
             <section id="my-reservations-section" role="tabpanel" aria-labelledby="tab-reservas" hidden>
-                <h3>Suas próximas reservas</h3>
-                <p>Confira o que está preparado para as próximas aulas.</p>
+                <h2>Suas próximas reservas</h2>
                 <div class="my-res-list" id="myResList"></div>
             </section>
         </main>
@@ -124,13 +124,9 @@
                 <span class="material-symbols-outlined">calendar_month</span>
                 <span>Agenda</span>
             </a>
-            <a href="#" class="mobile-bottom-item" id="mobileNewResBtn">
-                <span class="material-symbols-outlined">add_circle</span>
-                <span>Nova reserva</span>
-            </a>
             <a href="#my-reservations-section" class="mobile-bottom-item" id="mobileMyResBtn">
                 <span class="material-symbols-outlined">history_edu</span>
-                <span>Próximas</span>
+                <span>Suas próximas reservas</span>
             </a>
         </nav>
     </div>
@@ -140,8 +136,8 @@
         <div class="modal">
             <div class="modal-header">
                 <div>
-                    <h3>Criar nova reserva</h3>
-                    <p>Escolha quando e quais recursos você precisa.</p>
+                    <h3 id="teacher-booking-title">Criar nova reserva</h3>
+                    <p id="teacher-booking-description">Escolha quando e quais recursos você precisa.</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar modal">
                     <span class="material-symbols-outlined">close</span>
@@ -205,6 +201,11 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="res-class">Turma (opcional)</label>
+                        <input type="text" id="res-class" class="form-control" maxlength="100">
+                    </div>
+
                     <p class="avail-info" id="avail-info"></p>
 
                     <!-- Mensagem de erro -->
@@ -212,7 +213,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary">Confirmar reserva</button>
                 </div>
             </form>
@@ -225,7 +225,6 @@
             <div class="modal-header">
                 <div>
                     <h3>Detalhes da Reserva</h3>
-                    <p>Visualize ou cancele esta reserva.</p>
                 </div>
                 <button type="button" class="btn-close" aria-label="Fechar">
                     <span class="material-symbols-outlined">close</span>
@@ -233,15 +232,12 @@
             </div>
             <div class="modal-body" id="res-detail-body"></div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary btn-cancel-modal">Fechar</button>
-                <button type="button" class="btn-primary" id="btn-detail-register-students" style="display: none; background: linear-gradient(135deg, #10b981, #059669);">
+                <button type="button" class="btn-secondary" id="btn-detail-edit-res" hidden>Editar reserva</button>
+                <button type="button" class="btn-primary" id="btn-detail-register-students" hidden>
                     <span class="material-symbols-outlined">assignment_ind</span>
-                    Registrar Alunos
+                    Registrar aula
                 </button>
-                <button type="button" class="btn-primary btn-danger" id="btn-cancel-res">
-                    <span class="material-symbols-outlined">cancel</span>
-                    Cancelar Reserva
-                </button>
+                <button type="button" class="btn-primary btn-danger" id="btn-cancel-res" hidden>Cancelar reserva</button>
             </div>
         </div>
     </div>
@@ -314,7 +310,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-secondary btn-cancel-modal">Cancelar</button>
                     <button type="submit" class="btn-primary">
                         <span class="material-symbols-outlined">save</span>
                         Salvar Registro
@@ -332,6 +327,7 @@
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/main.js"></script>
+    <script src="../js/defeitos.js"></script>
     <script src="../js/professor.js"></script>
 <script src="../js/refinamento.js"></script>
 </body>

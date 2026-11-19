@@ -40,7 +40,27 @@
   display: grid !important; grid-template-columns: minmax(0, 1fr) auto;
 }
 .calendar-events-container .v2-event-time { grid-column: 1; grid-row: 1; font-size: 10px; }
-.calendar-events-container .event-mine-label { grid-column: 2; grid-row: 1; position: static !important; }
+.teacher-page button.calendar-event-card { width: 100%; text-align: left; }
+.teacher-page button.calendar-event-card:hover,
+.teacher-page button.calendar-event-card:focus-visible {
+  outline: 2px solid #234a94;
+  outline-offset: -2px;
+}
+.teacher-page .event-block { cursor: default; }
+.calendar-events-container .event-owner-label {
+  grid-column: 2; grid-row: 1; display: inline-flex; align-items: center; gap: 4px;
+  color: #485b75; font-size: 11px; font-weight: 650; line-height: 1.25;
+}
+.event-mine .event-owner-label { color: #1142bc; }
+.event-owner-label::after {
+  box-sizing: border-box;
+  content: '';
+  width: 6px;
+  height: 6px;
+  border: solid currentColor;
+  border-width: 1.5px 1.5px 0 0;
+  transform: rotate(45deg);
+}
 .calendar-events-container .event-teacher { grid-column: 1 / -1; grid-row: 2; }
 .calendar-events-container .event-desc { grid-column: 1 / -1; grid-row: 3; }
 .calendar-events-container .event-room { grid-column: 1 / -1; grid-row: 4; margin: 0 !important; }
@@ -51,41 +71,8 @@
   width: 100%; padding: 6px; border: 1px solid #dce5f0; border-radius: 6px;
   background: #fff; color: #234a94; font-size: 11px; cursor: pointer;
 }
-.v2-list-items { display: flex !important; flex-direction: column; gap: 14px !important; }
-.v2-time-group { min-width: 0; border: 1px solid #dde5f0; border-radius: 9px; overflow: hidden; }
-.v2-time-heading {
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  gap: 4px 12px; padding: 9px 12px; background: #f5f7fb; border-bottom: 1px solid #e6ebf3;
-}
-.v2-time-heading h4 { margin: 0; font-size: 13px; color: #263f64; }
-.v2-time-heading > span { font-size: 11px; color: #607189; }
-.v2-time-rows .calendar-event-card {
-  display: grid !important; grid-template-columns: minmax(0, 1fr) auto;
-  flex: none !important; min-height: 0 !important; margin: 0 !important;
-  padding: 10px 12px !important; gap: 4px 10px !important;
-  border: 0 !important; border-left: 3px solid #9aabc3 !important;
-  border-radius: 0 !important; box-shadow: none !important; background: white !important;
-}
-.v2-time-rows .calendar-event-card + .calendar-event-card { border-top: 1px solid #e6ebf3 !important; }
-.v2-time-rows .calendar-event-card.event-mine { border-left-color: #1142bc !important; background: #f7f9ff !important; }
-.v2-time-rows .calendar-event-card.event-block { border-left-color: #c35b4b !important; background: #fff8f6 !important; }
-.v2-time-rows .v2-event-time { display: none; }
-.v2-time-rows .event-teacher { grid-column: 1; grid-row: 1; font-size: 13px !important; white-space: normal; }
-.v2-time-rows .event-mine-label {
-  position: static !important; grid-column: 2; grid-row: 1; align-self: start;
-  font-size: 9px !important; letter-spacing: .3px; padding: 2px 5px; border-radius: 4px;
-  background: #e6edff; color: #1142bc;
-}
-.v2-time-rows .event-desc { grid-column: 1; grid-row: 2; font-size: 12px !important; white-space: normal; }
-.v2-time-rows .event-room { grid-column: 2; grid-row: 2; font-size: 11px !important; align-self: center; text-align: right; }
-.v2-time-rows .calendar-event-card:focus-visible { outline: 2px solid #1142bc; outline-offset: -3px; }
-.v2-time-rows .calendar-event-card:hover { background: #eef3ff !important; transform: none !important; }
 .my-res-item, .report-card { box-shadow: none !important; }
 .room-card, .eq-brand-card { padding: 18px !important; }
-@media (max-width: 480px) {
-  .v2-time-rows .calendar-event-card { padding: 10px !important; }
-  .v2-time-rows .event-room { max-width: 120px; overflow-wrap: anywhere; white-space: normal; }
-}
 
 
 html,
@@ -328,17 +315,6 @@ label,
   overflow: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-}
-
-.modal-footer {
-  flex-wrap: wrap;
-}
-
-.modal-footer > button,
-.modal-footer > .btn-primary,
-.modal-footer > .btn-secondary,
-.modal-footer > .btn-danger {
-  min-width: min(100%, 120px);
 }
 
 .v2-preview dl,
@@ -629,18 +605,6 @@ label,
     justify-content: flex-start;
   }
 
-  .v2-tool-group label {
-    flex: 1 1 150px;
-    min-width: 0;
-  }
-
-  .v2-tool-group select {
-    flex: 1 1 140px;
-    width: 100%;
-    max-width: 100%;
-    min-height: var(--responsive-touch-size);
-  }
-
   .v2-segment {
     width: 100%;
   }
@@ -650,8 +614,7 @@ label,
     min-height: var(--responsive-touch-size);
   }
 
-  .calendar-wrapper-card[hidden],
-  .v2-day-list[hidden] {
+  .calendar-wrapper-card[hidden] {
     display: none !important;
   }
 
@@ -661,25 +624,6 @@ label,
 
   .calendar-table {
     min-width: 870px !important;
-  }
-
-  .v2-day-list {
-    width: 100%;
-  }
-
-  .v2-day-section {
-    min-width: 0;
-  }
-
-  .v2-list-items {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .v2-list-items .calendar-event-card {
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
   }
 
   .v2-cell-action {
@@ -973,13 +917,6 @@ label,
     gap: 8px;
   }
 
-  .modal-footer > button {
-    flex: 1 1 140px;
-    min-width: 0;
-    width: auto;
-    min-height: var(--responsive-touch-size) !important;
-  }
-
   .btn-close {
     width: var(--responsive-touch-size) !important;
     height: var(--responsive-touch-size) !important;
@@ -1067,16 +1004,6 @@ label,
   .calendar-controls-bar,
   .v2-tool-group {
     padding-inline: 8px;
-  }
-
-  .v2-tool-group label {
-    width: 100%;
-    flex-basis: 100%;
-  }
-
-  .v2-tool-group select {
-    width: 100%;
-    max-width: none;
   }
 
   .week-label-text {
@@ -1167,15 +1094,6 @@ label,
     grid-template-columns: 44px minmax(0, 1fr) 44px;
   }
 
-  .v2-day-section {
-    padding: 12px !important;
-  }
-
-  .modal-footer > button,
-  .modal-confirm-footer > button {
-    flex-basis: 100%;
-  }
-
   .modal-confirm-footer {
     padding-inline: 16px;
   }
@@ -1233,14 +1151,26 @@ label,
 
 .modal-confirm-footer {
   flex: 0 0 auto;
-  flex-wrap: wrap;
 }
 
-.modal-confirm-footer > button {
-  flex: 1 1 140px;
+.modal-confirm { position: relative; }
+.modal-confirm .confirm-close { position: absolute; top: 10px; right: 10px; z-index: 1; }
+.modal-confirm-footer,
+.modal-footer { flex-wrap: nowrap !important; align-items: stretch; }
+.modal-confirm-footer > button,
+.modal-footer > button {
+  flex: 1 1 0;
+  width: 0;
   min-width: 0;
-  min-height: var(--responsive-touch-size);
+  height: auto;
+  min-height: 44px;
+  padding-inline: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
+.modal-footer > button[hidden],
+.modal-footer:has(> button):not(:has(> button:not([hidden]))) { display: none !important; }
 
 /* Navegação e hierarquia: agenda e reservas são visões independentes. */
 .page-eyebrow {
@@ -1284,7 +1214,7 @@ label,
 .teacher-main-content .agenda-action-header { margin-bottom: 28px; }
 .teacher-main-content { gap: 0; }
 .teacher-main-content #my-reservations-section { margin-top: 0; }
-.teacher-main-content #my-reservations-section > p { font-size: 14px; margin-bottom: 24px; }
+.teacher-main-content #my-reservations-section > h2 { font-size: 22px; margin-bottom: 16px; }
 .teacher-main-content .my-res-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .teacher-main-content .my-res-item {
   display: grid;
@@ -1294,23 +1224,23 @@ label,
   border: 1px solid #dfe6f0;
   border-radius: 12px;
 }
-.teacher-main-content .my-res-item .res-date { font-size: 14px; color: #53647c; }
+.teacher-main-content .my-res-item .res-date { display: block; margin-bottom: 5px; font-size: 14px; color: #53647c; }
+.teacher-main-content .my-res-item .res-date::first-letter { text-transform: uppercase; }
 .teacher-main-content .my-res-item .res-info strong { font-size: 19px; color: #18263f; }
 .teacher-main-content .my-res-item .res-info p { font-size: 14px; margin-top: 5px; }
-.teacher-main-content .my-res-item .res-actions { width: 100%; justify-content: flex-start; gap: 8px; margin-top: 4px; }
+.teacher-main-content .my-res-item .res-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.teacher-main-content .badge-confirmada { color: #166534; }
 .teacher-main-content .my-res-item .btn-res-cancel { margin-left: auto; font-size: 13px; }
 .reservation-blocked { border-left: 3px solid #c47152 !important; }
 .badge-blocked { color: #8a452d; background: #fff0e8; }
 .reservation-empty { grid-column: 1 / -1; padding: 48px 24px; text-align: center; border: 1px dashed #cdd8e8; border-radius: 12px; background: #fff; }
 .reservation-empty > .material-symbols-outlined { width: 48px; height: 48px; padding: 10px; border-radius: 12px; background: #edf2ff; color: #1142bc; margin-bottom: 14px; }
-.reservation-empty h4 { font-size: 20px; margin-bottom: 8px; }
 .reservation-empty p { font-size: 14px; color: #53647c; margin-bottom: 22px; }
 .btn-header-logout { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
 
 /* Calendário do professor: uma coluna de horários e uma coluna para o dia selecionado. */
 .v2-teacher-day .week-selector,
-.teacher-page .calendar-table [hidden],
-.v2-teacher-day .calendar-table .v2-cell-action {
+.teacher-page .calendar-table [hidden] {
   display: none !important;
 }
 
@@ -1378,11 +1308,10 @@ label,
   grid-template-rows: auto auto auto;
 }
 .v2-teacher-day .calendar-events-container .event-teacher { grid-row: 1; grid-column: 1; }
-.v2-teacher-day .calendar-events-container .event-desc { grid-row: 2; }
+.v2-teacher-day .calendar-events-container .event-desc { grid-row: 2; grid-column: 1; }
 .v2-teacher-day .calendar-events-container .event-room { grid-row: 3; }
 .v2-teacher-day .calendar-events-container .v2-event-time { grid-row: 1; grid-column: 2; align-self: center; }
-.v2-teacher-day .calendar-events-container .event-mine-label { grid-row: 2; justify-self: end; align-self: center; }
-.v2-teacher-day .calendar-events-container .event-mine .event-desc { grid-column: 1; }
+.v2-teacher-day .calendar-events-container .event-owner-label { grid-row: 2; grid-column: 2; justify-self: end; align-self: center; }
 
 .teacher-slot-info {
   display: flex;
@@ -1396,6 +1325,7 @@ label,
 }
 
 .teacher-slot-info p { flex: 1 1 92px; }
+.teacher-page:not(.v2-teacher-day) .teacher-slot-info { margin-top: 4px; }
 .teacher-slot-book {
   padding: 4px 10px;
   border: 1px solid #b6c9ee;
@@ -1443,7 +1373,7 @@ label,
   .v2-teacher-day .calendar-events-container .event-teacher { grid-column: 1; grid-row: 2; font-size: 14px !important; }
   .v2-teacher-day .calendar-events-container .event-desc { grid-column: 1; grid-row: 3; font-size: 13px !important; }
   .v2-teacher-day .calendar-events-container .event-room { grid-column: 1; grid-row: 4; font-size: 13px !important; }
-  .v2-teacher-day .calendar-events-container .event-mine-label { grid-column: 1; grid-row: 5; justify-self: start; }
+  .v2-teacher-day .calendar-events-container .event-owner-label { grid-column: 2; grid-row: 1; justify-self: end; }
 
   .v2-teacher-day .calendar-events-container .event-block .event-teacher { grid-row: auto; }
   .v2-teacher-day .calendar-events-container .event-block .event-desc { grid-row: auto; }
@@ -1452,8 +1382,8 @@ label,
   .teacher-main-content > .agenda-action-header > .agenda-header-right > .btn-teacher-new-res {
     display: inline-flex;
     flex: 0 0 auto !important;
-    align-self: flex-start;
-    width: auto;
+    align-self: stretch;
+    width: 100%;
     min-width: 0;
     min-height: var(--responsive-touch-size);
     height: auto;
@@ -1461,12 +1391,53 @@ label,
     justify-content: center;
     box-sizing: border-box;
   }
+
+  .teacher-main-content > .agenda-action-header #active-chip:not(.hidden) {
+    align-self: stretch;
+    max-width: none;
+    width: 100%;
+    min-height: 70px;
+  }
+
+  .teacher-main-content > .agenda-action-header #active-chip.chip-ready {
+    position: relative;
+    display: block !important;
+    padding: 0;
+  }
+
+  #active-chip.chip-ready .chip-icon, #active-chip.chip-ready .chip-dot { display: none; }
+  #active-chip.chip-ready .chip-body {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  #active-chip.chip-ready .btn-chip-action {
+    width: 100%;
+    min-height: 68px;
+    justify-content: center;
+    border-radius: inherit;
+  }
 }
 
-.v2-tool-group label { min-height: 44px; font-size: 13px; }
-.v2-tool-group select { font-size: 14px; min-height: 44px; }
-.v2-tool-group label:has(input[type="checkbox"]) { cursor: pointer; }
-.v2-tool-group input[type="checkbox"] { width: 18px; height: 18px; }
+@media (max-width: 768px), (max-height: 560px) and (orientation: landscape) {
+  #new-reservation-modal {
+    top: var(--booking-viewport-top, 0px);
+    bottom: auto;
+    height: var(--booking-viewport-height, 100dvh);
+    align-items: center;
+    padding: 16px !important;
+  }
+
+  #new-reservation-modal .modal {
+    max-height: min(
+      calc(var(--booking-viewport-height, 100dvh) * .85),
+      calc(var(--booking-viewport-height, 100dvh) - 32px)
+    ) !important;
+  }
+}
+
 .v2-segment button, .shift-btn { min-height: 44px; font-size: 14px !important; }
 .v2-calendar-legend { font-size: 12px; }
 .calendar-table .day-header-tag { font-size: 11px; letter-spacing: .04em; }
@@ -1481,7 +1452,6 @@ label,
 #new-reservation-modal .modal { width: min(100%, 760px) !important; max-width: 760px; }
 .booking-section { padding: 0; margin: 0 0 24px; border: 0; }
 .booking-section legend { display: flex; align-items: center; gap: 10px; width: 100%; padding-bottom: 18px; font-size: 16px; font-weight: 650; color: #263d60; }
-.booking-section legend span { display: grid; place-items: center; width: 28px; height: 28px; background: #edf2ff; border-radius: 8px; color: #1142bc; font-size: 12px; }
 .booking-section .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .booking-section .form-col { width: 100%; }
 .booking-section .form-group { margin-bottom: 14px; }
@@ -1493,7 +1463,6 @@ label,
 .resource-choices label:has(:checked) { border-color: #1142bc; background: #edf2ff; color: #1142bc; }
 .resource-choices input { width: 16px; min-height: 16px !important; height: 16px; accent-color: #1142bc; }
 #new-reservation-form > .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
-#new-reservation-form > .modal-footer > button { flex: 0 1 auto; width: auto; min-width: 132px; }
 .v2-availability { font-size: 14px !important; padding: 14px 16px !important; }
 .v2-preview { padding: 20px; font-size: 15px; }
 .v2-preview h4 { font-size: 20px; margin-bottom: 16px; }
@@ -1535,15 +1504,9 @@ label,
   .coord-metric p { font-size: 12px; }
   .coord-metric small { display: none; }
   .teacher-main-content .my-res-item { padding: 18px; }
-  #new-reservation-modal { padding: 0 !important; }
-  #new-reservation-modal .modal {
-    width: 100% !important; height: 100dvh; max-height: 100dvh !important;
-    border: 0 !important; border-radius: 0 !important;
-  }
   #new-reservation-modal .modal-header { padding: 18px 16px !important; }
   #new-reservation-form > .modal-body { padding: 20px 16px !important; }
   #new-reservation-form > .modal-footer { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important; }
-  #new-reservation-form > .modal-footer > button { flex: 1 1 0; min-width: 0; }
   .resource-choices label { font-size: 13px; padding: 8px 4px; gap: 5px; }
 }
 @media (max-width: 380px) {
@@ -1551,9 +1514,33 @@ label,
   .resource-choices label { flex-direction: column; }
 }
 @media (max-height: 560px) and (orientation: landscape) {
-  #new-reservation-modal { padding: 0 !important; }
-  #new-reservation-modal .modal { width: min(100%, 900px) !important; height: 100dvh; max-height: 100dvh !important; border-radius: 0 !important; }
   #new-reservation-modal .modal-header { padding: 10px 20px !important; }
   #new-reservation-modal .modal-header p { display: none; }
   #new-reservation-form > .modal-footer { padding: 8px 20px !important; }
+}
+
+/* A reserva fica ancorada à tela; somente o conteúdo rola verticalmente. */
+html:has(#new-reservation-modal:not(.hidden)),
+body:has(#new-reservation-modal:not(.hidden)) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+#new-reservation-modal {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+#new-reservation-modal .modal,
+#new-reservation-form,
+#new-reservation-form .booking-section,
+#new-reservation-form .form-col {
+  min-width: 0;
+}
+#new-reservation-form > .modal-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior: none;
+}
+#new-reservation-form .booking-section {
+  max-width: 100%;
 }

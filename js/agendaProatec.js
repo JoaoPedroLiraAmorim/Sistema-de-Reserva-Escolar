@@ -429,12 +429,8 @@ window.AgendaProatecModule = (function() {
 
         const btnCancel = document.getElementById('btn-cancel-res');
         if (btnCancel) {
-            if (r.situacao === 'confirmada') {
-                btnCancel.style.display = '';
-                btnCancel.onclick = () => cancelRes(id);
-            } else {
-                btnCancel.style.display = 'none';
-            }
+            btnCancel.hidden = r.situacao !== 'confirmada';
+            btnCancel.onclick = () => cancelRes(id);
         }
 
         openModal('res-detail-modal');

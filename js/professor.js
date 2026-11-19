@@ -8,9 +8,11 @@
 let currentSession = null;
 let currentWeekMonday = ERS.getMonday(new Date());
 let currentShift = 'manha';
-let selectedResId = null;
 
 const SHIFT_SLOTS = ERS.SHIFT_SLOTS;
+const bookingDate = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
+});
 
 // ─────────────────────────────────────────────────────────────
 //  INICIALIZAÇÃO
@@ -39,7 +41,6 @@ document.addEventListener('ers:ready', () => {
             });
             currentShift = btn.dataset.shift;
             renderCalendar();
-            populateTimeSlots(currentShift);
         });
     });
 
@@ -59,37 +60,20 @@ document.addEventListener('ers:ready', () => {
     }
 
     // Nova reserva
-    document.getElementById('btnOpenNewReservation').addEventListener('click', () => {
-        const dInput = document.getElementById('res-date');
-        dInput.min = ERS.today();
-        const todayStr = ERS.today();
-        const mondayStr = ERS.dateKey(currentWeekMonday);
-        if (!dInput.value || dInput.value < todayStr) {
-            dInput.value = mondayStr >= todayStr ? mondayStr : todayStr;
-        }
-        document.getElementById('res-error').style.display = 'none';
-        populateTimeSlots(currentShift);
-        populateRoomSelect();
-        populateBrandSelect();
-        updateAvailInfo();
-        openModal('new-reservation-modal');
-    });
-
-    // Mobile nav buttons
-    document.getElementById('mobileNewResBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('btnOpenNewReservation').click();
-    });
-
-    // Atualização de disponibilidade em tempo real
-    document.getElementById('res-quantity')?.addEventListener('input', updateAvailInfo);
-    document.getElementById('res-brand')?.addEventListener('change', updateAvailInfo);
-    document.getElementById('res-start')?.addEventListener('change', updateAvailInfo);
-    document.getElementById('res-end')?.addEventListener('change', updateAvailInfo);
-    document.getElementById('res-date')?.addEventListener('change', updateAvailInfo);
+    document.getElementById('btnOpenNewReservation').addEventListener('click', () => openTeacherReservationForm());
 
     // Submit do formulário de reserva
-    document.getElementById('new-reservation-form').addEventListener('submit', handleCreateReservation);
+    document.getElementById('new-reservation-form').addEventListener('submit', handleSaveReservation);
+    document.getElementById('calendarBody').addEventListener('click', event => {
+        const card = event.target.closest('button[data-res-id]');
+        if (card) openReservationDetail(card.dataset.resId);
+    });
+    document.getElementById('myResList').addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (button?.dataset.resId) openReservationDetail(button.dataset.resId);
+        if (button?.dataset.cancelId) cancelRes(button.dataset.cancelId);
+        if (button?.id === 'empty-new-reservation') openTeacherReservationForm();
+    });
 
     // Registro de Alunos e Notebooks
     document.getElementById('btnAddStudentRow')?.addEventListener('click', () => addStudentRow());
@@ -104,7 +88,6 @@ document.addEventListener('ers:ready', () => {
         }
     });
 
-    populateTimeSlots(currentShift);
     renderCalendar();
     renderMyReservations();
     renderActiveChip();
@@ -124,27 +107,27 @@ document.addEventListener('ers:ready', () => {
 // ─────────────────────────────────────────────────────────────
 //  POPULAR HORÁRIOS POR TURNO
 // ─────────────────────────────────────────────────────────────
-function populateTimeSlots(shift) {
-    const slots = SHIFT_SLOTS[shift] || SHIFT_SLOTS['manha'];
-    const selStart = document.getElementById('res-start');
-    const selEnd = document.getElementById('res-end');
+function reservationShift(start) {
+    if (start >= '19:00') return 'noite';
+    return start >= '13:00' ? 'tarde' : 'manha';
+}
 
-    if (selStart) {
-        const curVal = selStart.value;
-        selStart.innerHTML = '<option value="">Selecione o início</option>' +
-            slots.map(s => `<option value="${s.start}">${s.start}</option>`).join('');
-        if (slots.some(s => s.start === curVal)) {
-            selStart.value = curVal;
-        }
-    }
+function populateTimeSlots(shift, booking) {
+    const form = document.getElementById('new-reservation-form');
+    form.dataset.shift = shift;
+    const slots = SHIFT_SLOTS[shift];
+    const previous = booking || ERS.getReservations().find(r => r.id === form.dataset.reservationId);
 
-    if (selEnd) {
-        const curVal = selEnd.value;
-        selEnd.innerHTML = '<option value="">Selecione o fim</option>' +
-            slots.map(s => `<option value="${s.end}">${s.end}</option>`).join('');
-        if (slots.some(s => s.end === curVal)) {
-            selEnd.value = curVal;
-        }
+    for (const [id, key, found, title] of [
+        ['res-start', 'start', previous?.inicio, 'Selecione o início'],
+        ['res-end', 'end', previous?.fim, 'Selecione o fim']
+    ]) {
+        const field = document.getElementById(id);
+        const value = booking ? found : field.value;
+        const times = slots.map(slot => slot[key]);
+        if (found && shift === reservationShift(previous.inicio) && !times.includes(found)) times.push(found);
+        field.replaceChildren(new Option(title, ''), ...times.sort().map(time => new Option(time, time)));
+        if (times.includes(value)) field.value = value;
     }
 }
 
@@ -157,9 +140,7 @@ function populateBrandSelect() {
     const curVal = sel.value;
     sel.innerHTML = '<option value="">Qualquer marca</option>';
     if (typeof ERS.getBrands === 'function') {
-        ERS.getBrands().forEach(b => {
-            sel.innerHTML += `<option value="${b}">${ERS.escapeHtml(b)}</option>`;
-        });
+        sel.append(...ERS.getBrands().map(brand => new Option(brand, brand)));
     }
     if (curVal) sel.value = curVal;
 }
@@ -222,9 +203,7 @@ function renderCalendar() {
                 ERS.timesOverlap(slot.start, slot.end, r.inicio, r.fim)
             );
 
-            const blocks = ERS.getBlocks().filter(b =>
-                b.data === dk && ERS.timesOverlap(slot.start, slot.end, b.inicio, b.fim)
-            );
+            const blocks = ERS.getBlocksByDate(dk).filter(b => ERS.timesOverlap(slot.start, slot.end, b.inicio, b.fim));
 
             let html = '';
 
@@ -239,28 +218,16 @@ function renderCalendar() {
                 });
                 (blocks.length ? [] : slotReservations).forEach(r => {
                     const isMine = r.professorId === currentSession.userId;
-                    const colorClass = isMine ? 'primary' : 'tertiary';
-                    
-                    const descParts = [];
-                    if (r.notebooks) {
-                        const brandText = r.marca && r.marca !== 'Qualquer marca' ? ` (${r.marca})` : '';
-                        descParts.push(`${r.notebooks} notebooks${brandText}`);
-                    }
-                    if (r.sala) {
-                        descParts.push(r.sala);
-                    }
-                    const descText = descParts.join(' • ') || 'Reserva';
+                    const colorClass = isMine ? 'primary event-mine' : 'tertiary';
+                    const notebooks = r.notebooks ? `${r.notebooks} notebooks${r.marca && r.marca !== 'Qualquer marca' ? ' · ' + r.marca : ''}` : 'Somente sala';
 
-                    html += `<div class="calendar-event-card ${colorClass}${isMine ? ' event-mine' : ''}"
-                        data-res-id="${r.id}" onclick="openReservationDetail('${r.id}')">
-                        ${isMine ? '<span class="event-mine-label">Minha</span>' : ''}
+                    html += `<button type="button" class="calendar-event-card ${colorClass}" data-res-id="${ERS.escapeHtml(r.id)}" aria-haspopup="dialog">
+                        <span class="v2-event-time">${r.inicio}–${r.fim}</span>
+                        <span class="event-owner-label">${isMine ? 'Sua' : 'Outra'}</span>
                         <span class="event-teacher">${ERS.escapeHtml(r.professorNome)}</span>
-                        <span class="event-desc">${ERS.escapeHtml(descText)}</span>
-                        <span class="event-room">
-                            <span class="material-symbols-outlined">${r.sala ? 'meeting_room' : 'laptop'}</span>
-                            ${ERS.escapeHtml(r.sala || (r.marca && r.marca !== 'Qualquer marca' ? r.marca : 'Notebooks'))}
-                        </span>
-                    </div>`;
+                        <span class="event-desc">${ERS.escapeHtml(notebooks)}</span>
+                        ${r.sala ? `<span class="event-room"><span class="material-symbols-outlined">meeting_room</span> ${ERS.escapeHtml(r.sala)}</span>` : ''}
+                    </button>`;
                 });
                 html += `</div>`;
             }
@@ -289,27 +256,28 @@ function renderMyReservations() {
     if (count) count.textContent = myRes.length;
 
     if (myRes.length === 0) {
-        list.innerHTML = `<div class="reservation-empty"><span class="material-symbols-outlined">calendar_today</span><h4>Sua próxima aula começa aqui.</h4><p>Você ainda não tem próximas reservas.</p><button type="button" class="btn-primary" onclick="document.getElementById('btnOpenNewReservation').click()">Fazer uma reserva</button></div>`;
+        list.innerHTML = `<div class="reservation-empty"><span class="material-symbols-outlined">calendar_today</span><p>Você ainda não tem próximas reservas.</p><button type="button" class="btn-primary" id="empty-new-reservation">Nova reserva</button></div>`;
         return;
     }
 
     list.innerHTML = myRes.map(r => {
-        const blocked = ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim));
-        const nbText = r.notebooks ? `${r.notebooks} notebooks${r.marca && r.marca !== 'Qualquer marca' ? ' (' + ERS.escapeHtml(r.marca) + ')' : ''}` : '';
-        const infoDetail = [r.sala, nbText].filter(Boolean).join(' • ');
+        const blocked = ERS.isReservationBlocked(r);
+        const nbText = r.notebooks ? `${r.notebooks} notebooks${r.marca && r.marca !== 'Qualquer marca' ? ' · ' + r.marca : ''}` : '';
+        const infoDetail = [r.sala, nbText, r.turma].filter(Boolean).join(' • ');
+        const id = ERS.escapeHtml(r.id);
         return `
-        <div class="my-res-item${blocked ? ' reservation-blocked' : ''}">
-            <div class="res-date">${ERS.formatDate(r.data)}</div>
+        <article class="my-res-item${blocked ? ' reservation-blocked' : ''}">
             <div class="res-info">
+                <time class="res-date" datetime="${r.data}">${bookingDate.format(new Date(r.data + 'T12:00:00Z'))}</time>
                 <strong>${r.inicio}–${r.fim}</strong>
                 <p>${ERS.escapeHtml(infoDetail) || 'Reserva de recursos'}</p>
             </div>
             <div class="res-actions">
                 <span class="badge-situacao ${blocked ? 'badge-blocked' : 'badge-confirmada'}">${blocked ? 'Indisponível por bloqueio' : 'Confirmada'}</span>
-                ${!blocked && r.notebooks > 0 ? `<button type="button" class="btn-secondary" onclick="openReservationDetail('${r.id}')">Ver reserva</button>` : ''}
-                ${r.situacao === 'confirmada' ? `<button class="btn-res-cancel" onclick="cancelRes('${r.id}')">Cancelar</button>` : ''}
+                <button type="button" class="btn-secondary" data-res-id="${id}" aria-haspopup="dialog">Ver reserva</button>
+                ${r.situacao === 'confirmada' ? `<button type="button" class="btn-res-cancel" data-cancel-id="${id}">Cancelar</button>` : ''}
             </div>
-        </div>
+        </article>
     `;
     }).join('');
 }
@@ -325,8 +293,8 @@ function renderActiveChip() {
     // Busca reserva ativa de hoje do professor que contenha notebooks
     const todayNotebookRes = ERS.getReservationsByDate(ERS.today())
         .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && r.fim > ERS.getCurrentTime() && (r.notebooks > 0) &&
-            !ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim)))
-        .sort((a, b) => a.inicio.localeCompare(b.inicio));
+            !ERS.isReservationBlocked(r))
+        .sort((a, b) => Number(b.retiradaConfirmada) - Number(a.retiradaConfirmada) || a.inicio.localeCompare(b.inicio));
 
     const statusLabel = document.getElementById('active-chip-status');
     const textLabel = document.getElementById('active-chip-text');
@@ -350,16 +318,14 @@ function renderActiveChip() {
             if (btnRegister) {
                 btnRegister.style.display = 'inline-flex';
                 if (btnRegisterText) {
-                    btnRegisterText.textContent = r.alunosRegistrados && r.alunosNotebooks && r.alunosNotebooks.length > 0
-                        ? `Editar Alunos (${r.alunosNotebooks.length})`
-                        : 'Registrar Alunos';
+                    btnRegisterText.textContent = r.alunosRegistrados ? 'Editar registro da aula' : 'Registrar aula';
                 }
                 btnRegister.onclick = () => openRegisterStudentsModal(r.id);
             }
         } else {
             chip.classList.remove('chip-ready');
             if (statusLabel) {
-                statusLabel.textContent = 'Aguardando liberação da Coordenação';
+                statusLabel.textContent = 'Aguardando confirmação da coordenação';
             }
             if (btnRegister) {
                 btnRegister.style.display = 'none';
@@ -369,13 +335,13 @@ function renderActiveChip() {
         // Verifica se há reserva hoje apenas de sala (sem notebooks)
         const todayRoomOnly = ERS.getReservationsByDate(ERS.today())
             .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && r.fim > ERS.getCurrentTime() &&
-                !ERS.getBlocks().some(b => b.data === r.data && ERS.timesOverlap(b.inicio, b.fim, r.inicio, r.fim)));
+                !ERS.isReservationBlocked(r));
 
         if (todayRoomOnly.length > 0) {
             const r = todayRoomOnly[0];
             chip.classList.remove('hidden');
             chip.classList.remove('chip-ready');
-            if (textLabel) textLabel.textContent = `${r.inicio}–${r.fim} • ${ERS.escapeHtml(r.sala)}`;
+            if (textLabel) textLabel.textContent = `${r.inicio}–${r.fim} • ${r.sala}`;
             if (statusLabel) statusLabel.textContent = 'Reserva hoje';
             if (btnRegister) btnRegister.style.display = 'none';
         } else {
@@ -393,8 +359,9 @@ function openRegisterStudentsModal(resId) {
     if (!r) return;
 
     currentRegResId = resId;
+    document.getElementById('register-students-modal').dataset.reservaId = resId;
 
-    document.getElementById('reg-summary-date').textContent = ERS.formatDate(r.data);
+    document.getElementById('reg-summary-date').textContent = bookingDate.format(new Date(r.data + 'T12:00:00Z'));
     document.getElementById('reg-summary-time').textContent = `${r.inicio} – ${r.fim}`;
     document.getElementById('reg-summary-notebooks').textContent = `${r.notebooks} notebook(s)`;
     document.getElementById('reg-summary-room').textContent = r.sala || 'Sem sala fixa';
@@ -415,6 +382,7 @@ function openRegisterStudentsModal(resId) {
     if (errEl) errEl.style.display = 'none';
 
     openModal('register-students-modal');
+    window.Defeitos?.renderAssignmentWarnings();
 }
 
 function addStudentRow(num, etiqueta = '', aluno = '') {
@@ -545,107 +513,89 @@ function populateRoomSelect() {
     });
 }
 
-function updateAvailInfo() {
-    const infoEl = document.getElementById('avail-info');
-    if (!infoEl) return;
-    const brandSel = document.getElementById('res-brand');
-    const brand = brandSel ? brandSel.value : '';
-    const total = typeof ERS.getDisponivelByBrand === 'function' 
-        ? ERS.getDisponivelByBrand(brand) 
-        : ERS.getTotalDisponivel();
+function openTeacherReservationForm(booking) {
+    const form = document.getElementById('new-reservation-form');
+    if (form.dataset.saving) return;
+    const editing = Boolean(booking);
+    if (!editing && form.dataset.reservationId) form.reset();
+    form.dataset.reservationId = booking?.id || '';
+    document.getElementById('teacher-booking-title').textContent = editing ? 'Editar reserva' : 'Criar nova reserva';
+    document.getElementById('teacher-booking-description').textContent = editing
+        ? 'Atualize o horário, a turma ou os recursos da sua reserva.'
+        : 'Escolha quando e quais recursos você precisa.';
 
-    if (brand) {
-        infoEl.textContent = `${total} notebooks da marca ${brand} disponíveis.`;
-    } else {
-        infoEl.textContent = `${total} notebooks disponíveis no total.`;
+    const date = document.getElementById('res-date');
+    date.min = ERS.today();
+    if (editing) date.value = booking.data;
+    else if (!date.value || date.value < date.min) {
+        const monday = ERS.dateKey(currentWeekMonday);
+        date.value = monday >= date.min ? monday : date.min;
     }
+    populateTimeSlots(editing ? reservationShift(booking.inicio) : currentShift, booking);
+    populateRoomSelect();
+    populateBrandSelect();
+
+    if (editing) {
+        document.getElementById('res-room').value = booking.sala || '';
+        document.getElementById('res-brand').value = booking.marca || '';
+        document.getElementById('res-quantity').value = booking.notebooks || '';
+        document.getElementById('res-class').value = booking.turma || '';
+        form.dataset.prefillResource = booking.sala ? (booking.notebooks > 0 ? 'ambos' : 'sala') : 'notebooks';
+    }
+
+    document.getElementById('res-error').style.display = 'none';
+    openModal('new-reservation-modal');
 }
 
-async function handleCreateReservation(e) {
-    e.preventDefault();
-    const errEl = document.getElementById('res-error');
-    errEl.style.display = 'none';
-
-    const data   = document.getElementById('res-date').value;
+async function handleSaveReservation(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    if (form.dataset.saving) return;
+    const reservationId = form.dataset.reservationId;
+    const data = document.getElementById('res-date').value;
     const inicio = document.getElementById('res-start').value;
-    const fim    = document.getElementById('res-end').value;
-    const sala   = document.getElementById('res-room').value;
-    const marca  = document.getElementById('res-brand') ? document.getElementById('res-brand').value : '';
-    const qtd    = parseInt(document.getElementById('res-quantity').value) || 0;
-
-    // 1. Validação de Data (apenas hoje para frente)
-    if (!data) {
-        errEl.textContent = 'Por favor, selecione uma data para a reserva.';
-        errEl.style.display = 'block';
-        return;
-    }
-    if (data < ERS.today()) {
-        errEl.textContent = 'Não é permitido agendar reservas para datas anteriores a hoje.';
-        errEl.style.display = 'block';
-        return;
-    }
-
-    // 2. Validação de Horários
-    if (!inicio || !fim) {
-        errEl.textContent = 'Por favor, selecione os horários de início e término.';
-        errEl.style.display = 'block';
-        return;
-    }
-
-    // 3. Validação de Horários por Turno
-    const currentSlots = SHIFT_SLOTS[currentShift];
-    const validStarts = currentSlots.map(s => s.start);
-    const validEnds = currentSlots.map(s => s.end);
-    const shiftName = currentShift === 'manha' ? 'Manhã' : currentShift === 'tarde' ? 'Tarde' : 'Noite';
-
-    if (!validStarts.includes(inicio) || !validEnds.includes(fim)) {
-        errEl.textContent = `Os horários selecionados devem pertencer ao turno da ${shiftName}.`;
-        errEl.style.display = 'block';
-        return;
-    }
-
-    if (inicio >= fim) {
-        errEl.textContent = 'O horário de início deve ser anterior ao horário de término.';
-        errEl.style.display = 'block';
-        return;
-    }
-
-    // 4. Validação de Recurso
-    if (!sala && qtd <= 0) {
-        errEl.textContent = 'Selecione ao menos uma sala ou informe a quantidade de notebooks.';
-        errEl.style.display = 'block';
-        return;
-    }
-
-    const result = await ERS.createReservation({
-        professorId:   currentSession.userId,
-        professorNome: currentSession.nome,
+    const fim = document.getElementById('res-end').value;
+    const payload = {
         data, inicio, fim,
-        sala: sala || null,
-        marca: marca || 'Qualquer marca',
-        notebooks: qtd,
-    });
+        sala: document.getElementById('res-room').value || null,
+        marca: document.getElementById('res-brand').value || 'Qualquer marca',
+        notebooks: Number(document.getElementById('res-quantity').value),
+        turma: document.getElementById('res-class').value.trim()
+    };
+
+    const submit = form.querySelector('button[type="submit"]');
+    form.dataset.saving = 'true';
+    submit.disabled = true;
+    let result;
+    try {
+        result = reservationId
+            ? await ERS.updateReservation(reservationId, payload)
+            : await ERS.createReservation({ ...payload, professorId: currentSession.userId, professorNome: currentSession.nome });
+    } finally {
+        delete form.dataset.saving;
+        submit.disabled = false;
+    }
 
     if (!result.ok) {
-        errEl.textContent = result.message;
-        errEl.style.display = 'block';
+        const error = document.getElementById('res-error');
+        error.textContent = result.message;
+        error.style.display = 'block';
+        error.scrollIntoView({ block: 'nearest' });
         return;
     }
 
     closeModal('new-reservation-modal');
-    document.getElementById('new-reservation-form').reset();
-    ERS.showToast('Reserva criada com sucesso!', 'success');
+    form.reset();
+    delete form.dataset.reservationId;
+    ERS.showToast(reservationId ? 'Reserva atualizada com sucesso!' : 'Reserva criada com sucesso!', 'success');
 
-    // Navega automaticamente o calendário para a semana e turno da reserva
     currentWeekMonday = ERS.getMonday(data);
-    const isTarde = (inicio >= '13:00' && inicio < '18:15');
-    const isNoite = (inicio >= '19:00');
-    currentShift = isNoite ? 'noite' : isTarde ? 'tarde' : 'manha';
-
-    document.querySelectorAll('.shift-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.shift === currentShift);
+    currentShift = reservationShift(inicio);
+    document.querySelectorAll('.shift-btn').forEach(button => {
+        const active = button.dataset.shift === currentShift;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', active);
     });
-
     renderCalendar();
     renderMyReservations();
     renderActiveChip();
@@ -658,7 +608,6 @@ function openReservationDetail(id) {
     const r = ERS.getReservations().find(r => r.id === id);
     if (!r) return;
 
-    selectedResId = id;
     const isMine = r.professorId === currentSession.userId;
 
     let studentsHtml = '';
@@ -678,10 +627,11 @@ function openReservationDetail(id) {
 
     document.getElementById('res-detail-body').innerHTML = `
         <div class="detail-list">
-            <div><strong>Data:</strong> ${ERS.formatDate(r.data)}</div>
+            <div><strong>Data:</strong> ${bookingDate.format(new Date(r.data + 'T12:00:00Z'))}</div>
             <div><strong>Horário:</strong> ${r.inicio} – ${r.fim}</div>
             ${r.sala ? `<div><strong>Sala:</strong> ${ERS.escapeHtml(r.sala)}</div>` : ''}
             ${r.notebooks ? `<div><strong>Notebooks:</strong> ${r.notebooks}${r.marca && r.marca !== 'Qualquer marca' ? ' (' + ERS.escapeHtml(r.marca) + ')' : ''}</div>` : ''}
+            ${r.turma ? `<div><strong>Turma:</strong> ${ERS.escapeHtml(r.turma)}</div>` : ''}
             <div><strong>Professor:</strong> ${ERS.escapeHtml(r.professorNome)}</div>
             <div><strong>Situação:</strong> <span class="badge-situacao badge-${r.situacao}">${r.situacao}</span></div>
             ${r.retiradaConfirmada ? `<div><strong>Entrega:</strong> <span class="badge badge-success">Retirada confirmada pela Coordenação</span></div>` : (r.notebooks ? `<div><strong>Entrega:</strong> <span class="badge badge-warning">Aguardando confirmação da Coordenação</span></div>` : '')}
@@ -690,27 +640,29 @@ function openReservationDetail(id) {
     `;
 
     const btnDetailReg = document.getElementById('btn-detail-register-students');
-    if (btnDetailReg) {
-        if (isMine && r.notebooks > 0 && r.retiradaConfirmada) {
-            btnDetailReg.style.display = '';
-            btnDetailReg.innerHTML = `<span class="material-symbols-outlined">assignment_ind</span> ${r.alunosRegistrados ? 'Editar Alunos' : 'Registrar Alunos'}`;
-            btnDetailReg.onclick = () => {
-                closeModal('res-detail-modal');
-                openRegisterStudentsModal(id);
-            };
-        } else {
-            btnDetailReg.style.display = 'none';
+    btnDetailReg.hidden = !isMine || !r.notebooks || !r.retiradaConfirmada || ERS.isReservationBlocked(r);
+    btnDetailReg.textContent = r.alunosRegistrados ? 'Editar registro da aula' : 'Registrar aula';
+    btnDetailReg.onclick = () => {
+        closeModal('res-detail-modal');
+        openRegisterStudentsModal(id);
+    };
+
+    const btnEdit = document.getElementById('btn-detail-edit-res');
+    btnEdit.hidden = !ERS.canEditReservation(r, currentSession.userId);
+    btnEdit.onclick = () => {
+        const booking = ERS.getReservations().find(item => item.id === id);
+        if (!booking || !ERS.canEditReservation(booking, currentSession.userId)) {
+            ERS.showToast('Esta reserva não está mais disponível para edição.', 'warning');
+            return;
         }
-    }
+        closeModal('res-detail-modal');
+        openTeacherReservationForm(booking);
+    };
 
     const btnCancel = document.getElementById('btn-cancel-res');
-    if (isMine && r.situacao === 'confirmada') {
-        btnCancel.style.display = '';
-        btnCancel.onclick = () => cancelRes(id);
-    } else {
-        btnCancel.style.display = 'none';
-    }
-
+    btnCancel.hidden = !isMine || r.situacao !== 'confirmada';
+    btnCancel.onclick = () => cancelRes(id);
+    window.Defeitos?.renderDetail(r);
     openModal('res-detail-modal');
 }
 

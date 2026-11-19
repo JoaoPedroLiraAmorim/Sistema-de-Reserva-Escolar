@@ -10,7 +10,6 @@
 
 /* Destaque de reserva própria */
 .event-mine       { border-left: 3px solid var(--color-primary); }
-.event-mine-label { font-size: 10px; font-weight: 600; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.3px; }
 
 /* Bloqueio no calendário */
 .event-block { border-left: 3px solid #ef4444; background: #fef2f2 !important; }
