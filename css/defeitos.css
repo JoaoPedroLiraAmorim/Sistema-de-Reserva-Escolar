@@ -6,6 +6,7 @@
 #defects-list { display: grid; gap: 16px; }
 .defect-report { display: grid; gap: 10px; min-width: 0; padding: 18px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-white); overflow-wrap: anywhere; }
 .defect-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.defect-report .badge-warning { color: #92400e; }
 .defect-description { white-space: pre-wrap; }
 .defect-timestamp { color: var(--color-text-secondary); font-size: 13px; }
 .defect-warning { color: #92400e; background: var(--color-warning-bg); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 13px; overflow-wrap: anywhere; }

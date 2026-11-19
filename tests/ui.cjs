@@ -163,8 +163,12 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await page.locator('#add-room-modal').waitFor({state:'hidden'});assert.equal(await page.locator('#rooms-grid img').count(),0,'nome da sala não executa HTML');
   await login('p1');await visit('pages/professor.html');await page.evaluate(()=>openReservationDetail('active'));
   await page.getByRole('button',{name:'Reportar defeito',exact:true}).click();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>document.activeElement?.id==='btn-report-defect');
+  assert.equal(await page.locator('#res-detail-modal').isVisible(),true,'Escape retorna aos detalhes e restaura o foco');
+  await page.getByRole('button',{name:'Reportar defeito',exact:true}).click();
   await page.getByLabel('Número da etiqueta',{exact:true}).fill('NT-1');
-  await page.getByLabel('Descrição do defeito',{exact:true}).fill('A tela não liga. <img src=x onerror=alert(1)>');
+  await page.getByLabel('Descrição do defeito',{exact:true}).fill('A tela "não" liga. <img src=x onerror=alert(1)>');
   await page.getByRole('button',{name:'Enviar relato',exact:true}).click();
   await page.locator('#report-defect-modal').waitFor({state:'hidden'});
   assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM defeitos_reportados').get().n,1);
@@ -174,6 +178,9 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.equal(await page.locator('.sidebar-nav [data-defect-count]').textContent(),'1','Relatórios destaca relato novo');
   await visit('pages/relatorio.html');await page.locator('[data-report-tab="defeitos"]').click();
   assert.equal(await page.locator('#defects-list .defect-report').count(),1);
+  await page.getByRole('button',{name:'Marcar como lido',exact:true}).focus();
+  await page.evaluate(()=>window.dispatchEvent(new Event('ers:reservations-updated')));
+  assert.equal(await page.getByRole('button',{name:'Marcar como lido',exact:true}).evaluate(el=>el===document.activeElement),true,'atualização sem mudanças preserva foco mesmo com aspas no relato');
   await page.getByRole('button',{name:'Marcar como lido',exact:true}).click();
   await page.waitForFunction(()=>window.ERS_DATA.defects.every(d=>d.lidoEm));
   assert.equal(await page.locator('[data-report-tab="defeitos"] [data-defect-count]').isVisible(),false,'contador baixa após leitura explícita');
