@@ -1,11 +1,3 @@
-/* ==========================================================================
-   Relatório CSS - Sistema de Reserva Escolar
-   Estilos específicos para a tela de Relatórios Detalhados (PROATEC)
-   ========================================================================== */
-
-/* ---------------------------------------------------------
-   1. Cabeçalho da Página de Relatórios
-   --------------------------------------------------------- */
 .reports-page-header {
     display: flex;
     justify-content: space-between;
@@ -35,7 +27,6 @@
     flex-wrap: wrap;
 }
 
-/* Filtros rápidos por pill (Todas / Hoje) */
 .filter-pills {
     display: inline-flex;
     background-color: var(--color-surface-container, #f1f5f9);
@@ -100,9 +91,6 @@
     color: var(--color-primary);
 }
 
-/* ---------------------------------------------------------
-   2. Resumo de Estatísticas
-   --------------------------------------------------------- */
 .report-stats-grid {
     display: flex;
     gap: 14px;
@@ -152,9 +140,6 @@
     opacity: 0.4;
 }
 
-/* ---------------------------------------------------------
-   3. Lista e Cartões de Relatórios
-   --------------------------------------------------------- */
 .reports-list {
     display: flex;
     flex-direction: column;
@@ -181,7 +166,6 @@
     background-color: #fdfdfd;
 }
 
-/* Topo do Cartão de Relatório */
 .report-card-header {
     padding: 18px 22px;
     display: flex;
@@ -271,7 +255,6 @@
     color: var(--color-text-placeholder);
 }
 
-/* Botão "Ver registros" */
 .report-card-actions {
     display: flex;
     align-items: center;
@@ -325,9 +308,6 @@
     color: var(--color-primary, #1a73e8);
 }
 
-/* ---------------------------------------------------------
-   4. Modal de Registros de Notebooks e Alunos
-   --------------------------------------------------------- */
 .modal-records {
     max-width: 640px;
     width: 95%;
@@ -355,7 +335,6 @@
     font-size: 22px;
 }
 
-/* Grade Resumo da Reserva */
 .record-info-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -386,7 +365,6 @@
     font-weight: 500;
 }
 
-/* Tabela de Registros */
 .records-table-container {
     margin-top: 4px;
 }
@@ -525,9 +503,6 @@
     line-height: 1.4;
 }
 
-/* ---------------------------------------------------------
-   5. Responsividade
-   --------------------------------------------------------- */
 @media (max-width: 768px) {
     .reports-page-header {
         flex-direction: column;

@@ -93,12 +93,13 @@ async function identidadeFirebase(config, idToken) {
     return {
         id: `firebase:${config.projectId}:${claims.sub}`,
         email,
+        provider,
         nome: nome && nome.length <= 120 && !/\p{Cc}/u.test(nome) ? nome : null,
     };
 }
 
 async function vincularConta(db, identidade) {
-    // O papel inicial é decidido aqui, mesmo quando o cliente envia outro papel.
+
     await db.prepare(`INSERT INTO contas (id, email, papel, identidade_externa, nome)
         VALUES (?, ?, 'professor', ?, ?) ON CONFLICT DO NOTHING`)
         .bind(crypto.randomUUID(), identidade.email, identidade.id, identidade.nome).run();
@@ -135,8 +136,26 @@ export async function rotaConta(request, env, url) {
     if (pathname === '/api/conta/entrar') {
         const config = firebaseConfig(env);
         if (!config) throw new HttpError(503, 'O login ainda está sendo configurado.');
-        const { idToken } = await readJson(request);
+        const { idToken, nome } = await readJson(request);
         const identidade = await identidadeFirebase(config, idToken);
+        if (identidade.provider === 'google.com') {
+            const existente = await DB.prepare('SELECT id FROM contas WHERE identidade_externa = ?')
+                .bind(identidade.id).first();
+            if (!existente) {
+                const conflito = await DB.prepare('SELECT id FROM contas WHERE email = ?').bind(identidade.email).first();
+                if (conflito) throw new HttpError(409, 'Este e-mail já está vinculado a outra conta. Procure a coordenação.');
+                if (nome === undefined) {
+                    const sugestao = identidade.nome || '';
+                    return json({ precisaNome: true, nome: sugestao.includes('@') ||
+                        sugestao.toLowerCase() === identidade.email.split('@')[0] ? '' : sugestao });
+                }
+                const nomeConfirmado = typeof nome === 'string' ? nome.replace(/\s+/g, ' ').trim() : '';
+                if (!nomeConfirmado || nomeConfirmado.length > 120 || /[\p{Cc}@]/u.test(nomeConfirmado)) {
+                    throw new HttpError(400, 'Informe seu nome com até 120 caracteres, sem usar um e-mail.');
+                }
+                identidade.nome = nomeConfirmado;
+            }
+        }
         const contaId = await vincularConta(DB, identidade);
         return json({ ok: true }, 200, { 'Set-Cookie': await abrirSessao(request, DB, url, contaId) });
     }

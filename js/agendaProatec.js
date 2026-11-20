@@ -1,9 +1,3 @@
-/**
- * agendaProatec.js — Lógica da agenda semanal da Coordenação
- * Espelha a funcionalidade e grade de horários da agenda do professor.
- * Depende de: store.js, auth.js, main.js
- */
-
 'use strict';
 
 window.AgendaProatecModule = (function() {
@@ -13,18 +7,13 @@ window.AgendaProatecModule = (function() {
     let selectedResId = null;
     let isInitialized = false;
 
-
     const SHIFT_SLOTS = ERS.SHIFT_SLOTS;
 
-    // ─────────────────────────────────────────────────────────────
-    //  INICIALIZAÇÃO
-    // ─────────────────────────────────────────────────────────────
     function init(session) {
         currentSession = session || AUTH.getSession();
         if (!currentSession) return;
         window.BloqueiosModule?.init(currentSession);
 
-        // Mostrar botão de bloqueio para Coordenação
         const btnBlock = document.getElementById('btnOpenBlock');
         if (btnBlock) btnBlock.style.display = 'inline-flex';
         if (currentSession.role === 'coordenacao') {
@@ -34,7 +23,6 @@ window.AgendaProatecModule = (function() {
         if (!isInitialized) {
             isInitialized = true;
 
-            // Navegação de semana
             document.getElementById('btnPrevWeek')?.addEventListener('click', () => {
                 currentWeekMonday.setDate(currentWeekMonday.getDate() - 7);
                 renderCalendar();
@@ -44,7 +32,6 @@ window.AgendaProatecModule = (function() {
                 renderCalendar();
             });
 
-            // Controle de Turnos
             document.querySelectorAll('#shiftControl .shift-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('#shiftControl .shift-btn').forEach(b => b.classList.remove('active'));
@@ -55,7 +42,6 @@ window.AgendaProatecModule = (function() {
                 });
             });
 
-            // Configuração dos campos de data com mini-calendário e restrição
             const dateInput = document.getElementById('res-date');
             if (dateInput) {
                 dateInput.min = ERS.today();
@@ -67,10 +53,9 @@ window.AgendaProatecModule = (function() {
                     } catch (e) {}
                 };
                 dateInput.addEventListener('click', openCalendar);
-                // Avoid reopening the native picker when restoring dialog focus.
+
             }
 
-            // Botão Nova Reserva
             document.getElementById('btnOpenNewReservation')?.addEventListener('click', () => {
                 const dInput = document.getElementById('res-date');
                 if (dInput) {
@@ -91,14 +76,12 @@ window.AgendaProatecModule = (function() {
                 openModal('new-reservation-modal');
             });
 
-            // Disponibilidade em tempo real ao mudar campos
             document.getElementById('res-quantity')?.addEventListener('input', updateAvailInfo);
             document.getElementById('res-brand')?.addEventListener('change', updateAvailInfo);
             document.getElementById('res-start')?.addEventListener('change', updateAvailInfo);
             document.getElementById('res-end')?.addEventListener('change', updateAvailInfo);
             document.getElementById('res-date')?.addEventListener('change', updateAvailInfo);
 
-            // Submissão dos Formulários e Ações de Bloqueio
             document.getElementById('new-reservation-form')?.addEventListener('submit', handleCreateReservation);
             document.getElementById('btn-delete-blk')?.addEventListener('click', handleDeleteBlock);
         }
@@ -107,9 +90,6 @@ window.AgendaProatecModule = (function() {
         renderCalendar();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  POPULAR HORÁRIOS POR TURNO
-    // ─────────────────────────────────────────────────────────────
     function populateTimeSlots(shift) {
         const slots = SHIFT_SLOTS[shift] || SHIFT_SLOTS['manha'];
         const selStart = document.getElementById('res-start');
@@ -134,9 +114,6 @@ window.AgendaProatecModule = (function() {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  POPULAR MARCAS
-    // ─────────────────────────────────────────────────────────────
     function populateBrandSelect() {
         const sel = document.getElementById('res-brand');
         if (!sel) return;
@@ -150,9 +127,6 @@ window.AgendaProatecModule = (function() {
         if (curVal) sel.value = curVal;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  CALENDÁRIO / GRADE DE HORÁRIOS
-    // ─────────────────────────────────────────────────────────────
     function renderCalendar() {
         const weekLabelEl = document.getElementById('weekLabel');
         const thead = document.getElementById('calendarHead');
@@ -167,7 +141,6 @@ window.AgendaProatecModule = (function() {
         weekLabelEl.textContent =
             `${first.getDate()} ${ERS.MESES[first.getMonth()]} — ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
 
-        // Cabeçalho dos Dias
         const todayStr = ERS.today();
         thead.innerHTML = `<tr>
             <th class="time-col-header"><span class="material-symbols-outlined">schedule</span></th>
@@ -181,7 +154,6 @@ window.AgendaProatecModule = (function() {
             }).join('')}
         </tr>`;
 
-        // Corpo da Tabela
         tbody.innerHTML = '';
 
         slots.forEach(slot => {
@@ -261,9 +233,6 @@ window.AgendaProatecModule = (function() {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  CRIAR RESERVA
-    // ─────────────────────────────────────────────────────────────
     function populateRoomSelect() {
         const sel = document.getElementById('res-room');
         if (!sel) return;
@@ -278,8 +247,8 @@ window.AgendaProatecModule = (function() {
         if (!infoEl) return;
         const brandSel = document.getElementById('res-brand');
         const brand = brandSel ? brandSel.value : '';
-        const total = typeof ERS.getDisponivelByBrand === 'function' 
-            ? ERS.getDisponivelByBrand(brand) 
+        const total = typeof ERS.getDisponivelByBrand === 'function'
+            ? ERS.getDisponivelByBrand(brand)
             : ERS.getTotalDisponivel();
 
         if (brand) {
@@ -307,7 +276,6 @@ window.AgendaProatecModule = (function() {
             return;
         }
 
-        // 1. Validação de Data (apenas hoje para frente)
         if (!data) {
             if (errEl) { errEl.textContent = 'Por favor, selecione uma data para a reserva.'; errEl.style.display = 'block'; }
             return;
@@ -317,13 +285,11 @@ window.AgendaProatecModule = (function() {
             return;
         }
 
-        // 2. Validação de Horários
         if (!inicio || !fim) {
             if (errEl) { errEl.textContent = 'Por favor, selecione os horários de início e término.'; errEl.style.display = 'block'; }
             return;
         }
 
-        // 3. Validação de Horários por Turno
         const currentSlots = SHIFT_SLOTS[currentShift] || SHIFT_SLOTS['manha'];
         const validStarts = currentSlots.map(s => s.start);
         const validEnds = currentSlots.map(s => s.end);
@@ -343,7 +309,6 @@ window.AgendaProatecModule = (function() {
             return;
         }
 
-        // 4. Validação de Recurso
         if (!sala && qtd <= 0) {
             if (errEl) { errEl.textContent = 'Selecione ao menos uma sala ou informe a quantidade de notebooks.'; errEl.style.display = 'block'; }
             return;
@@ -370,9 +335,6 @@ window.AgendaProatecModule = (function() {
         if (window.ProatecModule?.render) window.ProatecModule.render();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  DETALHES / CANCELAR RESERVA
-    // ─────────────────────────────────────────────────────────────
     function openReservationDetail(id) {
         const r = ERS.getReservations().find(r => r.id === id);
         if (!r) return;
@@ -426,7 +388,6 @@ window.AgendaProatecModule = (function() {
             `;
         }
 
-
         const btnCancel = document.getElementById('btn-cancel-res');
         if (btnCancel) {
             btnCancel.hidden = r.situacao !== 'confirmada';
@@ -458,9 +419,6 @@ window.AgendaProatecModule = (function() {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  DETALHES / REMOVER BLOQUEIO
-    // ─────────────────────────────────────────────────────────────
     let selectedBlockId = null;
 
     function openBlockDetail(id) {
@@ -491,7 +449,7 @@ window.AgendaProatecModule = (function() {
         const b = ERS.getBlocks().find(b => b.id === selectedBlockId);
         const ok = await showConfirmModal({
             title: 'Remover Bloqueio',
-            message: b 
+            message: b
                 ? `Deseja realmente remover o bloqueio de <strong>${BloqueiosModule.formatBlockDates(b)}</strong>? Os horários voltarão a ficar disponíveis para reserva.`
                 : 'Deseja realmente remover este bloqueio? Os horários voltarão a ficar disponíveis.',
             icon: 'lock_open',
@@ -510,7 +468,6 @@ window.AgendaProatecModule = (function() {
         if (window.BloqueiosModule?.render) window.BloqueiosModule.render();
     }
 
-    // Fallback para carregamento isolado da página
     if (!window.isSpaMode) {
         document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);
@@ -536,7 +493,6 @@ window.AgendaProatecModule = (function() {
     };
 })();
 
-// Exporta funções chamadas inline no HTML / onclick
 window.openReservationDetail = function(id) {
     window.AgendaProatecModule?.openReservationDetail(id);
 };

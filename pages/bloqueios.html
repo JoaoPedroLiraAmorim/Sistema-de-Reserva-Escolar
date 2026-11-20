@@ -7,14 +7,10 @@
     <title>Bloqueios - Coordenação</title>
     <meta name="description" content="Gestão de bloqueios de períodos para impedir reservas em datas e horários específicos.">
 
-    <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
-
-    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/bloqueios.css">
 
-    <!-- Anti-flicker da Sidebar (Executado antes da renderização) -->
     <script>
         (function() {
             try {
@@ -35,16 +31,14 @@
 </head>
 <body data-page="bloqueios">
     <div class="app-container">
-        <!-- Sidebar injetada dinamicamente por sidebar.js -->
+
         <div id="sidebar-mount"></div>
 
-        <!-- Backdrop para Mobile -->
         <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-        <!-- Área Principal -->
         <div class="main-wrapper">
             <main class="dashboard-content">
-                <!-- Cabeçalho -->
+
                 <section class="dashboard-header">
                     <div class="header-greeting">
                         <div class="header-top-row">
@@ -64,7 +58,6 @@
         </div>
     </div>
 
-    <!-- Modal: Criar Bloqueio -->
     <div class="modal-backdrop hidden" id="block-modal">
         <div class="modal">
             <div class="modal-header">
@@ -160,10 +153,8 @@
         </div>
     </div>
 
-    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>

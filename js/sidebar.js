@@ -1,20 +1,6 @@
-/**
- * Sistema de Reserva Escolar — sidebar.js
- * Injeta dinamicamente o HTML da sidebar em todas as páginas internas.
- * Elimina a duplicação de ~60 linhas de HTML em cada página.
- *
- * Uso: Adicionar <div id="sidebar-mount"></div> no lugar do <aside>,
- *      e <script src="../js/sidebar.js"></script> ANTES dos demais scripts.
- *
- * O atributo data-page no <body> indica qual link marcar como ativo.
- * Ex: <body data-page="proatec">
- */
-
 (function () {
     'use strict';
 
-    // Mapa de página → nome do arquivo HTML (sem extensão)
-    // Usado para marcar o link ativo na sidebar
     const PAGE_MAP = {
         proatec:       'proatec.html',
         agenda:        'agendaProatec.html',
@@ -24,7 +10,6 @@
         bloqueios:     'bloqueios.html',
     };
 
-    // HTML da sidebar (único ponto de verdade)
     function buildSidebarHTML(activePage) {
         const nav = [
             { page: 'proatec',      href: 'proatec.html',      icon: 'home',          label: 'Início' },
@@ -56,7 +41,7 @@
 
             <nav class="sidebar-nav">
                 ${navLinks}
-                <!-- Item exclusivo da Coordenação: injetado por auth.js -->
+
             </nav>
 
             <div class="sidebar-footer">
@@ -77,12 +62,9 @@
             </div>
         </aside>
 
-        <!-- Backdrop para Mobile -->
         <div class="sidebar-backdrop" id="sidebarBackdrop"></div>`;
     }
 
-    // Injeta a sidebar no mount point antes do DOMContentLoaded
-    // (executa sync durante o parsing do HTML)
     function injectSidebar() {
         const mount = document.getElementById('sidebar-mount');
         if (!mount) return;
@@ -90,16 +72,12 @@
         const activePage = document.body.getAttribute('data-page') || '';
         mount.outerHTML = buildSidebarHTML(activePage);
 
-        // Algumas páginas legadas ainda contêm um backdrop estático além do
-        // injetado pela sidebar. Mantém um único backdrop para evitar camadas
-        // duplicadas ao abrir o menu móvel.
         const backdrops = document.querySelectorAll('.sidebar-backdrop');
         backdrops.forEach((backdrop, index) => {
             if (index > 0) backdrop.remove();
         });
     }
 
-    // Se o DOM já está pronto (script carregado depois), injeta agora
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectSidebar);
     } else {

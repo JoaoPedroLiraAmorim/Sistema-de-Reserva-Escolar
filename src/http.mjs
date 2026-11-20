@@ -36,7 +36,7 @@ export async function readJson(request) {
         const data = JSON.parse(body + decoder.decode());
         if (data && typeof data === 'object' && !Array.isArray(data)) return data;
     } catch {
-        // Responder da mesma forma a um JSON inválido e a um objeto ausente.
+
     }
     throw new HttpError(400, 'Dados inválidos.');
 }

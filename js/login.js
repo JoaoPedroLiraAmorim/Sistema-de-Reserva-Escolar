@@ -1,18 +1,11 @@
-/**
- * login.js — Lógica da tela de login
- * Depende de: store.js
- */
-
 'use strict';
 
-// Credenciais demo (definidas em JS, não no HTML como atributos visíveis)
 const DEMO_CREDENTIALS = [
     { email: 'professor@demo.com',   password: '123456' },
     { email: 'proatec@demo.com',     password: '123456' },
     { email: 'coordenacao@demo.com', password: '123456' },
 ];
 
-// Se já logado, redireciona direto
 (function () {
     const session = ERS.getSession();
     if (session) {
@@ -26,7 +19,7 @@ const DEMO_CREDENTIALS = [
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Toggle de senha
+
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput  = document.getElementById('password');
 
@@ -38,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Preencher credenciais demo via JS (sem data-pass exposto no HTML)
     document.querySelectorAll('.demo-pill').forEach((pill, index) => {
         const cred = DEMO_CREDENTIALS[index];
         if (!cred) return;
@@ -49,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Formulário de login (ERS.login é async)
     document.getElementById('login-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const email    = document.getElementById('email').value.trim();

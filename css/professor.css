@@ -1,11 +1,3 @@
-/* ==========================================================================
-   Professor CSS - Sistema de Reserva Escolar
-   Estilos específicos para o Portal e Agenda do Professor
-   ========================================================================== */
-
-/* ---------------------------------------------------------
-   1. Layout Geral & Barra Superior (Top Navigation)
-   --------------------------------------------------------- */
 .teacher-app {
     min-height: 100vh;
     display: flex;
@@ -66,8 +58,6 @@
     padding-left: 16px;
 }
 
-/* (nav links removed — navegação simplificada) */
-
 .teacher-user-actions {
     display: flex;
     align-items: center;
@@ -125,9 +115,6 @@
     color: var(--color-error);
 }
 
-/* ---------------------------------------------------------
-   2. Conteúdo Principal
-   --------------------------------------------------------- */
 .teacher-main-content {
     flex: 1;
     max-width: 1440px;
@@ -139,9 +126,6 @@
     gap: 20px;
 }
 
-/* ---------------------------------------------------------
-   3. Chip de Reserva em Andamento (inline, estilo sutil)
-   --------------------------------------------------------- */
 .active-res-chip {
     display: inline-flex;
     align-items: center;
@@ -226,9 +210,6 @@
     color: #1e3a6e;
 }
 
-/* ---------------------------------------------------------
-   4. Cabeçalho de Ações da Agenda
-   --------------------------------------------------------- */
 .agenda-action-header {
     display: flex;
     align-items: center;
@@ -282,9 +263,6 @@
     transform: scale(0.98);
 }
 
-/* ---------------------------------------------------------
-   5. Barra de Filtros e Controles de Semana
-   --------------------------------------------------------- */
 .calendar-controls-bar {
     display: flex;
     align-items: center;
@@ -330,7 +308,6 @@
     color: var(--color-text-primary);
 }
 
-/* Segmented Control para Turnos */
 .shift-segmented-control {
     display: flex;
     align-items: center;
@@ -364,9 +341,6 @@
     background-color: rgba(0, 0, 0, 0.03);
 }
 
-/* ---------------------------------------------------------
-   6. Grade Semanal de Horários
-   --------------------------------------------------------- */
 .calendar-wrapper-card {
     background-color: var(--color-bg-white);
     border: 1px solid var(--color-border-light);
@@ -390,7 +364,6 @@
     table-layout: fixed;
 }
 
-/* Cabeçalho dos Dias */
 .calendar-table th {
     background-color: #f4f6fb;
     border-bottom: 1px solid var(--color-border-light);
@@ -426,7 +399,6 @@
     margin-top: 2px;
 }
 
-/* Destaque para o dia de hoje */
 .calendar-table th.today-col {
     background-color: #edf2ff;
 }
@@ -446,7 +418,6 @@
     color: var(--color-primary);
 }
 
-/* Células de Horário */
 .calendar-table td {
     border-bottom: 1px solid var(--color-border-light);
     border-right: 1px solid var(--color-border-light);
@@ -494,7 +465,6 @@
     background-color: #eff2f8;
 }
 
-/* Linha de Intervalo */
 .interval-row td {
     height: 44px;
     background-color: #f1f4fa !important;
@@ -518,7 +488,6 @@
     font-size: 16px;
 }
 
-/* Cartões de Agendamento dentro das Células */
 .calendar-events-container {
     display: flex;
     flex-direction: column;
@@ -604,9 +573,6 @@
     font-size: 12px;
 }
 
-/* ---------------------------------------------------------
-   7. Navegação Inferior (Mobile Bottom Navigation)
-   --------------------------------------------------------- */
 .mobile-bottom-nav {
     display: none;
     position: fixed;
@@ -651,10 +617,6 @@
     transform: scale(0.92);
 }
 
-/* ---------------------------------------------------------
-   8. Responsividade
-   --------------------------------------------------------- */
-/* ---- Médio (tablets, 1024px) ---- */
 @media (max-width: 1024px) {
     .teacher-main-content {
         padding: 20px 24px 40px;
@@ -665,7 +627,6 @@
     }
 }
 
-/* ---- Pequeno (mobile, 768px) ---- */
 @media (max-width: 768px) {
     .teacher-header {
         padding: 0 16px;
@@ -770,9 +731,6 @@
     }
 }
 
-/* ---------------------------------------------------------
-   9. Modal de Registro de Uso de Equipamentos
-   --------------------------------------------------------- */
 .modal.modal-lg {
     max-width: 680px;
 }
@@ -799,7 +757,6 @@
     font-size: 22px;
 }
 
-/* Barra de Resumo da Reserva no Topo do Modal */
 .reg-reservation-summary {
     display: flex;
     align-items: center;
@@ -847,7 +804,6 @@
     color: var(--color-success);
 }
 
-/* Corpo do Modal e Grade de Linhas */
 .reg-modal-body {
     max-height: 52vh;
     overflow-y: auto;
@@ -984,7 +940,6 @@
     padding: 10px 22px;
 }
 
-/* Responsividade do Modal para Telas Pequenas */
 @media (max-width: 600px) {
     .reg-row-header {
         display: none;
@@ -992,7 +947,7 @@
 
     .reg-row {
         grid-template-columns: 1fr 32px;
-        grid-template-areas: 
+        grid-template-areas:
             "tag remove"
             "student student";
         gap: 6px;
@@ -1021,9 +976,6 @@
     }
 }
 
-/* ==========================================================================
-   Estilos Complementares da Agenda Dinâmica do Professor
-   ========================================================================== */
 .calendar-event-card {
     cursor: pointer;
 }

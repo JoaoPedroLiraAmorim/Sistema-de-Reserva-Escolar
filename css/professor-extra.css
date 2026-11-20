@@ -1,26 +1,14 @@
-/* ==========================================================================
-   professor-extra.css
-   Estilos complementares da página do Professor (calendário dinâmico,
-   lista de reservas, badges de situação).
-   ========================================================================== */
-
-/* Evento clicável no calendário */
 .calendar-event-card          { cursor: pointer; }
 .calendar-event-card:hover    { opacity: 0.85; }
 
-/* Destaque de reserva própria */
 .event-mine       { border-left: 3px solid var(--color-primary); }
 
-/* Bloqueio no calendário */
 .event-block { border-left: 3px solid #ef4444; background: #fef2f2 !important; }
 
-/* Label da semana */
 .week-label-text { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
 
-/* Célula vazia */
 .calendar-empty-cell { color: var(--color-text-muted); font-size: 12px; text-align: center; padding: 4px; }
 
-/* Seção "Minhas Reservas" */
 #my-reservations-section { margin-top: 28px; }
 
 .my-res-list {
@@ -52,7 +40,6 @@
 .my-res-item .res-info p     { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
 .my-res-item .res-actions    { display: flex; gap: 6px; align-items: center; }
 
-/* Botão cancelar reserva */
 .btn-res-cancel {
     background: none;
     border: 1px solid #fecaca;
@@ -66,31 +53,22 @@
 }
 .btn-res-cancel:hover { background: #fef2f2; }
 
-/* Badges de situação */
 .badge-situacao   { font-size: 11px; border-radius: 12px; padding: 2px 8px; font-weight: 600; }
 .badge-confirmada { background: #dcfce7; color: #16a34a; }
 .badge-cancelada  { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
 
-/* Chip de reserva ativa */
 .active-res-chip.hidden { display: none; }
 
-/* Info de disponibilidade no modal */
 .avail-info { font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; }
 
-/* Chip ativo no header */
 .section-title h2 { font-size: 13px; color: var(--color-text-muted); }
 
-/* Detail list no modal */
 .detail-list              { display: flex; flex-direction: column; gap: 10px; }
 .detail-list div          { font-size: 14px; }
 .detail-list div strong   { color: var(--color-text-primary); }
 
-/* Mensagem vazia */
 .empty-msg { font-size: 13px; color: var(--color-text-muted); padding: 12px 0; }
 
-/* ==========================================================================
-   Chip Ativo com Botão de Registro
-   ========================================================================== */
 .active-res-chip {
     display: flex;
     align-items: center;
@@ -150,9 +128,6 @@
     box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
 }
 
-/* ==========================================================================
-   Modal de Registro de Alunos
-   ========================================================================== */
 .modal-lg {
     max-width: 760px;
     width: 92%;

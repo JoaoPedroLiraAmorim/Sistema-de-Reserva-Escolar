@@ -13,7 +13,7 @@ A reserva e a retirada são etapas diferentes. Na interface atual, a reserva vá
 
 3. Jornada do Professor
 Acesso
-O professor entra no sistema e chega à sua área, com agenda, próximas reservas e ações para solicitar recursos. O acesso institucional é uma evolução prevista; o login atual é demonstrativo.
+O professor pode entrar com Google ou com e-mail e senha após confirmar o e-mail. No primeiro acesso pelo Google, informa ou confirma seu nome antes de concluir o cadastro. O nome do Google é sugerido quando não corresponde ao e-mail ou ao usuário do e-mail. Ao salvar, a conta é criada como Professor e a agenda é aberta. É possível voltar sem concluir o cadastro no sistema. Nos próximos acessos, entra diretamente e mantém o nome salvo. Os acessos de demonstração continuam disponíveis separadamente.
 
 Consulta da agenda
 O professor consulta a data e o período desejados, observa as reservas existentes e identifica uma oportunidade para sua aula.

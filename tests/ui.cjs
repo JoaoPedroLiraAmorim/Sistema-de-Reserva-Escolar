@@ -45,7 +45,9 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
     entrar:async(email,senha,api)=>{
      if(email===window.__cadastro?.email&&!window.__emailVerificado)return false;
      await api('conta/entrar',{idToken:email.startsWith('coord')?'c1':'p1'});return true;
-    },entrarGoogle:async api=>api('conta/entrar',{idToken:'p1'})};}
+    },entrarGoogle:async api=>window.__novoGoogle?({precisaNome:true,nome:'Nome do Google'}):api('conta/entrar',{idToken:'p1'}),
+    cancelarGoogle:async()=>{window.__googleCancelado=true;},
+    confirmarNomeGoogle:async(nome,api)=>{sessionStorage.setItem('teste_nome_google',nome);return api('conta/entrar',{idToken:'p1'});}};}
    export function prepararConfirmacao(config) {
     if(config.projectId!=='demo-alceu') throw Error('Projeto inesperado');
     return {conferir:async(code,mode)=>{
@@ -68,6 +70,25 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   const noOverflow=async label=>assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1&&document.body.scrollWidth<=innerWidth+1),true,label);
   const screenshot=async name=>{if(!process.env.UI_ARTIFACT_DIR)return;fs.mkdirSync(process.env.UI_ARTIFACT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.UI_ARTIFACT_DIR,name+'.png'),fullPage:true});};
   await page.setViewportSize({width:390,height:844});await visit('index.html');
+  await page.evaluate(()=>{window.__novoGoogle=true;});
+  await page.getByRole('button',{name:'Entrar com Google',exact:true}).click();
+  await page.getByRole('heading',{name:'Confirme seu nome.'}).waitFor();
+  assert.equal(await page.getByLabel('Nome',{exact:true}).inputValue(),'Nome do Google');
+  assert.equal(await page.getByLabel('Senha',{exact:true}).isVisible(),false);
+  await page.getByRole('button',{name:'Voltar para entrar',exact:true}).click();
+  assert.equal(await page.evaluate(()=>window.__googleCancelado),true);
+  await page.getByRole('button',{name:'Entrar com Google',exact:true}).click();
+  await page.getByLabel('Nome',{exact:true}).fill('prof@exemplo.com');
+  await page.getByRole('button',{name:'Salvar e entrar',exact:true}).click();
+  await page.getByRole('alert').filter({hasText:'Informe seu nome'}).waitFor();
+  assert.equal(writes.includes('/api/conta/entrar'),false);
+  await page.setViewportSize({width:320,height:740});await noOverflow('nome Google 320');
+  await page.getByLabel('Nome',{exact:true}).fill('  Maria   Silva ');
+  await page.getByRole('button',{name:'Salvar e entrar',exact:true}).click();
+  await page.waitForURL('**/pages/professor.html');
+  assert.equal(await page.evaluate(()=>sessionStorage.getItem('teste_nome_google')),'Maria Silva');
+  await context.clearCookies();writes.length=0;
+  await visit('index.html');
   assert.equal(await page.locator('[data-demo-role]').count(),2,'oferece dois acessos demo explícitos');
   await page.getByRole('button',{name:'Entrar com Google',exact:true}).waitFor();
   assert.ok(await page.locator('#login-google img').evaluate(img=>img.complete&&img.naturalWidth>0),'exibe o ícone do Google');
@@ -213,6 +234,14 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.deepEqual(await page.evaluate(()=>window.ERS_DATA.defects),[],'outro professor não acessa relatos nem nomes de alunos');
   await page.locator('.btn-header-logout').click();await page.waitForURL('**/index.html');
   await page.getByRole('button',{name:'Entrar com Google'}).click();await page.waitForURL('**/pages/professor.html');
+  await visit('index.html');await page.waitForURL('**/pages/professor.html');
+  await login('c1');await visit('index.html');await page.waitForURL('**/pages/proatec.html');
+  await context.clearCookies();
+  await context.addCookies([{name:'__Host-alceu_sessao',value:'sessao-invalida',url:base,httpOnly:true,secure:true,sameSite:'Lax'}]);
+  await visit('index.html');
+  await page.getByRole('button',{name:'Entrar com Google'}).waitFor();
+  assert.equal(new URL(page.url()).pathname,'/index.html');
+  await context.clearCookies();
   const savedCount = sql.prepare('SELECT COUNT(*) AS n FROM reservas').get().n;
   const roomsCount = sql.prepare('SELECT COUNT(*) AS n FROM salas').get().n;
   const writesBeforeDemo = writes.length;

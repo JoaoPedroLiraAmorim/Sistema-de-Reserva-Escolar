@@ -1,4 +1,3 @@
-/* Melhoria progressiva: mantém os módulos e fluxos do projeto original. */
 (function () {
     'use strict';
     const $ = s => document.querySelector(s);

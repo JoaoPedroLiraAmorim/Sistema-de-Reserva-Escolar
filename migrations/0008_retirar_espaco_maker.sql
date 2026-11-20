@@ -1,4 +1,3 @@
--- Retira a sala da operação sem excluir reservas históricas vinculadas.
 UPDATE salas SET ativa = 0
 WHERE lower(replace(trim(nome), 'Ç', 'ç')) IN ('espaço maker', 'espaco maker');
 

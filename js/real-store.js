@@ -1,4 +1,3 @@
-/* Cache em memória; todas as gravações são confirmadas pelo servidor. */
 (function () {
     'use strict';
     if (window.ERS_DEMO) {

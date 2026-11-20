@@ -1,12 +1,5 @@
-/**
- * Sistema de Reserva Escolar - main.js
- * Funções globais compartilhadas (Modais, Sidebar Mobile, Atalhos de Teclado)
- */
-
 document.addEventListener('ers:ready', () => {
-    // ---------------------------------------------------------
-    // 1. Controle de Sidebar (Retrátil com Ícones Clicáveis)
-    // ---------------------------------------------------------
+
     const sidebar = document.getElementById('sidebar');
     const menuToggle = document.getElementById('menuToggle');
     const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
@@ -15,11 +8,11 @@ document.addEventListener('ers:ready', () => {
     const SIDEBAR_STORAGE_KEY = 'escola_sidebar_collapsed';
 
     if (sidebar) {
-        // Aplica estado inicial salvo ou padrão (recolhido por padrão no desktop)
+
         const initSidebarState = () => {
             if (window.innerWidth > 768) {
                 const savedState = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-                // Se não houver preferência salva, inicia recolhido (ícones visíveis)
+
                 const isCollapsed = savedState !== null ? savedState === 'true' : false;
                 setSidebarCollapsed(isCollapsed);
             } else {
@@ -50,7 +43,6 @@ document.addEventListener('ers:ready', () => {
             setSidebarCollapsed(!isCurrentlyCollapsed);
         };
 
-        // Garante atributos data-tooltip em todos os links e perfil
         const setupTooltips = () => {
             sidebar.querySelectorAll('.nav-link').forEach(link => {
                 if (!link.getAttribute('data-tooltip')) {
@@ -69,8 +61,6 @@ document.addEventListener('ers:ready', () => {
         initSidebarState();
         setupTooltips();
 
-        // Reaplica o modo da sidebar ao cruzar o breakpoint sem recarregar a página.
-        // O estado recolhido/expandido continua persistido apenas para desktop.
         let wasMobile = window.innerWidth <= 768;
         window.addEventListener('resize', () => {
             const isMobile = window.innerWidth <= 768;
@@ -91,7 +81,6 @@ document.addEventListener('ers:ready', () => {
             }
         });
 
-        // Botão de recolher/expandir na própria sidebar
         if (sidebarToggleBtn) {
             sidebarToggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -104,7 +93,6 @@ document.addEventListener('ers:ready', () => {
             });
         }
 
-        // Clique no logotipo/marca: se estiver recolhido, expande
         if (sidebarBrandWrapper) {
             sidebarBrandWrapper.addEventListener('click', (e) => {
                 if (window.innerWidth > 768 && sidebar.classList.contains('collapsed')) {
@@ -114,7 +102,6 @@ document.addEventListener('ers:ready', () => {
             });
         }
 
-        // Fechamento no Mobile via Backdrop
         if (sidebarBackdrop) {
             document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.addEventListener('click', () => {
                 sidebar.classList.remove('open');
@@ -122,15 +109,13 @@ document.addEventListener('ers:ready', () => {
             }));
         }
 
-        // Fecha a sidebar ao clicar fora dela na página (desktop e mobile)
         document.addEventListener('click', (e) => {
             if (sidebar.contains(e.target)) return;
 
             if (window.innerWidth > 768) {
-                // No desktop: se estiver expandida (não-collapsed), recolhe/fecha
-                // A preferência de menu permanece estável durante o uso.
+
             } else {
-                // No mobile: se estiver aberta, fecha
+
                 if (sidebar.classList.contains('open')) {
                     sidebar.classList.remove('open');
                     document.querySelectorAll('.sidebar-backdrop').forEach(backdrop => backdrop.classList.remove('active'));
@@ -138,7 +123,6 @@ document.addEventListener('ers:ready', () => {
             }
         });
 
-        // Transição suave ao navegar por um link da sidebar ou atalhos
         document.querySelectorAll('.sidebar .nav-link, .quick-actions-grid .action-card, .link-action').forEach(link => {
             link.addEventListener('click', (e) => {
                 const href = link.getAttribute('href');
@@ -146,13 +130,11 @@ document.addEventListener('ers:ready', () => {
                     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
                     const targetPath = href.split('/').pop().split('?')[0];
 
-                    // Se já estiver na mesma tela, previne recarregar
                     if (currentPath === targetPath) {
                         e.preventDefault();
                         return;
                     }
 
-                    // Anima saída suave do conteúdo atual antes de trocar de página
                     const content = document.querySelector('.dashboard-content');
                     if (content) {
                         e.preventDefault();
@@ -171,7 +153,6 @@ document.addEventListener('ers:ready', () => {
             });
         });
 
-        // Reajusta em redimensionamento de tela
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('open');
@@ -183,9 +164,6 @@ document.addEventListener('ers:ready', () => {
         });
     }
 
-    // ---------------------------------------------------------
-    // 3. Modais: Fechamento por clique no fundo escuro ou botões de fechar
-    // ---------------------------------------------------------
     document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
         backdrop.addEventListener('click', (e) => {
             if (e.target === backdrop) {
@@ -194,7 +172,6 @@ document.addEventListener('ers:ready', () => {
         });
     });
 
-    // Fechamento automático pelos botões de fechar dos diálogos.
     document.addEventListener('click', (e) => {
         const closeBtn = e.target.closest('[data-close-modal], .btn-close');
         if (closeBtn) {
@@ -210,10 +187,6 @@ document.addEventListener('ers:ready', () => {
 
 });
 
-/**
- * Abre um modal pelo ID
- * @param {string} modalId - ID do elemento .modal-backdrop
- */
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -221,10 +194,6 @@ function openModal(modalId) {
     }
 }
 
-/**
- * Fecha um modal pelo ID
- * @param {string} modalId - ID do elemento .modal-backdrop
- */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -232,19 +201,6 @@ function closeModal(modalId) {
     }
 }
 
-/**
- * Exibe um modal de confirmação padronizado substituindo os antigos confirm()/alert() nativos.
- * Retorna uma Promise<boolean> que resolve true se o usuário confirmou e false se cancelou/fechou.
- *
- * @param {Object} options
- * @param {string} options.title - Título do modal
- * @param {string} options.message - Mensagem descritiva (suporta HTML)
- * @param {string} [options.icon] - Ícone Material Symbols ('event_busy', 'inventory_2', 'lock_open', 'warning', etc)
- * @param {string} [options.type] - 'danger' | 'warning' | 'success' | 'primary'
- * @param {string} [options.confirmText] - Texto do botão confirmar
- * @param {string} [options.cancelText] - Texto do botão cancelar
- * @returns {Promise<boolean>}
- */
 function showConfirmModal(options = {}) {
     return new Promise((resolve) => {
         const {

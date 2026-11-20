@@ -1,15 +1,6 @@
-/**
- * Sistema de Reserva Escolar — store.js
- * Módulo central de dados e lógica de negócio para demonstração local.
- * Usa LocalStorage para persistência entre sessões.
- */
-
 (function () {
     'use strict';
 
-    // ─────────────────────────────────────────────────────────────
-    //  CONSTANTES
-    // ─────────────────────────────────────────────────────────────
     const KEYS = {
         USERS:        'ers_users',
         ROOMS:        'ers_rooms',
@@ -20,7 +11,6 @@
         SEEDED:       'ers_seeded',
     };
 
-    // Horários disponíveis no sistema (fonte única de verdade)
     const TIME_SLOTS = [
         { start: '07:00', end: '07:50' },
         { start: '07:50', end: '08:40' },
@@ -40,7 +30,6 @@
         { start: '21:40', end: '22:30' },
     ];
 
-    // Turnos derivados dos TIME_SLOTS (fonte única — elimina duplicação nos outros JS)
     const SHIFT_SLOTS = {
         manha: TIME_SLOTS.slice(0, 6),
         tarde: TIME_SLOTS.slice(6, 12),
@@ -51,9 +40,6 @@
         Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
     const validTime = value => typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 
-    // ─────────────────────────────────────────────────────────────
-    //  UTILITÁRIOS
-    // ─────────────────────────────────────────────────────────────
     function load(key) {
         if (window.ERS_REAL) {
             const fields = { ers_users: 'professors', ers_rooms: 'rooms', ers_notebooks: 'notebooks', ers_reservations: 'reservations', ers_blocks: 'blocks', ers_session: 'session' };
@@ -74,7 +60,6 @@
         return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     }
 
-    /** Formata Date → 'YYYY-MM-DD' */
     function dateKey(date) {
         if (typeof date === 'string') return date;
         const d = new Date(date);
@@ -83,24 +68,20 @@
             String(d.getDate()).padStart(2, '0');
     }
 
-    /** Retorna 'YYYY-MM-DD' para hoje */
     function today(now = new Date()) {
         return window.ERS_REAL || window.ERS_DEMO ? schoolClock.format(now).slice(0, 10) : dateKey(now);
     }
 
-    /** Retorna 'YYYY-MM-DD' para N dias a partir de hoje (ou de baseDate) */
     function dayOffset(n, baseDate = null) {
         const d = baseDate ? new Date(baseDate) : new Date();
         d.setDate(d.getDate() + n);
         return dateKey(d);
     }
 
-    /** Compara horários: retorna true se [s1,e1) e [s2,e2) se sobrepõem */
     function timesOverlap(s1, e1, s2, e2) {
         return s1 < e2 && e1 > s2;
     }
 
-    /** Escapa HTML para evitar XSS em inserções dinâmicas */
     function escapeHtml(str) {
         if (typeof str !== 'string') return String(str || '');
         return str
@@ -111,10 +92,6 @@
             .replace(/'/g, '&#39;');
     }
 
-    /**
-     * Hash SHA-256 assíncrono de uma string.
-     * @returns {Promise<string>} hex digest
-     */
     async function hashPassword(plain) {
         try {
             if (typeof crypto !== 'undefined' && crypto && crypto.subtle) {
@@ -133,9 +110,6 @@
         return plain;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  SEED INICIAL
-    // ─────────────────────────────────────────────────────────────
     async function seed(force = false) {
         const h = await hashPassword('123456');
 
@@ -144,7 +118,6 @@
             return;
         }
 
-        // Usuários do sistema
         save(KEYS.USERS, [
             { id: 'u1', email: 'professor@demo.com',   password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
             { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'coordenacao',     nome: 'João Almeida',     avatarLetter: 'J' },
@@ -156,14 +129,12 @@
             { id: 'u8', email: 'camila.rodrigues@demo.com', password: '123456', passwordHash: h, role: 'professor', nome: 'Profª. Camila Rodrigues', avatarLetter: 'C' },
         ]);
 
-        // Salas ativas
         save(KEYS.ROOMS, [
             { id: 'r1', nome: 'Aquário',         ativa: true },
             { id: 'r2', nome: 'Sala de Leitura', ativa: true },
             { id: 'r3', nome: 'Sala de Vídeo',   ativa: true },
         ]);
 
-        // Notebooks (por marca com unidades disponíveis e defeitos para demonstração)
         save(KEYS.NOTEBOOKS, [
             { id: 'nb1', marca: 'Dell',    total: 18, funcionando: 16, defeito: 2 },
             { id: 'nb2', marca: 'Lenovo',  total: 20, funcionando: 17, defeito: 3 },
@@ -171,7 +142,6 @@
             { id: 'nb4', marca: 'Samsung', total: 10, funcionando: 9,  defeito: 1 },
         ]);
 
-        // Reservas mock ancoradas na semana letiva (segunda a sexta)
         const mon = getMonday(new Date());
         const dSeg = dateKey(mon);
         const dTer = dayOffset(1, mon);
@@ -179,13 +149,12 @@
         const dQui = dayOffset(3, mon);
         const dSex = dayOffset(4, mon);
 
-        // Preserva reservas manuais criadas pelo usuário
         const existingRes = (load(KEYS.RESERVATIONS) || []).filter(r =>
             r.id && !r.id.startsWith('mock-res-')
         );
 
         const mockReservations = [
-            // Segunda-feira
+
             {
                 id: 'mock-res-1',
                 professorId: 'u1',
@@ -277,7 +246,6 @@
                 retiradaConfirmada: false
             },
 
-            // Terça-feira (Dia da apresentação)
             {
                 id: 'mock-res-6',
                 professorId: 'u1',
@@ -357,7 +325,6 @@
                 retiradaConfirmada: false
             },
 
-            // Quarta-feira
             {
                 id: 'mock-res-12',
                 professorId: 'u4',
@@ -401,7 +368,6 @@
                 retiradaConfirmada: false
             },
 
-            // Quinta-feira
             {
                 id: 'mock-res-16',
                 professorId: 'u8',
@@ -459,7 +425,6 @@
                 retiradaConfirmada: false
             },
 
-            // Sexta-feira
             {
                 id: 'mock-res-20',
                 professorId: 'u1',
@@ -492,7 +457,6 @@
 
         save(KEYS.RESERVATIONS, [...existingRes, ...mockReservations]);
 
-        // Bloqueios mock na semana ativa (Coordenação)
         save(KEYS.BLOCKS, [
             {
                 id: 'mock-blk-1',
@@ -537,9 +501,6 @@
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  AUTENTICAÇÃO
-    // ─────────────────────────────────────────────────────────────
     async function login(email, password) {
         let users = load(KEYS.USERS);
         if (!users || !users.length) {
@@ -566,7 +527,6 @@
             )
         );
 
-        // Fallback garantido para as contas demo
         if (!user && cleanPassword === '123456') {
             const demoMap = {
                 'professor@demo.com':   { id: 'u1', role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
@@ -594,7 +554,7 @@
 
     function getSession() {
         const session = load(KEYS.SESSION);
-        // Migra sessões anteriores para o perfil único de gestão.
+
         if (session?.role === 'proatec') {
             session.role = 'coordenacao';
             save(KEYS.SESSION, session);
@@ -608,9 +568,6 @@
             .map(({ id, nome }) => ({ id, nome }));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  SALAS
-    // ─────────────────────────────────────────────────────────────
     const isRemovedRoom = nome => String(nome || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'espaco maker';
     function getRooms() { return (load(KEYS.ROOMS) || []).filter(r => !isRemovedRoom(r.nome)); }
 
@@ -636,9 +593,6 @@
         return { ok: true };
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  NOTEBOOKS
-    // ─────────────────────────────────────────────────────────────
     function getNotebooks() {
         const raw = load(KEYS.NOTEBOOKS);
         if (!raw || !Array.isArray(raw)) return [];
@@ -655,7 +609,6 @@
         });
     }
 
-    /** Retorna lista de marcas únicas (sem duplicatas) */
     function getBrands() {
         return [...new Set(getNotebooks().map(n => n.marca).filter(Boolean))];
     }
@@ -794,9 +747,6 @@
         return { ok: true };
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  RESERVAS
-    // ─────────────────────────────────────────────────────────────
     function getReservations() {
         const reservations = load(KEYS.RESERVATIONS) || [];
         if (window.ERS_REAL) return reservations;
@@ -804,7 +754,7 @@
         const currentTime = getCurrentTime();
         const active = reservations.filter(r => !isRemovedRoom(r.sala) && (r.data > currentDate ||
             (r.data === currentDate && r.fim > currentTime)));
-        // Exclusão ao término autorizada: os registros de uso pertencem à reserva.
+
         if (active.length !== reservations.length) save(KEYS.RESERVATIONS, active);
         return active;
     }
@@ -837,7 +787,6 @@
     function checkConflicts({ data, inicio, fim, sala, notebooks, marca = '', excludeId = null }) {
         const dk = dateKey(data);
 
-        // 1. Verificar bloqueios
         const bloqueio = getBlocksByDate(dk).find(b => timesOverlap(inicio, fim, b.inicio, b.fim));
         if (bloqueio) {
             return { ok: false, message: `Período bloqueado pela Coordenação${bloqueio.motivo ? `: ${bloqueio.motivo}` : ''}.` };
@@ -846,7 +795,6 @@
         const resDia = getReservationsByDate(dk);
         const conflitantes = resDia.filter(r => r.id !== excludeId && timesOverlap(inicio, fim, r.inicio, r.fim));
 
-        // 2. Verificar conflito de sala
         if (sala) {
             const conflSala = conflitantes.find(r => r.sala === sala);
             if (conflSala) {
@@ -854,7 +802,6 @@
             }
         }
 
-        // 3. Verificar disponibilidade de notebooks
         if (notebooks && notebooks > 0) {
             const disponivel = getAvailability({ data: dk, inicio, fim, marca, excludeId });
             if (notebooks > disponivel) {
@@ -945,7 +892,6 @@
         return { ok: true, reservation: r };
     }
 
-    /** Retorna o horário atual no formato HH:MM (suporta mock em window._ers_mock_time) */
     function getCurrentTime(now = new Date()) {
         if (typeof window !== 'undefined' && window._ers_mock_time) {
             return window._ers_mock_time;
@@ -984,7 +930,6 @@
             withinReservationWindow(r, 10, agora);
     }
 
-    /** Verifica se o horário de início da reserva já chegou hoje */
     function isPickupTimeReady(res) {
         if (!res || !res.data || !res.inicio) return false;
         if (res.data !== today()) return false;
@@ -1002,7 +947,6 @@
             return { ok: false, message: 'Esta reserva está indisponível por bloqueio da coordenação.' };
         }
 
-        // Regra de Negócio: A Coordenação só pode confirmar quando der o horário da reserva, nunca antes!
         if (!isPickupTimeReady(r)) {
             const curTime = getCurrentTime();
             return {
@@ -1033,9 +977,6 @@
         return { ok: true, reservation: r };
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  BLOQUEIOS
-    // ─────────────────────────────────────────────────────────────
     function getBlocks() { return load(KEYS.BLOCKS) || []; }
 
     function getBlocksByDate(data) {
@@ -1073,14 +1014,6 @@
         return { ok: true };
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  UTILITÁRIOS DE UI
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Exibe toast genérico com botão de fechar.
-     * Usa textContent para evitar XSS.
-     */
     function showToast(message, type = 'success') {
         const container = document.getElementById('toastContainer');
         if (!container) { console.warn('[Toast]', message); return; }
@@ -1091,17 +1024,14 @@
         toast.className = `toast-notification ${type}`;
         toast.setAttribute('role', 'alert');
 
-        // Ícone
         const iconEl = document.createElement('span');
         iconEl.className = 'material-symbols-outlined';
         iconEl.style.fontSize = '20px';
         iconEl.textContent = icons[type] || 'info';
 
-        // Mensagem (textContent — sem XSS)
         const msgEl = document.createElement('span');
         msgEl.textContent = message;
 
-        // Botão fechar
         const closeBtn = document.createElement('button');
         closeBtn.className = 'toast-close-btn';
         closeBtn.setAttribute('aria-label', 'Fechar notificação');
@@ -1113,7 +1043,6 @@
         toast.appendChild(closeBtn);
         container.appendChild(toast);
 
-        // Auto-dismiss após 5s
         const timer = setTimeout(() => dismissToast(toast), 5000);
         toast._dismissTimer = timer;
     }
@@ -1125,30 +1054,26 @@
         setTimeout(() => toast.remove(), 350);
     }
 
-    /** Formata data 'YYYY-MM-DD' → 'DD/MM/YYYY' */
     function formatDate(dk) {
         if (!dk) return '';
         const [y, m, d] = dk.split('-');
         return `${d}/${m}/${y}`;
     }
 
-    /** Nomes dos dias da semana em pt-BR */
     const DIAS_SEMANA      = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const DIAS_SEMANA_FULL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     const MESES      = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-    /** Retorna a segunda-feira da semana letiva; no fim de semana, avança para a próxima. */
     function getMonday(date) {
         const d = new Date(typeof date === 'string' ? date + 'T12:00:00' : date);
-        d.setHours(12, 0, 0, 0); // evita bug de timezone
+        d.setHours(12, 0, 0, 0);
         const day = d.getDay();
         const diff = day === 0 ? 1 : day === 6 ? 2 : 1 - day;
         d.setDate(d.getDate() + diff);
         return d;
     }
 
-    /** Retorna as cinco datas letivas (segunda a sexta), dada a segunda-feira. */
     function getWeekDays(monday) {
         return Array.from({ length: 5 }, (_, i) => {
             const d = new Date(monday);
@@ -1157,38 +1082,32 @@
         });
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  SEGURANÇA — Listener de storage para detectar logout em outra aba
-    // ─────────────────────────────────────────────────────────────
     window.addEventListener('storage', (e) => {
         if (window.ERS_REAL) return;
         if (window.ERS_DEMO) return;
         if (e.key === KEYS.SESSION && e.newValue === null) {
-            // Sessão removida em outra aba → redireciona para login
+
             const isInPages = window.location.pathname.includes('/pages/');
             window.location.href = isInPages ? '../index.html' : 'index.html';
         }
     });
 
-    // ─────────────────────────────────────────────────────────────
-    //  EXPOSIÇÃO PÚBLICA
-    // ─────────────────────────────────────────────────────────────
     window.ERS = {
-        // Auth (login agora é async)
+
         login, logout, getSession, getProfessors,
-        // Salas
+
         getRooms, getActiveRooms, toggleRoom, addRoom,
-        // Notebooks
+
         getNotebooks, getTotalEquipamentos, getTotalDisponivel, getTotalDefeito, getBrands, getDisponivelByBrand,
         addNotebooks, registerNotebookDefect, registerNotebookAvailability, updateNotebookStatus, updateNotebookBrandCounts, deleteNotebookBrand,
-        // Reservas
+
         getReservations, getReservationsByDate, getReservationsByUser,
         createReservation, cancelReservation, updateReservation, checkConflicts, getAvailability,
         isReservationWithinWindow, canEditReservation, isReservationBlocked,
         confirmPickup, saveStudentAssignments,
-        // Bloqueios
+
         getBlocks, getBlocksByDate, createBlock, deleteBlock,
-        // Utils
+
         showToast, formatDate, dateKey, today, dayOffset, escapeHtml,
         getMonday, getWeekDays, timesOverlap, getCurrentTime, isPickupTimeReady,
         resetDemoData,
@@ -1196,9 +1115,6 @@
         TIME_SLOTS, SHIFT_SLOTS,
     };
 
-    // ─────────────────────────────────────────────────────────────
-    //  INICIALIZAÇÃO
-    // ─────────────────────────────────────────────────────────────
     if (window.ERS_REAL) return;
     window.ERS.ready = seed().then(() => getReservations());
     setInterval(() => {

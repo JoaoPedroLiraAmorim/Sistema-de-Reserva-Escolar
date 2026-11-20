@@ -1,8 +1,3 @@
-/**
- * professor.js — Lógica da página do Professor
- * Depende de: store.js, auth.js, main.js
- */
-
 'use strict';
 
 let currentSession = null;
@@ -14,9 +9,6 @@ const bookingDate = new Intl.DateTimeFormat('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
 });
 
-// ─────────────────────────────────────────────────────────────
-//  INICIALIZAÇÃO
-// ─────────────────────────────────────────────────────────────
 document.addEventListener('ers:ready', () => {
     currentSession = AUTH.requireAuth(['professor']);
     if (!currentSession) return;
@@ -24,7 +16,6 @@ document.addEventListener('ers:ready', () => {
     AUTH.renderUserInfo(currentSession);
     AUTH.setupLogout();
 
-    // Navegação de semana
     document.getElementById('btnPrevWeek').addEventListener('click', () => {
         showTeacherCalendarWeek(ERS.dayOffset(-7, currentWeekMonday));
     });
@@ -32,7 +23,6 @@ document.addEventListener('ers:ready', () => {
         showTeacherCalendarWeek(ERS.dayOffset(7, currentWeekMonday));
     });
 
-    // Turno
     document.querySelectorAll('.shift-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.shift-btn').forEach(button => {
@@ -44,7 +34,6 @@ document.addEventListener('ers:ready', () => {
         });
     });
 
-    // Configuração do campo de data com mini-calendário e restrição
     const dateInput = document.getElementById('res-date');
     if (dateInput) {
         dateInput.min = ERS.today();
@@ -56,13 +45,11 @@ document.addEventListener('ers:ready', () => {
             } catch (e) {}
         };
         dateInput.addEventListener('click', openCalendar);
-        // Avoid reopening the native picker when restoring dialog focus.
+
     }
 
-    // Nova reserva
     document.getElementById('btnOpenNewReservation').addEventListener('click', () => openTeacherReservationForm());
 
-    // Submit do formulário de reserva
     document.getElementById('new-reservation-form').addEventListener('submit', handleSaveReservation);
     document.getElementById('calendarBody').addEventListener('click', event => {
         const card = event.target.closest('button[data-res-id]');
@@ -75,11 +62,9 @@ document.addEventListener('ers:ready', () => {
         if (button?.id === 'empty-new-reservation') openTeacherReservationForm();
     });
 
-    // Registro de Alunos e Notebooks
     document.getElementById('btnAddStudentRow')?.addEventListener('click', () => addStudentRow());
     document.getElementById('register-students-form')?.addEventListener('submit', handleSaveStudentRegistration);
 
-    // Sincronização em tempo real quando o Coordenação confirmar em outra aba
     window.addEventListener('storage', (e) => {
         if (e.key === 'ers_reservations') {
             renderActiveChip();
@@ -91,7 +76,7 @@ document.addEventListener('ers:ready', () => {
     renderCalendar();
     renderMyReservations();
     renderActiveChip();
-    // Atualiza a tela aberta quando uma reserva chega ao término.
+
     setInterval(() => {
         if (!document.hidden) {
             renderMyReservations();
@@ -104,9 +89,6 @@ document.addEventListener('ers:ready', () => {
     });
 });
 
-// ─────────────────────────────────────────────────────────────
-//  POPULAR HORÁRIOS POR TURNO
-// ─────────────────────────────────────────────────────────────
 function reservationShift(start) {
     if (start >= '19:00') return 'noite';
     return start >= '13:00' ? 'tarde' : 'manha';
@@ -131,9 +113,6 @@ function populateTimeSlots(shift, booking) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  POPULAR MARCAS
-// ─────────────────────────────────────────────────────────────
 function populateBrandSelect() {
     const sel = document.getElementById('res-brand');
     if (!sel) return;
@@ -145,9 +124,6 @@ function populateBrandSelect() {
     if (curVal) sel.value = curVal;
 }
 
-// ─────────────────────────────────────────────────────────────
-//  CALENDÁRIO
-// ─────────────────────────────────────────────────────────────
 function showTeacherCalendarWeek(date) {
     const monday = ERS.getMonday(date);
     if (ERS.dateKey(monday) === ERS.dateKey(currentWeekMonday)) return;
@@ -164,7 +140,6 @@ function renderCalendar() {
     document.getElementById('weekLabel').textContent =
         `${first.getDate()} ${ERS.MESES[first.getMonth()]} — ${last.getDate()} ${ERS.MESES[last.getMonth()]}`;
 
-    // Cabeçalho
     const thead = document.getElementById('calendarHead');
     const todayStr = ERS.today();
     thead.innerHTML = `<tr>
@@ -180,7 +155,6 @@ function renderCalendar() {
         }).join('')}
     </tr>`;
 
-    // Corpo
     const tbody = document.getElementById('calendarBody');
     tbody.innerHTML = '';
 
@@ -240,9 +214,6 @@ function renderCalendar() {
     });
 }
 
-// ─────────────────────────────────────────────────────────────
-//  MINHAS RESERVAS
-// ─────────────────────────────────────────────────────────────
 function renderMyReservations() {
     const list = document.getElementById('myResList');
     if (!list || !currentSession) return;
@@ -290,7 +261,6 @@ function renderActiveChip() {
     const chip = document.getElementById('active-chip');
     if (!chip) return;
 
-    // Busca reserva ativa de hoje do professor que contenha notebooks
     const todayNotebookRes = ERS.getReservationsByDate(ERS.today())
         .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && r.fim > ERS.getCurrentTime() && (r.notebooks > 0) &&
             !ERS.isReservationBlocked(r))
@@ -308,8 +278,6 @@ function renderActiveChip() {
             textLabel.textContent = `${r.inicio}–${r.fim} ${r.sala ? '• ' + r.sala : ''} • ${r.notebooks} notebooks`;
         }
 
-        // REGRA DE NEGÓCIO CRÍTICA:
-        // O botão de registrar só aparece se o Coordenação tiver confirmado a retirada!
         if (r.retiradaConfirmada) {
             chip.classList.add('chip-ready');
             if (statusLabel) {
@@ -332,7 +300,7 @@ function renderActiveChip() {
             }
         }
     } else {
-        // Verifica se há reserva hoje apenas de sala (sem notebooks)
+
         const todayRoomOnly = ERS.getReservationsByDate(ERS.today())
             .filter(r => r.professorId === currentSession.userId && r.situacao === 'confirmada' && r.fim > ERS.getCurrentTime() &&
                 !ERS.isReservationBlocked(r));
@@ -351,9 +319,6 @@ function renderActiveChip() {
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  MODAL: REGISTRAR ALUNOS E ETIQUETAS DOS NOTEBOOKS
-// ─────────────────────────────────────────────────────────────
 function openRegisterStudentsModal(resId) {
     const r = ERS.getReservations().find(x => x.id === resId);
     if (!r) return;
@@ -501,9 +466,6 @@ async function handleSaveStudentRegistration(e) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  CRIAR RESERVA
-// ─────────────────────────────────────────────────────────────
 function populateRoomSelect() {
     const sel = document.getElementById('res-room');
     if (!sel) return;
@@ -601,9 +563,6 @@ async function handleSaveReservation(event) {
     renderActiveChip();
 }
 
-// ─────────────────────────────────────────────────────────────
-//  DETALHES / CANCELAR
-// ─────────────────────────────────────────────────────────────
 function openReservationDetail(id) {
     const r = ERS.getReservations().find(r => r.id === id);
     if (!r) return;

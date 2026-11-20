@@ -1,16 +1,9 @@
-/* ==========================================================================
-   PROATEC CSS - Painel Administrativo / Dashboard
-   Layout e estilos específicos da tela PROATEC (Início)
-   ========================================================================== */
-
-/* 1. Layout Principal */
 .app-container {
     display: flex;
     min-height: 100vh;
     width: 100%;
 }
 
-/* 2. Área Principal - Estilos da Dashboard */
 .dashboard-content {
     padding: 32px;
     display: flex;
@@ -18,7 +11,6 @@
     gap: 28px;
 }
 
-/* Cabeçalho */
 .dashboard-header {
     display: flex;
     align-items: center;
@@ -73,7 +65,6 @@
     margin-bottom: 12px;
 }
 
-/* 3. Ações Rápidas */
 .quick-actions-section {
     display: flex;
     flex-direction: column;
@@ -136,7 +127,6 @@
     line-height: 1.4;
 }
 
-/* 4. Grid Principal (Reservas & Retirada) */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -180,7 +170,6 @@
     margin: 0;
 }
 
-/* Lista de Reservas */
 .reservations-card {
     display: flex;
     flex-direction: column;
@@ -262,7 +251,6 @@
     gap: 8px;
 }
 
-/* Card de Próxima Reserva em Destaque */
 .pickup-card {
     display: flex;
     flex-direction: column;
@@ -312,7 +300,6 @@
     margin: 0;
 }
 
-/* 5. Inventário por Marca (Sem ícone de notebook no cabeçalho) */
 .inventory-card {
     display: flex;
     flex-direction: column;
@@ -425,7 +412,6 @@
     background-color: #dc2626;
 }
 
-/* 6. Empty States e Mensagens Limpas */
 .empty-msg {
     font-size: 13px;
     color: var(--color-text-muted);
@@ -461,7 +447,6 @@
     margin: 0;
 }
 
-/* 7. Responsividade */
 @media (max-width: 1024px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -483,7 +468,6 @@
     }
 }
 
-/* 8. Botões de Confirmação de Retirada (PROATEC) */
 .agenda-actions-col {
     display: flex;
     align-items: center;
@@ -563,14 +547,12 @@
     color: #059669;
 }
 
-/* Badge ao vivo / No horário */
 .pickup-badge-time.pickup-badge-live {
     background-color: #ecfdf5;
     color: #065f46;
     border: 1px solid #a7f3d0;
 }
 
-/* Botão de seleção múltipla quando há mais de uma turma no mesmo horário */
 .btn-pickup-multiple {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
@@ -582,7 +564,6 @@
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
 }
 
-/* Banner de aguardando horário de início */
 .pickup-waiting-banner {
     display: flex;
     align-items: flex-start;
@@ -617,7 +598,6 @@
     line-height: 1.4;
 }
 
-/* Estado de todas as entregas concluídas hoje */
 .pickup-all-done {
     display: flex;
     flex-direction: column;
@@ -631,7 +611,6 @@
     margin-top: 10px;
 }
 
-/* Lista de cards dentro do modal de confirmação de turmas */
 .pickup-cards-list {
     display: flex;
     flex-direction: column;

@@ -13,6 +13,8 @@ export function prepararLogin(config) {
     auth.languageCode = 'pt-BR';
     google.setCustomParameters({ prompt: 'select_account' });
 
+    let googlePendente = null;
+
     async function concluir(user, api) {
         if (!user.emailVerified) return false;
         try {
@@ -30,17 +32,32 @@ export function prepararLogin(config) {
         },
         async entrarGoogle(api) {
             const { user } = await signInWithPopup(auth, google);
-            if (!await concluir(user, api)) {
-                await signOut(auth);
-                throw new Error('Escolha uma conta Google com e-mail verificado.');
+            try {
+                if (!user.emailVerified) throw new Error('Escolha uma conta Google com e-mail verificado.');
+                const result = await api('conta/entrar', { idToken: await user.getIdToken() });
+                if (result.precisaNome) googlePendente = user;
+                return result;
+            } finally {
+                if (!googlePendente) await signOut(auth).catch(() => {});
             }
+        },
+        async confirmarNomeGoogle(nome, api) {
+            if (!googlePendente) throw new Error('Entre novamente com Google para continuar.');
+            const result = await api('conta/entrar', { idToken: await googlePendente.getIdToken(), nome });
+            googlePendente = null;
+            await signOut(auth).catch(() => {});
+            return result;
+        },
+        async cancelarGoogle() {
+            googlePendente = null;
+            await signOut(auth).catch(() => {});
         },
         async cadastrar(email, senha, nome) {
             const { user } = await createUserWithEmailAndPassword(auth, email, senha);
             try {
                 await updateProfile(user, { displayName: nome });
             } catch (error) {
-                // Descarta apenas a conta recém-criada se o nome não for salvo.
+
                 await deleteUser(user).catch(() => signOut(auth).catch(() => {}));
                 throw error;
             }

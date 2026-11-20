@@ -11,7 +11,7 @@
 	"vars": {
 		"ACCOUNT_ORIGIN": "https://app.reservas-alceu.workers.dev"
 	},
-	// Banco de desenvolvimento criado na Cloudflare; dev continua usando a cópia local.
+
 	"d1_databases": [
 		{
 			"binding": "DB",

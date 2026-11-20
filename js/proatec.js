@@ -1,8 +1,3 @@
-/**
- * proatec.js — Lógica do dashboard Coordenação
- * Depende de: store.js, auth.js, main.js
- */
-
 'use strict';
 
 window.ProatecModule = (function() {
@@ -15,14 +10,12 @@ window.ProatecModule = (function() {
 
         document.getElementById('equipmentForm')?.addEventListener('submit', handleEquipmentSubmit);
 
-        // Atualização em tempo real entre abas
         window.addEventListener('storage', (e) => {
             if (e.key === 'ers_reservations') {
                 render();
             }
         });
 
-        // Verificação periódica para habilitar o card assim que der o horário da aula
         if (refreshTimer) clearInterval(refreshTimer);
         refreshTimer = setInterval(() => {
             renderTodayReservations();
@@ -36,14 +29,8 @@ window.ProatecModule = (function() {
         renderBrandGrid();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  RESERVAS DO DIA
-    // ─────────────────────────────────────────────────────────────
     let currentModalReservationIds = [];
 
-    // ─────────────────────────────────────────────────────────────
-    //  RESERVAS DO DIA & CONTROLE DE RETIRADA
-    // ─────────────────────────────────────────────────────────────
     function renderTodayReservations() {
         const list   = document.getElementById('today-reservations-list');
         const pickup = document.getElementById('next-pickup-box');
@@ -66,7 +53,6 @@ window.ProatecModule = (function() {
             return;
         }
 
-        // 1. Lista cronológica (apenas indicativo de status — confirmação exclusiva no card)
         list.innerHTML = todayRes.map((r, i) => {
             let statusBadge = '';
             const blocked = ERS.isReservationBlocked(r);
@@ -98,13 +84,12 @@ window.ProatecModule = (function() {
             `;
         }).join('');
 
-        // 2. Card de Retirada (Regra de Negócio: só pode confirmar quando der o horário, nunca antes!)
         const nbReservations = todayRes.filter(r => r.notebooks > 0 && r.situacao !== 'cancelada' &&
             !ERS.isReservationBlocked(r));
         const readyReservations = nbReservations.filter(r => !r.retiradaConfirmada && ERS.isPickupTimeReady(r));
 
         if (readyReservations.length > 1) {
-            // CASO A: Mais de uma turma pronta para retirada no horário atual
+
             const teacherNames = readyReservations.map(x => x.professorNome).join(', ');
             pickup.innerHTML = `
                 <div class="pickup-badge-time pickup-badge-live">
@@ -122,7 +107,7 @@ window.ProatecModule = (function() {
                 </button>
             `;
         } else if (readyReservations.length === 1) {
-            // CASO B: Apenas uma turma pronta para retirada no horário atual
+
             const r = readyReservations[0];
             pickup.innerHTML = `
                 <div class="pickup-badge-time pickup-badge-live">
@@ -137,7 +122,7 @@ window.ProatecModule = (function() {
                 </button>
             `;
         } else {
-            // CASO C: Nenhuma reserva pronta no momento (ou ainda não deu o horário, ou todas concluídas)
+
             const upcoming = nbReservations.filter(r => !r.retiradaConfirmada && !ERS.isPickupTimeReady(r));
 
             if (upcoming.length > 0) {
@@ -193,12 +178,9 @@ window.ProatecModule = (function() {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL: SELEÇÃO DE QUAL TURMA CONFIRMAR (QUANDO HÁ MÚLTIPLAS)
-    // ─────────────────────────────────────────────────────────────
     function openMultiplePickupModal() {
         const todayRes = ERS.getReservationsByDate(ERS.today());
-        // Turmas prontas para retirada no horário atual ou recém-confirmadas da mesma rodada
+
         const ready = todayRes.filter(r => r.notebooks > 0 && r.situacao !== 'cancelada' && ERS.isPickupTimeReady(r));
         if (ready.length === 0) {
             ERS.showToast('Nenhuma reserva pronta para retirada no momento.', 'warning');
@@ -321,9 +303,6 @@ window.ProatecModule = (function() {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  GRID DE MARCAS
-    // ─────────────────────────────────────────────────────────────
     function renderBrandGrid() {
         const grid = document.getElementById('brand-grid');
         if (!grid) return;
@@ -362,9 +341,6 @@ window.ProatecModule = (function() {
         }).join('');
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL: CADASTRAR EQUIPAMENTO
-    // ─────────────────────────────────────────────────────────────
     async function handleEquipmentSubmit(e) {
         e.preventDefault();
         const brand = document.getElementById('eq-brand').value;

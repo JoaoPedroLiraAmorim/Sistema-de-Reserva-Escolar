@@ -7,9 +7,6 @@
     <title>Alceu Reservas - Agenda do Professor</title>
     <meta name="description" content="Portal do professor para visualizar e gerenciar reservas de laboratório e notebooks.">
 
-    <!-- Fontes do Google -->
-
-    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/professor.css">
@@ -20,7 +17,7 @@
 </head>
 <body class="teacher-page">
     <div class="teacher-app">
-        <!-- Barra Superior -->
+
         <header class="teacher-header">
             <div class="teacher-brand-group">
                 <a href="professor.html" class="teacher-brand-logo">
@@ -32,7 +29,6 @@
                 <span class="teacher-greeting">Olá, Professor</span>
             </div>
 
-            <!-- Usuário -->
             <div class="teacher-user-actions">
                 <div class="teacher-user-badge">
                     <div class="teacher-avatar">M</div>
@@ -47,9 +43,8 @@
             </div>
         </header>
 
-        <!-- Conteúdo Principal -->
         <main class="teacher-main-content">
-            <!-- Cabeçalho da Agenda -->
+
             <section class="agenda-action-header">
                 <div class="agenda-action-title">
                     <h1>Agenda do professor</h1>
@@ -60,7 +55,7 @@
                         <span class="material-symbols-outlined">add</span>
                         <span>Nova reserva</span>
                     </button>
-                    <!-- Chip de reserva ativa -->
+
                     <div class="active-res-chip hidden" id="active-chip">
                         <span class="chip-dot"></span>
                         <span class="material-symbols-outlined chip-icon">timer</span>
@@ -81,7 +76,7 @@
                 <button type="button" id="tab-reservas" role="tab" aria-selected="false" aria-controls="my-reservations-section" tabindex="-1" data-teacher-view="reservas">Suas próximas reservas <span id="upcoming-count">0</span></button>
             </div>
             <div id="teacher-agenda-panel" role="tabpanel" aria-labelledby="tab-agenda">
-            <!-- Controles do Calendário -->
+
             <section class="calendar-controls-bar">
                 <div class="week-selector">
                     <button type="button" class="btn-week-nav" id="btnPrevWeek" aria-label="Semana anterior">
@@ -100,7 +95,6 @@
                 </div>
             </section>
 
-            <!-- Grade de Horários -->
             <section class="calendar-wrapper-card">
                 <div class="calendar-scroll-area">
                     <table class="calendar-table" id="calendarTable" aria-label="Grade de horários da agenda do professor">
@@ -111,14 +105,13 @@
             </section>
 
             </div>
-            <!-- Somente reservas futuras e em andamento. -->
+
             <section id="my-reservations-section" role="tabpanel" aria-labelledby="tab-reservas" hidden>
                 <h2>Suas próximas reservas</h2>
                 <div class="my-res-list" id="myResList"></div>
             </section>
         </main>
 
-        <!-- Navegação Mobile -->
         <nav class="mobile-bottom-nav" aria-label="Navegação móvel">
             <a href="#teacher-agenda-panel" class="mobile-bottom-item active" id="mobileAgendaBtn">
                 <span class="material-symbols-outlined">calendar_month</span>
@@ -131,7 +124,6 @@
         </nav>
     </div>
 
-    <!-- Modal: Criar Nova Reserva -->
     <div class="modal-backdrop hidden" id="new-reservation-modal">
         <div class="modal">
             <div class="modal-header">
@@ -146,13 +138,12 @@
 
             <form id="new-reservation-form">
                 <div class="modal-body">
-                    <!-- Data com mini-calendário -->
+
                     <div class="form-group">
                         <label for="res-date">Data da reserva</label>
                         <input type="date" id="res-date" class="form-control" required style="cursor: pointer;">
                     </div>
 
-                    <!-- Horários Dinâmicos por Turno -->
                     <div class="form-row">
                         <div class="form-col form-group">
                             <label for="res-start">Horário de início</label>
@@ -173,7 +164,7 @@
                             </div>
                         </div>
                     </div>
-<!-- Sala -->
+
                     <div class="form-group">
                         <label for="res-room">Reservar sala (opcional)</label>
                         <div class="select-wrapper">
@@ -184,7 +175,6 @@
                         </div>
                     </div>
 
-                    <!-- Marca e Quantidade de Notebooks -->
                     <div class="form-row">
                         <div class="form-col form-group">
                             <label for="res-brand">Marca do notebook</label>
@@ -208,7 +198,6 @@
 
                     <p class="avail-info" id="avail-info"></p>
 
-                    <!-- Mensagem de erro -->
                     <div id="res-error" class="login-error-msg"></div>
                 </div>
 
@@ -219,7 +208,6 @@
         </div>
     </div>
 
-    <!-- Modal: Detalhes/Cancelar Reserva -->
     <div class="modal-backdrop hidden" id="res-detail-modal">
         <div class="modal">
             <div class="modal-header">
@@ -242,7 +230,6 @@
         </div>
     </div>
 
-    <!-- Modal: Registrar Alunos e Etiquetas dos Notebooks -->
     <div class="modal-backdrop hidden" id="register-students-modal">
         <div class="modal modal-lg">
             <div class="modal-header">
@@ -257,7 +244,7 @@
 
             <form id="register-students-form">
                 <div class="modal-body">
-                    <!-- Resumo da Reserva -->
+
                     <div class="reservation-summary-banner" id="reg-modal-summary">
                         <div class="summary-item">
                             <span class="material-symbols-outlined">calendar_today</span>
@@ -281,7 +268,6 @@
                         Preencha a etiqueta de patrimônio/identificação de cada notebook e o nome do aluno correspondente.
                     </p>
 
-                    <!-- Lista de Alunos e Etiquetas -->
                     <div class="student-registration-table-wrapper">
                         <table class="student-registration-table">
                             <thead>
@@ -293,7 +279,7 @@
                                 </tr>
                             </thead>
                             <tbody id="student-rows-body">
-                                <!-- Linhas geradas dinamicamente -->
+
                             </tbody>
                         </table>
                     </div>
@@ -319,10 +305,8 @@
         </div>
     </div>
 
-    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>

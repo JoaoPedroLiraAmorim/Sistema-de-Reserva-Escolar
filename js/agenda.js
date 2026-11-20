@@ -1,12 +1,5 @@
-/**
- * Sistema de Reserva Escolar - agenda.js
- * Comportamentos específicos para a tela de Agenda de Reservas (Coordenação)
- */
-
 document.addEventListener('DOMContentLoaded', () => {
-    // ---------------------------------------------------------
-    // 1. Adição dinâmica de linhas de alunos/notebooks no modal
-    // ---------------------------------------------------------
+
     const btnAddNotebookRow = document.getElementById('btnAddNotebookRow');
     const usageRowsContainer = document.getElementById('usageRowsContainer');
     let notebookCount = 3;
@@ -25,12 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/**
- * Abre modal de registro de uso preenchendo os dados do agendamento clicado
- * @param {string} room - Nome da sala (ex: 'Sala 12')
- * @param {string} teacher - Nome do professor (ex: 'Prof. Carlos')
- * @param {string} count - Quantidade de equipamentos (ex: '20 notebooks')
- */
 function openUsageModal(room, teacher, count) {
     const title = document.getElementById('modalUsageTitle');
     const sub = document.getElementById('modalUsageSubtitle');

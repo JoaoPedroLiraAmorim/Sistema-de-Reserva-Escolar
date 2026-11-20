@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = path.resolve(root, 'public');
-// Só esta pasta gerada pode ser removida. Links não são seguidos.
+
 if (path.dirname(output) !== path.resolve(root) || path.basename(output) !== 'public') {
     throw new Error('Diretório de saída inválido.');
 }

@@ -1,4 +1,3 @@
-/* Relatos por etiqueta, separados do controle de quantidades do estoque. */
 (function () {
     'use strict';
     const demoKey = 'alceu_demo:ers_defects';

@@ -1,4 +1,3 @@
-/* Componentes e adaptações comuns do Alceu Reservas. Carregar por último. */
 :root {
   --responsive-gutter: clamp(12px, 2.2vw, 32px);
   --responsive-touch-size: 44px;
@@ -26,7 +25,6 @@
 .teacher-day-controls { display: none; }
 .teacher-main-content .active-res-chip.hidden { display: none !important; }
 
-/* Reservas são registros comparáveis: linhas compactas em vez de tiles esticados. */
 .calendar-events-container { height: auto !important; gap: 5px !important; }
 .calendar-events-container > .calendar-event-card {
   flex: 0 0 auto !important;
@@ -73,7 +71,6 @@
 }
 .my-res-item, .report-card { box-shadow: none !important; }
 .room-card, .eq-brand-card { padding: 18px !important; }
-
 
 html,
 body {
@@ -173,7 +170,6 @@ label,
   max-width: 100%;
 }
 
-/* Calendários semanais permanecem completos e usam rolagem dentro do próprio quadro. */
 .calendar-wrapper-card,
 .calendar-scroll-area,
 .student-registration-table-wrapper,
@@ -193,8 +189,6 @@ label,
   overflow-x: auto;
 }
 
-/* Tabelas dentro de modal são controles roláveis próprios: não as deixe
-   encolher a zero quando o formulário inteiro precisa caber em landscape. */
 .student-registration-table-wrapper,
 .records-table-wrapper {
   flex: 0 0 auto;
@@ -215,7 +209,6 @@ label,
   min-width: 520px;
 }
 
-/* Os rótulos continuam acessíveis na tabela desktop e aparecem nos blocos mobile. */
 .student-field-label {
   position: absolute;
   width: 1px;
@@ -235,7 +228,6 @@ label,
   overflow-wrap: anywhere;
 }
 
-/* Formulários, listas e grades deixam os filhos encolherem antes de alargar a página. */
 .form-row,
 .form-options-row,
 .agenda-action-header,
@@ -285,7 +277,6 @@ label,
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
 }
 
-/* Diálogos: rolagem fica no conteúdo e as ações continuam alcançáveis. */
 .modal-backdrop {
   padding: clamp(8px, 2.5vw, 24px) !important;
   overflow-y: auto;
@@ -331,7 +322,6 @@ label,
   overscroll-behavior: contain;
 }
 
-/* Navegação desktop e tablet: reservar largura do menu e reduzir gutters. */
 @media (min-width: 769px) {
   .dashboard-content,
   .teacher-main-content {
@@ -374,7 +364,6 @@ label,
   }
 }
 
-/* Layout de telas estreitas. */
 @media (max-width: 768px) {
   .dashboard-content,
   .teacher-main-content {
@@ -447,7 +436,6 @@ label,
     gap: 14px;
   }
 
-  /* A agenda PROATEC usa o cabeçalho dividido em desktop; em mobile, cada bloco ocupa a coluna inteira. */
   .dashboard-content > .agenda-action-header {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
@@ -490,7 +478,6 @@ label,
     white-space: normal;
   }
 
-  /* O chip ocupa a largura do cabeçalho quando existe uma reserva ativa. */
   .teacher-main-content > .agenda-action-header {
     display: flex;
     flex-direction: column;
@@ -807,7 +794,6 @@ label,
     min-width: 520px;
   }
 
-  /* Cada notebook ocupa um bloco: nenhum campo depende de arrastar para o lado. */
   .student-registration-table-wrapper {
     max-height: none;
     overflow: visible;
@@ -1099,7 +1085,6 @@ label,
   }
 }
 
-/* Retrato/landscape baixo: o conteúdo pode rolar sem ocultar ações do diálogo. */
 @media (max-height: 560px) and (orientation: landscape) {
   .modal-backdrop {
     align-items: flex-start;
@@ -1132,7 +1117,6 @@ label,
   }
 }
 
-/* Alguns diálogos agrupam corpo e rodapé dentro do formulário. */
 .modal > form {
   display: flex;
   flex: 1 1 auto;
@@ -1172,7 +1156,6 @@ label,
 .modal-footer > button[hidden],
 .modal-footer:has(> button):not(:has(> button:not([hidden]))) { display: none !important; }
 
-/* Navegação e hierarquia: agenda e reservas são visões independentes. */
 .page-eyebrow {
   display: block;
   margin-bottom: 10px;
@@ -1238,7 +1221,6 @@ label,
 .reservation-empty p { font-size: 14px; color: #53647c; margin-bottom: 22px; }
 .btn-header-logout { width: 44px; height: 44px; min-width: 44px; min-height: 44px; }
 
-/* Calendário do professor: uma coluna de horários e uma coluna para o dia selecionado. */
 .v2-teacher-day .week-selector,
 .teacher-page .calendar-table [hidden] {
   display: none !important;
@@ -1341,7 +1323,6 @@ label,
 @media (max-width: 768px), (max-width: 900px) and (max-height: 560px) and (orientation: landscape) {
   .teacher-page .v2-segment { display: none; }
 
-  /* Agenda diária ampla: horários fixos à esquerda e espaço para cada aula. */
   .v2-teacher-day #v2-selected-day {
     font-size: clamp(16px, 4.5vw, 19px);
     line-height: 1.4;
@@ -1448,7 +1429,6 @@ label,
   .calendar-table .v2-cell-action { transition: background-color .15s, border-color .15s; }
 }
 
-/* Formulário de reserva: agrupamentos curtos e escolha explícita dos recursos. */
 #new-reservation-modal .modal { width: min(100%, 760px) !important; max-width: 760px; }
 .booking-section { padding: 0; margin: 0 0 24px; border: 0; }
 .booking-section legend { display: flex; align-items: center; gap: 10px; width: 100%; padding-bottom: 18px; font-size: 16px; font-weight: 650; color: #263d60; }
@@ -1470,7 +1450,6 @@ label,
 .modal-header p { font-size: 14px !important; }
 .modal-footer .btn-primary, .modal-footer .btn-secondary { font-size: 14px !important; }
 
-/* Resumo operacional da coordenação. */
 .coord-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0 32px; }
 .coord-metric { position: relative; padding: 20px; background: #fff; border: 1px solid #dfe6ef; border-radius: 12px; }
 .coord-metric-icon { display: inline-flex; color: #1142bc; padding: 9px; border-radius: 10px; background: #edf2ff; margin-bottom: 16px; }
@@ -1519,7 +1498,6 @@ label,
   #new-reservation-form > .modal-footer { padding: 8px 20px !important; }
 }
 
-/* A reserva fica ancorada à tela; somente o conteúdo rola verticalmente. */
 html:has(#new-reservation-modal:not(.hidden)),
 body:has(#new-reservation-modal:not(.hidden)) {
   overflow: hidden;

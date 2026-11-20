@@ -93,6 +93,27 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
     assert.equal((await call(authPath, config, { idToken: 'token-sem-assinatura' })).status, 401);
     assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM contas').get().n, 0);
 
+    const googleClaims = { uid: 'nova-google', email: 'nova@exemplo.com', provider: 'google.com', name: 'nova@exemplo.com' };
+    const googleToken = await emitir(googleClaims);
+    const primeiro = await call(authPath, config, { idToken: googleToken });
+    assert.deepEqual(await primeiro.json(), { precisaNome: true, nome: '' });
+    assert.equal(primeiro.headers.get('Set-Cookie'), null);
+    assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM contas').get().n, 0);
+    for (const nome of ['', '   ', 'nome@exemplo.com', 'a'.repeat(121), 123]) {
+        assert.equal((await call(authPath, config, { idToken: googleToken, nome })).status, 400);
+    }
+    const nomeEmail = await call(authPath, config, { idToken: await emitir({ ...googleClaims, name: 'nova' }) });
+    assert.deepEqual(await nomeEmail.json(), { precisaNome: true, nome: '' });
+    const confirmado = await call(authPath, config, { idToken: googleToken, nome: '  Maria   Silva ', papel: 'coordenacao' });
+    assert.equal(confirmado.status, 200);
+    assert.ok(confirmado.headers.get('Set-Cookie'));
+    const novaConta = sql.prepare('SELECT nome, papel FROM contas WHERE email = ?').get(googleClaims.email);
+    assert.equal(novaConta.nome, 'Maria Silva');
+    assert.equal(novaConta.papel, 'professor');
+    const novamente = await call(authPath, config, { idToken: googleToken, nome: 'Outro nome' });
+    assert.deepEqual(await novamente.json(), { ok: true });
+    assert.equal(sql.prepare('SELECT nome FROM contas WHERE email = ?').get(googleClaims.email).nome, 'Maria Silva');
+
     const entrar = async (claims, cookie) => call(authPath, config, {
         idToken: await emitir(claims), papel: 'coordenacao', nome: 'Nome enviado fora do token',
     }, { cookie });

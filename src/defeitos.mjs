@@ -43,7 +43,7 @@ export async function alterarDefeito(db, conta, acao, args, now = new Date()) {
     }
     const id = crypto.randomUUID();
     const aluno = JSON.parse(r.alunos).find(a => normalizedTag(a.etiqueta) === normalizedTag(etiqueta))?.aluno || '';
-    // Revalida a reserva na gravação: uma alteração concorrente não autoriza um relato indevido.
+
     const result = await db.prepare(`INSERT INTO defeitos_reportados
         (id, reserva_id, conta_id, etiqueta, etiqueta_normalizada, descricao, aluno_no_relato, contexto, criado_em)
         SELECT ?, id, conta_id, ?, ?, ?, ?, json_object('data', data, 'inicio', inicio, 'fim', fim,

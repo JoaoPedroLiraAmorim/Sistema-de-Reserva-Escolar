@@ -7,15 +7,11 @@
     <title>Agenda de Reservas - Coordenação</title>
     <meta name="description" content="Agenda semanal de reservas de notebooks e salas da Coordenação.">
 
-    <!-- Fontes do Google com display=block para prevenir FOUT de ícones -->
-
-    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/agenda.css">
     <link rel="stylesheet" href="../css/bloqueios.css">
 
-    <!-- Anti-flicker da Sidebar (Executado antes da renderização) -->
     <script>
         (function() {
             try {
@@ -36,15 +32,12 @@
 </head>
 <body data-page="agenda">
     <div class="app-container">
-        <!-- Sidebar injetada dinamicamente por sidebar.js -->
+
         <div id="sidebar-mount"></div>
 
-        <!-- Backdrop para Mobile -->
-
-        <!-- Conteúdo Principal -->
         <div class="main-wrapper">
             <main class="dashboard-content">
-                <!-- Cabeçalho da Agenda -->
+
                 <section class="agenda-action-header">
                     <div class="agenda-action-title">
                         <div class="header-top-row">
@@ -54,7 +47,7 @@
                     </div>
 
                     <div class="agenda-header-right">
-                        <!-- Botão de bloqueio -->
+
                         <button type="button" class="btn-block-action" id="btnOpenBlock">
                             <span class="material-symbols-outlined">block</span>
                             <span>Criar bloqueio</span>
@@ -66,7 +59,6 @@
                     </div>
                 </section>
 
-                <!-- Controles do Calendário -->
                 <section class="calendar-controls-bar">
                     <div class="week-selector">
                         <button type="button" class="btn-week-nav" id="btnPrevWeek" aria-label="Semana anterior">
@@ -85,7 +77,6 @@
                     </div>
                 </section>
 
-                <!-- Grade de Horários -->
                 <section class="calendar-wrapper-card">
                     <div class="calendar-scroll-area">
                         <table class="calendar-table" id="calendarTable">
@@ -98,7 +89,6 @@
         </div>
     </div>
 
-    <!-- Modal 1: Criar Nova Reserva -->
     <div class="modal-backdrop hidden" id="new-reservation-modal">
         <div class="modal">
             <div class="modal-header">
@@ -113,19 +103,17 @@
 
             <form id="new-reservation-form">
                 <div class="modal-body">
-                    <!-- Data com mini-calendário -->
+
                     <div class="form-group">
                         <label for="res-date">Data da reserva</label>
                         <input type="date" id="res-date" class="form-control" required style="cursor: pointer;">
                     </div>
 
-                    <!-- Professor -->
                     <div class="form-group">
                         <label for="res-professor">Professor / Solicitante</label>
                         <select id="res-professor" class="form-control" required><option value="">Selecione um professor</option></select>
                     </div>
 
-                    <!-- Horários Dinâmicos por Turno -->
                     <div class="form-row">
                         <div class="form-col form-group">
                             <label for="res-start">Horário de início</label>
@@ -147,7 +135,6 @@
                         </div>
                     </div>
 
-                    <!-- Sala -->
                     <div class="form-group">
                         <label for="res-room">Reservar sala (opcional)</label>
                         <div class="select-wrapper">
@@ -157,7 +144,7 @@
                             <span class="material-symbols-outlined select-icon">expand_more</span>
                         </div>
                     </div>
-<!-- Marca e Quantidade de Notebooks -->
+
                     <div class="form-row">
                         <div class="form-col form-group">
                             <label for="res-brand">Marca do notebook</label>
@@ -176,7 +163,6 @@
 
                     <p class="avail-info" id="avail-info"></p>
 
-                    <!-- Mensagem de erro -->
                     <div id="res-error" class="login-error-msg"></div>
                 </div>
 
@@ -187,7 +173,6 @@
         </div>
     </div>
 
-    <!-- Modal 2: Detalhes / Cancelar Reserva -->
     <div class="modal-backdrop hidden" id="res-detail-modal">
         <div class="modal">
             <div class="modal-header">
@@ -209,7 +194,6 @@
         </div>
     </div>
 
-    <!-- Modal 3: Criar Bloqueio (Coordenação) -->
     <div class="modal-backdrop hidden" id="block-modal">
         <div class="modal">
             <div class="modal-header">
@@ -302,7 +286,6 @@
         </div>
     </div>
 
-    <!-- Modal 4: Detalhes do Bloqueio -->
     <div class="modal-backdrop hidden" id="block-detail-modal">
         <div class="modal">
             <div class="modal-header">
@@ -324,10 +307,8 @@
         </div>
     </div>
 
-    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts Externos -->
     <script src="../js/store.js"></script>
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>

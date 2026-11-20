@@ -1,8 +1,3 @@
-/**
- * relatorio.js — Relatórios de reservas e registros de equipamentos/alunos
- * Depende de: store.js, auth.js, main.js
- */
-
 'use strict';
 
 window.RelatorioModule = (function() {
@@ -10,7 +5,7 @@ window.RelatorioModule = (function() {
     const ICON_NAMES  = ['laptop_mac', 'laptop_chromebook', 'laptop_windows'];
     let currentSession = null;
     let isInitialized = false;
-    let filterMode = 'all'; // 'all' | 'today' | 'date'
+    let filterMode = 'all';
     let selectedDate = null;
 
     function init(session) {
@@ -32,7 +27,6 @@ window.RelatorioModule = (function() {
                 });
             }
 
-            // Fechar modal ao clicar fora ou pressionar ESC
             const modalBackdrop = document.getElementById('records-modal');
             if (modalBackdrop) {
                 modalBackdrop.addEventListener('click', (e) => {
@@ -49,13 +43,9 @@ window.RelatorioModule = (function() {
             });
         }
 
-        // Inicia exibindo todas as reservas para visualização imediata
         setFilterMode('all');
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  CONTROLE DE FILTROS
-    // ─────────────────────────────────────────────────────────────
     function setFilterMode(mode, customDate = null) {
         filterMode = mode;
         const btnAll   = document.getElementById('btn-filter-all');
@@ -85,15 +75,12 @@ window.RelatorioModule = (function() {
         renderReport();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  RENDERIZAÇÃO DO RELATÓRIO
-    // ─────────────────────────────────────────────────────────────
     function renderReport() {
         const allReservations = ERS.getReservations();
         let reservations = [];
 
         if (filterMode === 'all') {
-            // Todas as reservas: confirmadas e canceladas, ordenadas pela data (mais recentes primeiro)
+
             reservations = [...allReservations].sort((a, b) => {
                 const cmpDate = (b.data || '').localeCompare(a.data || '');
                 if (cmpDate !== 0) return cmpDate;
@@ -106,7 +93,6 @@ window.RelatorioModule = (function() {
                 .sort((a, b) => (a.inicio || '').localeCompare(b.inicio || ''));
         }
 
-        // Estatísticas sem quantidade de notebooks (apenas contagem de reservas)
         const totalRes    = reservations.length;
         const confirmadas = reservations.filter(r => r.situacao === 'confirmada').length;
         const canceladas  = reservations.filter(r => r.situacao === 'cancelada').length;
@@ -192,9 +178,6 @@ window.RelatorioModule = (function() {
         }).join('');
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL: REGISTROS DE NOTEBOOKS E ALUNOS
-    // ─────────────────────────────────────────────────────────────
     function openRecordsModal(resId) {
         const backdrop = document.getElementById('records-modal');
         if (!backdrop) return;
@@ -206,7 +189,6 @@ window.RelatorioModule = (function() {
             return;
         }
 
-        // 1. Resumo da Reserva
         const infoEl = document.getElementById('records-res-info');
         if (infoEl) {
             const isConfirmed = r.situacao === 'confirmada';
@@ -240,7 +222,6 @@ window.RelatorioModule = (function() {
             `;
         }
 
-        // 2. Tabela de Registros de Notebooks e Alunos
         const container = document.getElementById('records-table-container');
         if (container) {
             container.dataset.reservaId = resId;
@@ -308,7 +289,6 @@ window.RelatorioModule = (function() {
         }
     }
 
-    // Fallback para carregamento direto da página
     if (!window.isSpaMode) {
         document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);

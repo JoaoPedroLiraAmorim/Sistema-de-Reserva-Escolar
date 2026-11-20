@@ -1,8 +1,3 @@
-/**
- * bloqueios.js — Gestão de bloqueios de períodos (exclusivo Coordenação)
- * Depende de: store.js, auth.js, main.js
- */
-
 'use strict';
 
 window.BloqueiosModule = (function() {
@@ -34,9 +29,6 @@ window.BloqueiosModule = (function() {
         renderBlocks();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  LISTA DE BLOQUEIOS
-    // ─────────────────────────────────────────────────────────────
     function renderBlocks() {
         const blocks = [...ERS.getBlocks()]
             .sort((a, b) => a.data.localeCompare(b.data) || a.inicio.localeCompare(b.inicio));
@@ -102,9 +94,6 @@ window.BloqueiosModule = (function() {
         if (window.AgendaProatecModule?.render) window.AgendaProatecModule.render();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  CRIAR BLOQUEIO
-    // ─────────────────────────────────────────────────────────────
     function setDateBounds() {
         const start = document.getElementById('blk-date');
         const end = document.getElementById('blk-date-end');
@@ -166,7 +155,6 @@ window.BloqueiosModule = (function() {
         if (window.AgendaProatecModule?.render) window.AgendaProatecModule.render();
     }
 
-    // Fallback para carregamento isolado da página bloqueios.html
     if (!window.isSpaMode && window.location.pathname.includes('bloqueios.html')) {
         document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['coordenacao']);
@@ -187,7 +175,6 @@ window.BloqueiosModule = (function() {
     };
 })();
 
-// Exporta funções chamadas inline no HTML / onclick
 window.deleteBlock = function(id) {
     window.BloqueiosModule?.deleteBlock(id);
 };

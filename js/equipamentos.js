@@ -1,9 +1,3 @@
-/**
- * Sistema de Reserva Escolar — equipamentos.js
- * Módulo de gestão de notebooks escolares agrupados por marca.
- * Dependências: store.js, auth.js, main.js
- */
-
 'use strict';
 
 window.EquipamentosModule = (function () {
@@ -11,9 +5,6 @@ window.EquipamentosModule = (function () {
     let isInitialized = false;
     let selectedBrandId = null;
 
-    /**
-     * Inicializa o módulo com a sessão ativa
-     */
     function init(session) {
         currentSession = session || (window.AUTH ? AUTH.getSession() : null);
         if (!currentSession) return;
@@ -26,29 +17,23 @@ window.EquipamentosModule = (function () {
         renderEquipmentView();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  LISTENERS E CONFIGURAÇÕES DE INTERAÇÃO
-    // ─────────────────────────────────────────────────────────────
     function setupEventListeners() {
-        // 1. Botão Cabeçalho: "+ Adicionar equipamentos"
+
         const btnAdd = document.getElementById('btnAddEquipment');
         if (btnAdd) {
             btnAdd.addEventListener('click', openAddEquipmentModal);
         }
 
-        // 2. Mudança no seletor de marca (Cadastrar nova marca)
         const brandSelect = document.getElementById('add-brand-select');
         if (brandSelect) {
             brandSelect.addEventListener('change', handleBrandSelectChange);
         }
 
-        // 3. Submissão do Formulário de Adicionar Equipamentos
         const addForm = document.getElementById('add-equipment-form');
         if (addForm) {
             addForm.addEventListener('submit', handleAddEquipmentSubmit);
         }
 
-        // 4. Ação no Modal de Detalhes: "Registrar defeito"
         const btnOpenDefect = document.getElementById('btnOpenRegisterDefect');
         if (btnOpenDefect) {
             btnOpenDefect.addEventListener('click', () => {
@@ -59,7 +44,6 @@ window.EquipamentosModule = (function () {
             });
         }
 
-        // 5. Ação no Modal de Detalhes: "Registrar disponibilidade"
         const btnOpenAvailDetail = document.getElementById('btnOpenRegisterAvailFromDetail');
         if (btnOpenAvailDetail) {
             btnOpenAvailDetail.addEventListener('click', () => {
@@ -70,7 +54,6 @@ window.EquipamentosModule = (function () {
             });
         }
 
-        // 6. Botão Cabeçalho: "Registrar disponibilidade"
         const btnOpenAvailTop = document.getElementById('btnOpenAvailabilityTop');
         if (btnOpenAvailTop) {
             btnOpenAvailTop.addEventListener('click', () => {
@@ -78,40 +61,32 @@ window.EquipamentosModule = (function () {
             });
         }
 
-        // 7. Input de quantidade com defeito (Cálculo da prévia em tempo real)
         const defectQtyInput = document.getElementById('defect-qty');
         if (defectQtyInput) {
             defectQtyInput.addEventListener('input', updateDefectPreview);
         }
 
-        // 8. Submissão do Formulário de Registrar Defeito
         const defectForm = document.getElementById('register-defect-form');
         if (defectForm) {
             defectForm.addEventListener('submit', handleRegisterDefectSubmit);
         }
 
-        // 9. Seletor de marca no modal de disponibilidade
         const availBrandSelect = document.getElementById('avail-brand-select');
         if (availBrandSelect) {
             availBrandSelect.addEventListener('change', handleAvailBrandSelectChange);
         }
 
-        // 10. Input de quantidade arrumada (Cálculo da prévia em tempo real)
         const availQtyInput = document.getElementById('avail-qty');
         if (availQtyInput) {
             availQtyInput.addEventListener('input', updateAvailabilityPreview);
         }
 
-        // 11. Submissão do Formulário de Registrar Disponibilidade
         const availForm = document.getElementById('register-availability-form');
         if (availForm) {
             availForm.addEventListener('submit', handleRegisterAvailabilitySubmit);
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  RENDERIZAÇÃO GERAL DA VIEW
-    // ─────────────────────────────────────────────────────────────
     function renderEquipmentView() {
         const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
 
@@ -119,12 +94,6 @@ window.EquipamentosModule = (function () {
         renderBrandCards(notebooks);
     }
 
-    /**
-     * Renderiza exatamente os 3 cards de resumo solicitados:
-     * 1. TOTAL DE EQUIPAMENTOS
-     * 2. DISPONÍVEIS
-     * 3. COM DEFEITO
-     */
     function renderSummaryCards(notebooks) {
         const container = document.getElementById('eq-summary-cards');
         if (!container) return;
@@ -160,15 +129,6 @@ window.EquipamentosModule = (function () {
         `;
     }
 
-    /**
-     * Renderiza os cards das marcas existentes em grade de 3 colunas.
-     * Cada card exibe SOMENTE:
-     * - nome da marca
-     * - quantidade total (ex: "12 notebooks")
-     * - quantidade disponível
-     * - quantidade com defeito
-     * - pequeno ícone/inicial e seta indicando clique
-     */
     function renderBrandCards(notebooks) {
         const grid = document.getElementById('eq-brands-grid');
         if (!grid) return;
@@ -195,13 +155,13 @@ window.EquipamentosModule = (function () {
             const totalLabel = nb.total === 1 ? '1 notebook' : `${nb.total} notebooks`;
 
             return `
-                <div class="eq-brand-card" 
-                     role="button" 
-                     tabindex="0" 
+                <div class="eq-brand-card"
+                     role="button"
+                     tabindex="0"
                      data-brand-id="${nb.id}"
                      title="Clique para ver detalhes de ${ERS.escapeHtml(nb.marca)}"
                      aria-label="Detalhes da marca ${ERS.escapeHtml(nb.marca)}">
-                    
+
                     <div class="eq-brand-top">
                         <div class="brand-identity">
                             <span class="brand-initial-avatar">${ERS.escapeHtml(initial)}</span>
@@ -227,7 +187,6 @@ window.EquipamentosModule = (function () {
             `;
         }).join('');
 
-        // Conecta o evento de clique e teclado a cada card de marca
         grid.querySelectorAll('.eq-brand-card').forEach(card => {
             const brandId = card.getAttribute('data-brand-id');
             card.addEventListener('click', () => openBrandDetailModal(brandId));
@@ -240,9 +199,6 @@ window.EquipamentosModule = (function () {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL 1: DETALHES DA MARCA
-    // ─────────────────────────────────────────────────────────────
     function openBrandDetailModal(brandId) {
         const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
         const nb = notebooks.find(n => n.id === brandId);
@@ -277,9 +233,6 @@ window.EquipamentosModule = (function () {
         openModal('brand-detail-modal');
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL 2: ADICIONAR EQUIPAMENTOS
-    // ─────────────────────────────────────────────────────────────
     function openAddEquipmentModal() {
         const form = document.getElementById('add-equipment-form');
         if (form) form.reset();
@@ -362,7 +315,6 @@ window.EquipamentosModule = (function () {
             return;
         }
 
-        // Desabilita botão durante operação para evitar duplo envio
         const btnSubmit = document.getElementById('btnAddEquipmentSubmit');
         if (btnSubmit) btnSubmit.disabled = true;
 
@@ -384,9 +336,6 @@ window.EquipamentosModule = (function () {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL 3: REGISTRAR DEFEITO
-    // ─────────────────────────────────────────────────────────────
     function openRegisterDefectModal(brandId) {
         const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
         const nb = notebooks.find(n => n.id === brandId);
@@ -411,7 +360,6 @@ window.EquipamentosModule = (function () {
             errEl.style.display = 'none';
         }
 
-        // Inicializa a prévia
         updateDefectPreview();
 
         openModal('register-defect-modal');
@@ -423,11 +371,6 @@ window.EquipamentosModule = (function () {
         }
     }
 
-    /**
-     * Atualiza a prévia em tempo real:
-     * Disponíveis após alteração: X - qtd
-     * Com defeito após alteração: Y + qtd
-     */
     function updateDefectPreview() {
         const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
         const nb = notebooks.find(n => n.id === selectedBrandId);
@@ -463,7 +406,6 @@ window.EquipamentosModule = (function () {
             return;
         }
 
-        // Válido
         if (errEl) errEl.style.display = 'none';
         const newDisp = nb.funcionando - qtd;
         const newDef = nb.defeito + qtd;
@@ -520,9 +462,6 @@ window.EquipamentosModule = (function () {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  MODAL 4: REGISTRAR DISPONIBILIDADE (COMPUTADORES ARRUMADOS)
-    // ─────────────────────────────────────────────────────────────
     function openRegisterAvailabilityModal(brandId = null) {
         const notebooks = ERS.getNotebooks ? ERS.getNotebooks() : [];
         if (notebooks.length === 0) {
@@ -746,9 +685,6 @@ window.EquipamentosModule = (function () {
         element.style.display = 'block';
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  INICIALIZAÇÃO AUTOMÁTICA DA PÁGINA
-    // ─────────────────────────────────────────────────────────────
     if (!window.isSpaMode) {
         document.addEventListener('ers:ready', () => {
             const s = window.AUTH ? AUTH.requireAuth(['proatec', 'coordenacao']) : null;

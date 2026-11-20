@@ -1,8 +1,3 @@
-/**
- * salas.js — Gestão de salas reserváveis
- * Depende de: store.js, auth.js, main.js
- */
-
 'use strict';
 
 window.SalasModule = (function() {
@@ -28,9 +23,6 @@ window.SalasModule = (function() {
         renderRooms();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  GRID DE SALAS
-    // ─────────────────────────────────────────────────────────────
     function renderRooms() {
         const rooms    = ERS.getRooms();
         const todayRes = ERS.getReservationsByDate(ERS.today());
@@ -102,7 +94,6 @@ window.SalasModule = (function() {
         if (window.AgendaProatecModule?.populateRoomSelect) window.AgendaProatecModule.populateRoomSelect();
     }
 
-    // Fallback para carregamento isolado da página
     if (!window.isSpaMode) {
         document.addEventListener('ers:ready', () => {
             const s = AUTH.requireAuth(['proatec', 'coordenacao']);
@@ -122,7 +113,6 @@ window.SalasModule = (function() {
     };
 })();
 
-// Exporta funções chamadas inline no HTML / onclick
 window.toggleRoom = function(id) {
     window.SalasModule?.toggleRoom(id);
 };

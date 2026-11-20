@@ -7,14 +7,10 @@
     <title>Equipamentos - Alceu Reservas</title>
     <meta name="description" content="Gerencie os notebooks disponíveis na escola.">
 
-    <!-- Fontes do Google -->
-
-    <!-- Folhas de Estilo -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/equipamentos.css">
 
-    <!-- Anti-flicker da Sidebar (Executado antes da renderização) -->
     <script>
         (function() {
             try {
@@ -35,19 +31,18 @@
 </head>
 <body data-page="equipamentos">
     <div class="app-container">
-        <!-- Sidebar injetada dinamicamente por sidebar.js -->
+
         <div id="sidebar-mount"></div>
 
-        <!-- Área Principal -->
         <div class="main-wrapper">
             <main class="dashboard-content">
-                <!-- 1. Cabeçalho -->
+
                 <section class="eq-page-header">
                     <div class="eq-header-info">
                         <h1 class="eq-page-title">Equipamentos</h1>
                         <p class="eq-page-desc">Gerencie os notebooks disponíveis na escola.</p>
                     </div>
-                    <!-- Ações Principais -->
+
                     <div class="eq-header-actions">
                         <button type="button" class="btn-secondary btn-availability-action" id="btnOpenAvailabilityTop">
                             <span class="material-symbols-outlined">check_circle</span>
@@ -60,27 +55,22 @@
                     </div>
                 </section>
 
-                <!-- 2. Cards de Resumo (Exatamente 3 cards) -->
                 <section class="eq-summary-section" aria-label="Resumo dos equipamentos">
                     <div class="eq-summary-cards" id="eq-summary-cards">
-                        <!-- Renderizado dinamicamente por equipamentos.js -->
+
                     </div>
                 </section>
 
-                <!-- 3. Seção Equipamentos por Marca -->
                 <section class="eq-brands-section" aria-label="Equipamentos por marca">
                     <h2 class="eq-section-title">Equipamentos por marca</h2>
                     <div class="eq-brands-grid" id="eq-brands-grid">
-                        <!-- Renderizado dinamicamente por equipamentos.js -->
+
                     </div>
                 </section>
             </main>
         </div>
     </div>
 
-    <!-- ==============================================================
-         MODAL 1: Detalhes da Marca
-         ============================================================== -->
     <div class="modal-backdrop hidden" id="brand-detail-modal" role="dialog" aria-modal="true" aria-labelledby="brand-detail-title">
         <div class="modal modal-md">
             <div class="modal-header">
@@ -124,9 +114,6 @@
         </div>
     </div>
 
-    <!-- ==============================================================
-         MODAL 2: Adicionar Equipamentos
-         ============================================================== -->
     <div class="modal-backdrop hidden" id="add-equipment-modal" role="dialog" aria-modal="true" aria-labelledby="add-equipment-title">
         <div class="modal modal-md">
             <div class="modal-header">
@@ -151,7 +138,6 @@
                         </div>
                     </div>
 
-                    <!-- Campo condicional para cadastrar nova marca -->
                     <div class="form-group hidden" id="new-brand-group">
                         <label for="add-brand-new">Nome da nova marca</label>
                         <input type="text" id="add-brand-new" class="form-control" placeholder="Digite o nome da marca (Ex: Samsung, Asus, HP)">
@@ -173,9 +159,6 @@
         </div>
     </div>
 
-    <!-- ==============================================================
-         MODAL 3: Registrar Defeito
-         ============================================================== -->
     <div class="modal-backdrop hidden" id="register-defect-modal" role="dialog" aria-modal="true" aria-labelledby="register-defect-title">
         <div class="modal modal-md">
             <div class="modal-header">
@@ -190,7 +173,7 @@
             <form id="register-defect-form" novalidate>
                 <input type="hidden" id="defect-brand-id">
                 <div class="modal-body">
-                    <!-- Marca e Disponíveis Atualmente -->
+
                     <div class="defect-brand-banner">
                         <div class="defect-brand-info">
                             <span class="defect-brand-label">Marca</span>
@@ -207,7 +190,6 @@
                         <input type="number" id="defect-qty" class="form-control" min="1" step="1" placeholder="Ex: 2" required>
                     </div>
 
-                    <!-- Prévia calculada após alteração -->
                     <div class="defect-preview-card" id="defect-preview-card">
                         <div class="preview-header">
                             <span class="material-symbols-outlined">sync_alt</span>
@@ -236,9 +218,6 @@
         </div>
     </div>
 
-    <!-- ==============================================================
-         MODAL 4: Registrar Disponibilidade (Equipamentos Arrumados)
-         ============================================================== -->
     <div class="modal-backdrop hidden" id="register-availability-modal" role="dialog" aria-modal="true" aria-labelledby="register-availability-title">
         <div class="modal modal-md">
             <div class="modal-header">
@@ -253,7 +232,7 @@
             <form id="register-availability-form" novalidate>
                 <input type="hidden" id="avail-brand-id">
                 <div class="modal-body">
-                    <!-- Seleção de Marca (visível se aberto pelo topo) -->
+
                     <div class="form-group" id="avail-brand-select-group">
                         <label for="avail-brand-select">Marca do equipamento</label>
                         <div class="select-wrapper">
@@ -264,7 +243,6 @@
                         </div>
                     </div>
 
-                    <!-- Banner de marca e defeitos atuais -->
                     <div class="defect-brand-banner avail-banner" id="avail-brand-banner">
                         <div class="defect-brand-info">
                             <span class="defect-brand-label">Marca</span>
@@ -281,7 +259,6 @@
                         <input type="number" id="avail-qty" class="form-control" min="1" step="1" placeholder="Ex: 2" required>
                     </div>
 
-                    <!-- Prévia calculada após alteração -->
                     <div class="defect-preview-card avail-preview-card" id="avail-preview-card">
                         <div class="preview-header" style="color: #15803d;">
                             <span class="material-symbols-outlined">published_with_changes</span>
@@ -311,10 +288,8 @@
         </div>
     </div>
 
-    <!-- Container Toast -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Scripts do Sistema -->
     <script src="../js/store.js"></script>
     <script src="../js/real-store.js"></script>
     <script src="../js/auth.js"></script>

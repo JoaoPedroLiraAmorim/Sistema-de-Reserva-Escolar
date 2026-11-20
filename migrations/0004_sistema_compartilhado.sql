@@ -22,10 +22,10 @@ CREATE TABLE reservas (
 );
 CREATE INDEX reservas_horarios ON reservas(data, inicio, fim);
 CREATE INDEX reservas_conta ON reservas(conta_id, data);
--- Mantém as reservas já criadas pela primeira integração.
+
 INSERT INTO reservas (id, conta_id, sala_id, data, inicio, fim)
 SELECT id, conta_id, sala_id, data, inicio, fim FROM reservas_salas;
--- Validar na própria gravação também protege pedidos concorrentes.
+
 CREATE TRIGGER reservas_validar BEFORE INSERT ON reservas WHEN NEW.situacao = 'confirmada'
 BEGIN
  SELECT RAISE(ABORT, 'SALA_INDISPONIVEL') WHERE NEW.sala_id IS NOT NULL AND

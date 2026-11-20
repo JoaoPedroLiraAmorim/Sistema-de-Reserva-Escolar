@@ -1,9 +1,3 @@
-/* ==========================================================================
-   salas.css
-   Estilos da página de gestão de salas reserváveis.
-   ========================================================================== */
-
-/* 1. Cabeçalho da página de Salas */
 .salas-page-header,
 .dashboard-header {
     display: flex;
@@ -53,7 +47,6 @@
     margin-bottom: 4px;
 }
 
-/* Botão Nova Sala (padronizado, menor, no canto direito e alinhado) */
 .btn-add-room,
 #btnAddRoom {
     display: inline-flex;
@@ -83,7 +76,6 @@
     font-size: 18px;
 }
 
-/* 2. Grid de cards */
 .rooms-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -91,7 +83,6 @@
     margin-top: 8px;
 }
 
-/* Card de sala */
 .room-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -122,7 +113,6 @@
 }
 .room-icon span { color: var(--color-primary); font-size: 22px; }
 
-/* Badge de status */
 .room-status {
     font-size: 12px;
     font-weight: 600;
@@ -132,7 +122,6 @@
 .room-status.ativa   { background: #dcfce7; color: #16a34a; }
 .room-status.inativa { background: #f1f5f9; color: #94a3b8; }
 
-/* Nome e metadados */
 .room-name { font-size: 17px; font-weight: 700; color: var(--color-text-primary); }
 
 .room-meta {
@@ -151,7 +140,6 @@
     border-top: 1px solid var(--color-border);
 }
 
-/* Botão de ativar/desativar */
 .room-card-actions { display: flex; gap: 8px; margin-top: 4px; }
 
 .btn-toggle-room {
@@ -175,7 +163,6 @@
 .btn-toggle-room.ativar:hover   { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
 .btn-toggle-room.desativar:hover { background: #fef2f2; border-color: #dc2626; color: #dc2626; }
 
-/* 3. Responsividade */
 @media (max-width: 768px) {
     .salas-page-header,
     .dashboard-header {

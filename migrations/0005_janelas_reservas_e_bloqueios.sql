@@ -12,7 +12,6 @@ CREATE TABLE reservas_alteracoes (
 );
 CREATE INDEX reservas_alteracoes_reserva ON reservas_alteracoes(reserva_id, id);
 
--- As validações ocorrem na gravação e veem o estado mais recente do banco.
 DROP TRIGGER reservas_validar;
 CREATE TRIGGER reservas_validar BEFORE INSERT ON reservas WHEN NEW.situacao = 'confirmada'
 BEGIN

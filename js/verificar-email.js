@@ -4,7 +4,7 @@ const params = new URLSearchParams(location.search);
 const code = params.get('oobCode');
 const mode = params.get('mode');
 const validLink = ['verifyEmail', 'resetPassword', 'recoverEmail'].includes(mode) && code && code.length <= 2048;
-// O código de uso único não permanece no endereço, no histórico nem no referrer.
+
 history.replaceState(null, '', location.pathname);
 let confirmation;
 

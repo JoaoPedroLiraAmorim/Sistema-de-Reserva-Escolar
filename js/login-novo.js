@@ -1,15 +1,7 @@
-/**
- * login-novo.js — Lógica da Nova Tela de Login (Alceu Reservas)
- * Design Limpo e Centralizado
- * Depende de: store.js (ERS)
- */
-
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ─────────────────────────────────────────────────────────────
-    // 1. Alternar Visibilidade da Senha (Eye Toggle)
-    // ─────────────────────────────────────────────────────────────
+
     const togglePasswordBtn = document.getElementById('togglePassword');
     const passwordInput     = document.getElementById('password');
 
@@ -58,15 +50,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('login-status');
     let busy = false;
     let registering = false;
+    let confirmandoGoogle = false;
 
     function atualizarBotao(carregando = false) {
         btnLogin.classList.toggle('loading', carregando);
-        btnText.textContent = registering
+        btnText.textContent = confirmandoGoogle
+            ? (carregando ? 'Salvando...' : 'Salvar e entrar')
+            : registering
             ? (carregando ? 'Criando conta...' : 'Criar conta')
             : (carregando ? 'Entrando...' : 'Entrar');
     }
 
     function mostrarCadastro(ativo) {
+        confirmandoGoogle = false;
+        [emailInput, passwordInput].forEach(input => {
+            input.disabled = false;
+            input.closest('.form-group').hidden = false;
+        });
         registering = ativo;
         title.textContent = ativo ? 'Crie sua conta.' : 'Bem-vindo de volta.';
         description.textContent = ativo
@@ -92,9 +92,25 @@ document.addEventListener('DOMContentLoaded', () => {
     registerButton.addEventListener('click', () => {
         if (!busy) mostrarCadastro(true);
     });
-    backButton.addEventListener('click', () => {
-        if (!busy) mostrarCadastro(false);
-    });
+    backButton.addEventListener('click', () => executar(backButton, async () => {
+        if (confirmandoGoogle) await (await autenticacao()).cancelarGoogle();
+        mostrarCadastro(false);
+    }));
+
+    function pedirNomeGoogle(nome) {
+        mostrarCadastro(true);
+        registering = false;
+        confirmandoGoogle = true;
+        title.textContent = 'Confirme seu nome.';
+        description.textContent = 'Como você quer ser identificado nas reservas da escola?';
+        [emailInput, passwordInput].forEach(input => {
+            input.disabled = true;
+            input.closest('.form-group').hidden = true;
+        });
+        nameInput.value = nome || '';
+        atualizarBotao();
+        nameInput.focus();
+    }
 
     document.querySelectorAll('[data-demo-role]').forEach(button => button.addEventListener('click', () => executar(button, async () => {
         window.ERS_DEMO = true;
@@ -135,6 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!conta) throw new Error('Não foi possível abrir sua sessão. Entre novamente.');
         location.assign(conta.papel === 'coordenacao' ? 'pages/proatec.html' : 'pages/professor.html');
     }
+
+    api('conta/sessao').then(({ conta }) => {
+        if (conta) location.replace(conta.papel === 'coordenacao' ? 'pages/proatec.html' : 'pages/professor.html');
+    }).catch(() => {});
 
     async function autenticacao() {
         const auth = await firebaseReady;
@@ -198,10 +218,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (busy) return;
         clearFieldErrors();
         const name = nameInput.value.replace(/\s+/g, ' ').trim();
-        if (registering && (!name || name.length > nameInput.maxLength || /\p{Cc}/u.test(name))) {
-            showError('Informe seu nome com até 120 caracteres.');
+        if ((registering || confirmandoGoogle) && (!name || name.length > nameInput.maxLength || /\p{Cc}/u.test(name) || (confirmandoGoogle && name.includes('@')))) {
+            showError('Informe seu nome com até 120 caracteres, sem usar um e-mail.');
             nameInput.setAttribute('aria-invalid', 'true');
             nameInput.focus();
+            return;
+        }
+        if (confirmandoGoogle) {
+            executar(btnLogin, async () => {
+                await (await autenticacao()).confirmarNomeGoogle(name, api);
+                await abrirSistema();
+            });
             return;
         }
         const email = lerEmail();
@@ -238,7 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     googleButton.addEventListener('click', () => executar(googleButton, async () => {
-        await (await autenticacao()).entrarGoogle(api);
+        const result = await (await autenticacao()).entrarGoogle(api);
+        if (result.precisaNome) {
+            pedirNomeGoogle(result.nome);
+            return;
+        }
         await abrirSistema();
     }));
 
@@ -259,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const msgSpan = errorBox.querySelector('.error-text') || errorBox;
         msgSpan.textContent = msg;
         errorBox.style.display = 'flex';
-        if (registering) nameInput.setAttribute('aria-describedby', 'login-error');
+        if (registering || confirmandoGoogle) nameInput.setAttribute('aria-describedby', 'login-error');
         emailInput?.setAttribute('aria-describedby','login-error');
         passwordInput?.setAttribute('aria-describedby','login-error caps-hint');
     }
@@ -287,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpDialog=document.getElementById('access-help-dialog');
     document.querySelectorAll('[data-access-help]').forEach(button=>button.addEventListener('click',()=>helpDialog?.showModal()));
 
-    // Carrega e-mail lembrado anteriormente se existir
     const savedEmail = localStorage.getItem('edulab_saved_email');
     if (savedEmail && emailInput && !emailInput.value) {
         emailInput.value = savedEmail;
