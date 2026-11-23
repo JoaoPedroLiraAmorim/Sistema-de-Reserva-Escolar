@@ -18,7 +18,7 @@
 #report-defect-modal > .modal { width: min(100%, 520px); max-height: 85dvh; border-radius: var(--radius-xl); }
 @media (max-width: 480px) { .defect-report { padding: 14px; } .report-subtabs { display: grid; grid-template-columns: 1fr; } }
 
-#btn-report-defect { padding: 12px 16px; background-color: #b91c1c; color: #fff; font-size: 15px; font-weight: 600; }
+#btn-report-defect { background-color: #b91c1c; color: #fff; }
 #btn-report-defect:hover { background-color: #991b1b; opacity: 1; }
 #btn-report-defect:focus-visible { outline: 3px solid #b91c1c; outline-offset: 3px; }
 #btn-report-defect[hidden] { display: none !important; }

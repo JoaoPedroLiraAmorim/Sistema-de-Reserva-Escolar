@@ -123,6 +123,11 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    await page.setViewportSize({width,height});await visit('pages/professor.html');await noOverflow('professor '+width);
    assert.equal(await page.locator('#v2-day-list,[data-agenda-mode="list"]').count(),0);
    assert.equal(await page.locator('#v2-room-filter,#v2-only-mine').count(),0,'professor sem filtros de sala ou de minhas reservas');
+   const newButton = await page.locator('#btnOpenNewReservation').boundingBox();
+   const reportButton = await page.locator('#btn-report-defect').boundingBox();
+   assert.ok(Math.abs(newButton.width-reportButton.width)<=1 && Math.abs(newButton.height-reportButton.height)<=1,'ações têm o mesmo tamanho em '+width);
+   assert.ok(Math.abs(newButton.y-reportButton.y)<=1 && newButton.x+newButton.width<=reportButton.x,'ações lado a lado em '+width);
+   if(width<=768) assert.ok(newButton.height<=44.5,'ações compactas no celular');
    if(width>=1920) assert.equal(await page.locator('.teacher-main-content').evaluate(el=>Math.abs(el.getBoundingClientRect().width-el.parentElement.clientWidth)<=1),true,'professor ocupa a largura disponível no desktop');
    const daily=width<=1100;
    assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:5);
@@ -204,7 +209,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   await page.waitForFunction(()=>document.activeElement?.id==='btn-report-defect');
   assert.equal(await page.locator('#res-detail-modal').isVisible(),false,'Escape retorna à tela inicial');
   await page.getByRole('button',{name:'Reportar defeito',exact:true}).click();
-  assert.equal(await page.getByLabel('Aula em andamento',{exact:true}).inputValue(),'active');
+  assert.equal(await page.locator('#report-defect-form select').count(),0,'formulário contém apenas etiqueta e problema');
   await page.getByLabel('Número da etiqueta',{exact:true}).fill('NT-1');
   await page.getByLabel('Relate o problema',{exact:true}).fill('A tela "não" liga. <img src=x onerror=alert(1)>');
   await page.getByRole('button',{name:'Enviar relato',exact:true}).click();
@@ -219,13 +224,16 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.equal(await page.getByRole('button',{name:'Enviar relato',exact:true}).isDisabled(),true,'sem aula ativa não envia relato');
   assert.equal(await page.getByLabel('Número da etiqueta',{exact:true}).isDisabled(),true);
   await page.keyboard.press('Escape');
-  sql.prepare("INSERT INTO reservas (id,conta_id,data,inicio,fim,notebooks) VALUES ('active2','p1',?,'00:00','23:59',1)").run(today);
+  sql.prepare("INSERT INTO reservas (id,conta_id,data,inicio,fim,notebooks) VALUES ('active2','p1',?,'00:01','23:59',1)").run(today);
   await login('p1');await visit('pages/professor.html');
   await page.getByRole('button',{name:'Reportar defeito',exact:true}).click();
-  assert.equal(await page.locator('#defect-reservation option').count(),3,'duas aulas próprias elegíveis e uma opção inicial');
-  assert.equal(await page.getByLabel('Aula em andamento',{exact:true}).inputValue(),'');
-  await page.getByLabel('Aula em andamento',{exact:true}).selectOption('active2');
-  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#report-defect-form select').count(),0);
+  await page.getByLabel('Número da etiqueta',{exact:true}).fill('NT-2');
+  await page.getByLabel('Relate o problema',{exact:true}).fill('Teclado com falha.');
+  await page.getByRole('button',{name:'Enviar relato',exact:true}).click();
+  await page.locator('#report-defect-modal').waitFor({state:'hidden'});
+  assert.equal(sql.prepare("SELECT reserva_id FROM defeitos_reportados WHERE etiqueta='NT-2'").get().reserva_id,'active2','relato vincula automaticamente à reserva em andamento de início mais recente');
+  sql.exec("DELETE FROM defeitos_reportados WHERE etiqueta='NT-2'; DELETE FROM reservas WHERE id='active2'");
 
   assert.equal(sql.prepare("SELECT funcionando FROM equipamentos WHERE id='n1'").get().funcionando,10,'relato não altera estoque');
   await login('c1');await visit('pages/proatec.html');

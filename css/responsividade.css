@@ -1522,3 +1522,33 @@ body:has(#new-reservation-modal:not(.hidden)) {
 #new-reservation-form .booking-section {
   max-width: 100%;
 }
+
+/* Ações principais do professor com dimensões iguais em todas as telas. */
+.teacher-primary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 360px;
+  max-width: 100%;
+}
+.teacher-primary-actions > .btn-teacher-new-res {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  justify-content: center;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 20px;
+}
+@media (max-width: 768px) {
+  .teacher-primary-actions { width: 100%; gap: 8px; }
+  .teacher-primary-actions > .btn-teacher-new-res {
+    min-height: 44px;
+    padding: 8px;
+    font-size: 12px;
+    line-height: 18px;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .teacher-primary-actions .material-symbols-outlined { font-size: 18px; }
+}
