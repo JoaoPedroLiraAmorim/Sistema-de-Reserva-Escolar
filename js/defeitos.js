@@ -60,7 +60,7 @@
         if (!footer) return;
         let button = document.getElementById('btn-report-defect');
         if (!button) {
-            button = document.createElement('button'); button.id = 'btn-report-defect'; button.type = 'button'; button.className = 'btn-secondary'; button.textContent = 'Reportar defeito';
+            button = document.createElement('button'); button.id = 'btn-report-defect'; button.type = 'button'; button.className = 'btn-danger'; button.textContent = 'Reportar defeito';
             button.onclick = () => openReport(detailReservation); footer.prepend(button);
         }
         button.hidden = !canReport(r);
@@ -156,7 +156,7 @@
         if (document.getElementById('res-detail-modal')) {
             document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop hidden" id="report-defect-modal" role="dialog" aria-modal="true" aria-labelledby="report-defect-title"><div class="modal">
                 <div class="modal-header"><div><h3 id="report-defect-title">Reportar defeito</h3><p id="report-defect-context"></p></div><button type="button" class="btn-close" aria-label="Fechar relato de defeito"><span class="material-symbols-outlined">close</span></button></div>
-                <form id="report-defect-form"><div class="modal-body"><label for="defect-tag">Número da etiqueta</label><input class="form-control" id="defect-tag" name="etiqueta" required maxlength="100" autocomplete="off"><label for="defect-description">Descrição do defeito</label><textarea class="form-control" id="defect-description" name="descricao" required maxlength="2000" rows="4"></textarea><p id="report-defect-error" class="defect-warning" role="alert" hidden></p></div><div class="modal-footer"><button type="submit" class="btn-primary">Enviar relato</button></div></form></div></div>`);
+                <form id="report-defect-form"><div class="modal-body"><label for="defect-tag">Número da etiqueta</label><input class="form-control" id="defect-tag" name="etiqueta" placeholder="Ex.: NT-01" required maxlength="100" autocomplete="off"><label for="defect-description">Relate o problema</label><textarea class="form-control" id="defect-description" name="descricao" placeholder="Descreva o problema encontrado no notebook." required maxlength="2000" rows="4"></textarea><p id="report-defect-error" class="defect-warning" role="alert" hidden></p></div><div class="modal-footer"><button type="submit" class="btn-primary">Enviar relato</button></div></form></div></div>`);
             const modal = document.getElementById('report-defect-modal');
             modal.querySelector('.btn-close').onclick = closeReport;
             modal.addEventListener('click', e => { if (e.target === modal) modal.querySelector('.btn-close').click(); });

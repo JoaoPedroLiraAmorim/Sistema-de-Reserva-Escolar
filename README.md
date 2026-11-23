@@ -26,7 +26,7 @@ Os botões **Professor demo** e **Coordenação demo** permitem experimentar a m
 - Durante sua aula com notebooks, o professor pode abrir os detalhes da reserva e reportar um defeito por etiqueta e descrição, inclusive antes da confirmação da retirada. O relato guarda autor, horário do servidor e contexto da aula, é privado entre professores e fica visível à Coordenação em **Relatórios → Defeitos reportados**. O contador indica relatos não lidos; **Marcar como lido** baixa o contador e preserva o relato.
 - Os registros de aluno mostram um alerta quando a etiqueta possui relato na mesma reserva, independentemente de o aluno ter sido vinculado antes ou depois. O relato não atribui responsabilidade ao aluno nem muda automaticamente as quantidades do estoque; a Coordenação confirma os ajustes no controle de equipamentos existente.
 - Espaço Maker foi retirado dos catálogos e da demonstração. A migração 0008 desativa eventual cadastro antigo, impede recadastro/reativação e preserva reservas históricas vinculadas.
-- A migração 0004 preserva as reservas existentes em reservas_salas. A tabela antiga permanece como origem histórica; as novas gravações usam reservas. Nenhuma conta ou reserva existente é apagada.
+- A migração 0004 preserva as reservas existentes em reservas_salas. As novas gravações usam reservas. A migração 0009 remove reservas_salas somente se todos os seus registros estiverem representados em reservas com os mesmos dados básicos; também exige convites e desafios vazios. Se houver divergências, a migração falha para permitir revisão e cópia de segurança, sem apagar os registros.
 - O histórico permanece no banco. A agenda e os relatórios de reservas consultam o dia atual e datas futuras; uma consulta histórica completa de reservas ainda não está disponível na interface. A subaba de defeitos mantém também os relatos de aulas passadas.
 
 ## E-mails e confirmação de conta
@@ -105,3 +105,11 @@ npx wrangler deploy --keep-vars
 Aplique somente migrações revisadas e confira a conta, o Worker app e o ID do banco em wrangler.jsonc antes de publicar. Nenhuma migração é executada automaticamente pelo build.
 
 O domínio .web.app requer publicação no Firebase Hosting. Firebase Authentication, usado aqui, é independente da hospedagem; migrar o host exige adaptar a ligação com a API e os cookies da sessão.
+
+## Estrutura atual do banco
+
+Após a migração 0009, as oito tabelas da aplicação são: contas, sessoes, salas, equipamentos, reservas, bloqueios, reservas_alteracoes e defeitos_reportados. Tabelas internas do SQLite e de controle de migrações não entram nessa contagem.
+
+Retiradas e vínculos de alunos ficam em reservas. O histórico de edições usa reservas_alteracoes; relatos e confirmações de leitura usam defeitos_reportados. Convites e desafios pertenciam ao fluxo antigo, substituído pelo Firebase Authentication.
+
+Antes de aplicar 0009 em um banco existente, faça uma cópia de segurança. Caso a proteção legado_precisa_de_revisao impeça a limpeza, revise e preserve os dados antigos antes de continuar; não remova essa proteção para forçar a execução. As migrações locais não atualizam o banco publicado.

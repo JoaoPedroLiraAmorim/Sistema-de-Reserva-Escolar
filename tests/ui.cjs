@@ -202,7 +202,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.equal(await page.locator('#res-detail-modal').isVisible(),true,'Escape retorna aos detalhes e restaura o foco');
   await page.getByRole('button',{name:'Reportar defeito',exact:true}).click();
   await page.getByLabel('Número da etiqueta',{exact:true}).fill('NT-1');
-  await page.getByLabel('Descrição do defeito',{exact:true}).fill('A tela "não" liga. <img src=x onerror=alert(1)>');
+  await page.getByLabel('Relate o problema',{exact:true}).fill('A tela "não" liga. <img src=x onerror=alert(1)>');
   await page.getByRole('button',{name:'Enviar relato',exact:true}).click();
   await page.locator('#report-defect-modal').waitFor({state:'hidden'});
   assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM defeitos_reportados').get().n,1);
