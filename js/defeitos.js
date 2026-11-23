@@ -56,14 +56,6 @@
     }
     function renderDetail(r) {
         detailReservation = r;
-        const footer = document.querySelector('#res-detail-modal .modal-footer');
-        if (!footer) return;
-        let button = document.getElementById('btn-report-defect');
-        if (!button) {
-            button = document.createElement('button'); button.id = 'btn-report-defect'; button.type = 'button'; button.className = 'btn-danger'; button.textContent = 'Reportar defeito';
-            button.onclick = () => openReport(detailReservation); footer.prepend(button);
-        }
-        button.hidden = !canReport(r);
         document.getElementById('reservation-defect-reports')?.remove();
         const reports = reportsFor(r.id);
         if (reports.length) {
@@ -71,23 +63,29 @@
             section.innerHTML = '<h4>Defeitos reportados</h4>' + reports.map(reportMarkup).join(''); document.getElementById('res-detail-body').append(section);
         }
     }
-    function openReport(r) {
-        if (!canReport(r)) { ERS.showToast('Reporte defeitos durante o horário de sua reserva com notebooks.', 'warning'); return; }
-        reportReservation = r;
+    function openReport() {
+        const reservations = ERS.getReservations().filter(canReport);
         reportGeneration++;
         const form = document.getElementById('report-defect-form'); form.reset();
-        form.querySelector('[type="submit"]').disabled = false;
+        const select = document.getElementById('defect-reservation');
+        select.replaceChildren(new Option(reservations.length ? 'Selecione a aula' : 'Nenhuma aula com notebooks em andamento', ''));
+        for (const r of reservations) select.add(new Option(`${ERS.formatDate(r.data)} · ${r.inicio}–${r.fim} · ${r.turma || r.marca || 'Notebooks'}`, r.id));
+        if (reservations.length === 1) select.value = reservations[0].id;
+        reportReservation = reservations.find(r => r.id === select.value) || null;
+        select.disabled = !reservations.length;
+        for (const field of form.querySelectorAll('input, textarea, [type="submit"]')) field.disabled = !reservations.length;
         document.getElementById('report-defect-error').hidden = true;
-        document.getElementById('report-defect-context').textContent = `${ERS.formatDate(r.data)} · ${r.inicio}–${r.fim}`;
-        closeModal('res-detail-modal'); openModal('report-defect-modal'); document.getElementById('defect-tag').focus();
+        document.getElementById('report-defect-context').textContent = reservations.length
+            ? 'Informe a etiqueta do notebook e descreva o problema.'
+            : 'Você pode reportar um defeito durante sua aula com notebooks, mesmo antes da confirmação da retirada.';
+        openModal('report-defect-modal');
+        (reservations.length === 1 ? document.getElementById('defect-tag') : reservations.length ? select : form.closest('.modal').querySelector('.btn-close')).focus();
     }
     function closeReport() {
         reportGeneration++;
+        reportReservation = null;
         closeModal('report-defect-modal');
-        if (reportReservation) {
-            openReservationDetail(reportReservation.id);
-            requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById('btn-report-defect')?.focus()));
-        }
+        requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById('btn-report-defect')?.focus()));
     }
     function renderAssignmentWarnings() {
         const modal = document.getElementById('register-students-modal');
@@ -153,21 +151,30 @@
     function init() {
         if (initialized) return; initialized = true;
         installDemoActions();
-        if (document.getElementById('res-detail-modal')) {
+        if (document.getElementById('btn-report-defect')) {
             document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop hidden" id="report-defect-modal" role="dialog" aria-modal="true" aria-labelledby="report-defect-title"><div class="modal">
                 <div class="modal-header"><div><h3 id="report-defect-title">Reportar defeito</h3><p id="report-defect-context"></p></div><button type="button" class="btn-close" aria-label="Fechar relato de defeito"><span class="material-symbols-outlined">close</span></button></div>
-                <form id="report-defect-form"><div class="modal-body"><label for="defect-tag">Número da etiqueta</label><input class="form-control" id="defect-tag" name="etiqueta" placeholder="Ex.: NT-01" required maxlength="100" autocomplete="off"><label for="defect-description">Relate o problema</label><textarea class="form-control" id="defect-description" name="descricao" placeholder="Descreva o problema encontrado no notebook." required maxlength="2000" rows="4"></textarea><p id="report-defect-error" class="defect-warning" role="alert" hidden></p></div><div class="modal-footer"><button type="submit" class="btn-primary">Enviar relato</button></div></form></div></div>`);
+                <form id="report-defect-form"><div class="modal-body"><label for="defect-reservation">Aula em andamento</label><select class="form-control" id="defect-reservation" required></select><label for="defect-tag">Número da etiqueta</label><input class="form-control" id="defect-tag" name="etiqueta" placeholder="Ex.: NT-01" required maxlength="100" autocomplete="off"><label for="defect-description">Relate o problema</label><textarea class="form-control" id="defect-description" name="descricao" placeholder="Descreva o problema encontrado no notebook." required maxlength="2000" rows="4"></textarea><p id="report-defect-error" class="defect-warning" role="alert" hidden></p></div><div class="modal-footer"><button type="submit" class="btn-primary">Enviar relato</button></div></form></div></div>`);
             const modal = document.getElementById('report-defect-modal');
+            document.getElementById('btn-report-defect').onclick = openReport;
+            document.getElementById('defect-reservation').addEventListener('change', e => {
+                reportReservation = ERS.getReservations().find(r => r.id === e.target.value) || null;
+            });
             modal.querySelector('.btn-close').onclick = closeReport;
             modal.addEventListener('click', e => { if (e.target === modal) modal.querySelector('.btn-close').click(); });
             document.getElementById('report-defect-form').addEventListener('submit', async e => {
                 e.preventDefault(); const button = e.target.querySelector('[type="submit"]'); button.disabled = true;
                 const reservation = reportReservation, generation = reportGeneration;
+                if (!canReport(reservation)) {
+                    const error = document.getElementById('report-defect-error');
+                    error.textContent = 'Selecione uma aula com notebooks em andamento. Atualize a página se a reserva mudou.';
+                    error.hidden = false; button.disabled = false; return;
+                }
                 try {
                     const result = await ERS.reportNotebookDefect({ reservaId: reservation.id, etiqueta: document.getElementById('defect-tag').value, descricao: document.getElementById('defect-description').value });
                     if (generation !== reportGeneration || modal.classList.contains('hidden')) return;
                     if (!result.ok) { const error = document.getElementById('report-defect-error'); error.textContent = result.message; error.hidden = false; return; }
-                    closeModal(modal.id); ERS.showToast('Defeito reportado à coordenação.', 'success'); openReservationDetail(reservation.id);
+                    closeReport(); ERS.showToast('Defeito reportado à coordenação.', 'success');
                 } catch { if (generation === reportGeneration && !modal.classList.contains('hidden')) { const error = document.getElementById('report-defect-error'); error.textContent = 'Não foi possível enviar o relato. Tente novamente.'; error.hidden = false; } }
                 finally { if (generation === reportGeneration) button.disabled = false; }
             });
