@@ -147,6 +147,11 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
     assert.ok(modalBox.x>=15&&modalBox.x+modalBox.width<=width-15,'modal mantém margens laterais em '+width);
     assert.ok(modalBox.height<=height*.85+2,'nova reserva não ocupa a tela inteira em '+width);
    }
+   assert.equal(await page.locator('#res-class').count(),0,'nova reserva sem campo Turma');
+   if(width<=768) {
+    const dateBox=await page.locator('#res-date').boundingBox();
+    assert.ok(dateBox.width<=220.5 && dateBox.height<=44.5,'data compacta no celular em '+width);
+   }
    const reservationBody=page.locator('#new-reservation-form>.modal-body');
    assert.equal(await reservationBody.evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'reserva sem conteúdo horizontal em '+width);
    const before=await page.locator('#new-reservation-modal .modal').boundingBox();

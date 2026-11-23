@@ -466,7 +466,7 @@
         e.preventDefault();e.stopImmediatePropagation();
         const v=id=>$('#'+id)?.value||'';
         const excludeId = form.dataset.reservationId || null;
-        const data={data:v('res-date'),inicio:v('res-start'),fim:v('res-end'),sala:v('res-room'),marca:v('res-brand'),notebooks:Number(v('res-quantity')),turma:v('res-class').trim(),excludeId};
+        const data={data:v('res-date'),inicio:v('res-start'),fim:v('res-end'),sala:v('res-room'),marca:v('res-brand'),notebooks:Number(v('res-quantity')),turma:form.dataset.turma||'',excludeId};
         let error=(!data.sala&&!data.notebooks?'Escolha uma sala ou informe a quantidade de notebooks.':'');
         const weekday = new Date(data.data + 'T12:00:00').getDay();
         if (weekday === 0 || weekday === 6) error = 'As reservas são de segunda a sexta-feira. Escolha um dia letivo.';

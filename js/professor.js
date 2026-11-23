@@ -481,9 +481,10 @@ function openTeacherReservationForm(booking) {
     const editing = Boolean(booking);
     if (!editing && form.dataset.reservationId) form.reset();
     form.dataset.reservationId = booking?.id || '';
+    form.dataset.turma = booking?.turma || '';
     document.getElementById('teacher-booking-title').textContent = editing ? 'Editar reserva' : 'Criar nova reserva';
     document.getElementById('teacher-booking-description').textContent = editing
-        ? 'Atualize o horário, a turma ou os recursos da sua reserva.'
+        ? 'Atualize o horário ou os recursos da sua reserva.'
         : 'Escolha quando e quais recursos você precisa.';
 
     const date = document.getElementById('res-date');
@@ -501,7 +502,6 @@ function openTeacherReservationForm(booking) {
         document.getElementById('res-room').value = booking.sala || '';
         document.getElementById('res-brand').value = booking.marca || '';
         document.getElementById('res-quantity').value = booking.notebooks || '';
-        document.getElementById('res-class').value = booking.turma || '';
         form.dataset.prefillResource = booking.sala ? (booking.notebooks > 0 ? 'ambos' : 'sala') : 'notebooks';
     }
 
@@ -522,7 +522,7 @@ async function handleSaveReservation(event) {
         sala: document.getElementById('res-room').value || null,
         marca: document.getElementById('res-brand').value || 'Qualquer marca',
         notebooks: Number(document.getElementById('res-quantity').value),
-        turma: document.getElementById('res-class').value.trim()
+        turma: form.dataset.turma || ''
     };
 
     const submit = form.querySelector('button[type="submit"]');

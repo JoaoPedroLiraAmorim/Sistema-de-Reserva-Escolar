@@ -1552,3 +1552,18 @@ body:has(#new-reservation-modal:not(.hidden)) {
   }
   .teacher-primary-actions .material-symbols-outlined { font-size: 18px; }
 }
+
+@media (max-width: 768px) {
+  #new-reservation-form #res-date {
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px !important;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    font-size: 16px !important;
+  }
+  #new-reservation-form #res-date::-webkit-date-and-time-value { text-align: left; }
+}
