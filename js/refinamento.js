@@ -147,7 +147,6 @@
     const phoneAgenda = window.matchMedia('(max-width: 768px), (max-width: 900px) and (max-height: 560px) and (orientation: landscape)');
     const teacherAgenda = document.body.classList.contains('teacher-page');
     let agendaMode = agendaBreakpoint.matches ? 'day' : 'grid';
-    let agendaModeChosen = false;
     let selectedAgendaDay;
     const isTeacherDay = () => teacherAgenda && !phoneAgenda.matches && agendaMode === 'day';
     const getAgendaDays = () => [...document.querySelectorAll('#calendarHead th[data-date]')].map(el => el.dataset.date);
@@ -188,26 +187,9 @@
         tools.innerHTML = '<span id="v2-agenda-summary" class="v2-agenda-summary"></span>';
         controls.after(tools);
         if (teacherAgenda) {
-            tools.insertAdjacentHTML('beforeend', `<div class="v2-tool-group"><button type="button" class="v2-today">Hoje</button>
-                <div class="v2-segment" role="group" aria-label="Visualização da agenda">
-                    <button type="button" data-agenda-mode="grid">${icon('grid')}Semana</button>
-                    <button type="button" data-agenda-mode="day">${icon('calendar')}Dia</button>
-                </div></div>`);
             wrapper.insertAdjacentHTML('afterend','<div class="v2-calendar-legend"><span><i></i>Sua reserva</span><span><i class="other"></i>Outra reserva</span><span><i class="block"></i>Período bloqueado</span></div>');
-            $('.v2-today').onclick = () => {
-                const today = new Date(ERS.today() + 'T12:00:00');
-                const date = today.getDay() === 0 || today.getDay() === 6 ? ERS.getMonday(today) : today;
-                selectAgendaDay(ERS.dateKey(date));
-            };
-            document.querySelectorAll('[data-agenda-mode]').forEach(button => {
-                button.onclick = () => {
-                    agendaModeChosen = true;
-                    agendaMode = button.dataset.agendaMode;
-                    renderAgenda();
-                };
-            });
             agendaBreakpoint.addEventListener('change', event => {
-                if (!agendaModeChosen) agendaMode = event.matches ? 'day' : 'grid';
+                agendaMode = event.matches ? 'day' : 'grid';
                 renderAgenda();
             });
             phoneAgenda.addEventListener('change', renderAgenda);
@@ -375,9 +357,6 @@
         const days = getAgendaDays();
         if (!days.length) return;
         if (teacherAgenda) {
-            document.querySelectorAll('[data-agenda-mode]').forEach(button => {
-                button.setAttribute('aria-pressed', button.dataset.agendaMode === (isTeacherDay() ? 'day' : 'grid'));
-            });
             renderTeacherAgenda(days);
         } else {
             const bookings = new Set([...document.querySelectorAll('#calendarBody [data-res-id]')].map(card => card.dataset.resId));
@@ -552,7 +531,7 @@
         if($('#sidebar'))window.AUTH?.adaptSidebarByRole(ERS.getSession());
         const main=$('main');if(main){main.id=main.id||'main-content';main.tabIndex=-1;document.body.insertAdjacentHTML('afterbegin',`<a class="skip-link" href="#${main.id}">Pular para o conteúdo</a>`);}
         const wrapper=$('.main-wrapper');
-        if(wrapper){wrapper.insertAdjacentHTML('afterbegin',`<header class="v2-topbar"><div class="v2-topbar-brand"><button class="v2-mobile-menu" id="v2-mobile-menu" aria-label="Abrir menu de navegação">${icon('menu')}</button><span class="v2-logo">${icon('school')}</span>Alceu Reservas</div><div class="v2-topbar-note"><span>Gestão de salas e notebooks</span><a href="../index.html" id="v2-switch">Trocar perfil</a></div></header>`);$('#v2-switch').textContent='Sair';$('#v2-switch').onclick=async e=>{e.preventDefault();if(await ERS.logout())location.assign('../index.html');};$('#v2-mobile-menu').onclick=e=>{e.stopPropagation();$('#sidebar').classList.toggle('open');$('#sidebarBackdrop')?.classList.toggle('active');};}
+        if(wrapper){wrapper.insertAdjacentHTML('afterbegin',`<header class="v2-topbar"><div class="v2-topbar-brand"><button class="v2-mobile-menu" id="v2-mobile-menu" aria-label="Abrir menu de navegação">${icon('menu')}</button><span class="v2-logo">${icon('school')}</span>Alceu Reservas</div><div class="v2-topbar-note"><span>Gestão de salas e notebooks</span><a href="../index.html" id="v2-switch">${icon('logout')}<span>Sair</span></a></div></header>`);$('#v2-switch').onclick=async e=>{e.preventDefault();if(await ERS.logout())location.assign('../index.html');};$('#v2-mobile-menu').onclick=e=>{e.stopPropagation();$('#sidebar').classList.toggle('open');$('#sidebarBackdrop')?.classList.toggle('active');};}
         if(main&&!teacherAgenda&&!document.body.classList.contains('login-page'))main.insertAdjacentHTML('beforeend','<footer class="v2-version-footer"><span>Alceu Reservas · Gestão de recursos escolares</span><span>Salas e equipamentos</span></footer>');
         if (location.pathname.endsWith('/proatec.html')) {
             $('.dashboard-header')?.insertAdjacentHTML('afterend', '<section id="coord-overview" class="coord-overview" aria-label="Resumo de hoje"></section>');

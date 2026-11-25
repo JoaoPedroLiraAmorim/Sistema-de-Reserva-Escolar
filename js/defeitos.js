@@ -106,7 +106,8 @@
         table.querySelectorAll('tbody tr').forEach(row => {
             const label = row.querySelector('.record-tag-badge strong');
             if (!label || !reports.some(d => tag(d.etiqueta) === tag(label.textContent)) || row.querySelector('.defect-warning')) return;
-            const warning = document.createElement('p'); warning.className = 'defect-warning'; warning.textContent = 'Defeito reportado neste notebook.'; label.closest('td').append(warning);
+            const warning = document.createElement('span'); warning.className = 'defect-warning record-defect-warning'; warning.textContent = 'Defeito reportado';
+            warning.setAttribute('role', 'status'); label.closest('td').append(warning);
         });
     }
     function updateBadges() {

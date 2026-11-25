@@ -278,10 +278,12 @@ function renderActiveChip() {
             textLabel.textContent = `${r.inicio}–${r.fim} ${r.sala ? '• ' + r.sala : ''} • ${r.notebooks} notebooks`;
         }
 
-        if (r.retiradaConfirmada) {
+        if (r.retiradaConfirmada || window.ERS_DEMO) {
             chip.classList.add('chip-ready');
             if (statusLabel) {
-                statusLabel.textContent = r.alunosRegistrados ? 'Notebooks entregues • Alunos registrados' : 'Notebooks entregues pela Coordenação';
+                statusLabel.textContent = r.alunosRegistrados
+                    ? 'Notebooks entregues • Alunos registrados'
+                    : (r.retiradaConfirmada ? 'Notebooks entregues pela Coordenação' : 'Demonstração • registre os alunos');
             }
             if (btnRegister) {
                 btnRegister.style.display = 'inline-flex';
@@ -606,7 +608,7 @@ function openReservationDetail(id) {
     `;
 
     const btnDetailReg = document.getElementById('btn-detail-register-students');
-    btnDetailReg.hidden = !isMine || !r.notebooks || !r.retiradaConfirmada || ERS.isReservationBlocked(r);
+    btnDetailReg.hidden = !isMine || !r.notebooks || (!r.retiradaConfirmada && !window.ERS_DEMO) || ERS.isReservationBlocked(r);
     btnDetailReg.textContent = r.alunosRegistrados ? 'Editar registro da aula' : 'Registrar aula';
     btnDetailReg.onclick = () => {
         closeModal('res-detail-modal');

@@ -113,15 +113,15 @@
     async function seed(force = false) {
         const h = await hashPassword('123456');
 
-        const SEED_VERSION_KEY = 'ers_seeded_v6';
+        const SEED_VERSION_KEY = 'ers_seeded_v8';
         if (!force && load(SEED_VERSION_KEY)) {
             return;
         }
 
         save(KEYS.USERS, [
             { id: 'u1', email: 'professor@demo.com',   password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
-            { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'coordenacao',     nome: 'João Almeida',     avatarLetter: 'J' },
-            { id: 'u3', email: 'coordenacao@demo.com', password: '123456', passwordHash: h, role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
+            { id: 'u2', email: 'proatec@demo.com',     password: '123456', passwordHash: h, role: 'coordenacao',     nome: 'Coordenação', avatarLetter: 'C' },
+            { id: 'u3', email: 'coordenacao@demo.com', password: '123456', passwordHash: h, role: 'coordenacao', nome: 'Coordenação', avatarLetter: 'C' },
             { id: 'u4', email: 'ana.souza@demo.com',    password: '123456', passwordHash: h, role: 'professor',   nome: 'Profª. Ana Souza', avatarLetter: 'A' },
             { id: 'u5', email: 'carlos.lima@demo.com',  password: '123456', passwordHash: h, role: 'professor',   nome: 'Prof. Carlos Lima',avatarLetter: 'C' },
             { id: 'u6', email: 'maria.santos@demo.com', password: '123456', passwordHash: h, role: 'professor',   nome: 'Profª. Maria Santos', avatarLetter: 'M' },
@@ -138,7 +138,7 @@
         save(KEYS.NOTEBOOKS, [
             { id: 'nb1', marca: 'Dell',    total: 18, funcionando: 16, defeito: 2 },
             { id: 'nb2', marca: 'Lenovo',  total: 20, funcionando: 17, defeito: 3 },
-            { id: 'nb3', marca: 'Acer',    total: 14, funcionando: 12, defeito: 2 },
+            { id: 'nb3', marca: 'Acer',    total: 18, funcionando: 15, defeito: 3 },
             { id: 'nb4', marca: 'Samsung', total: 10, funcionando: 9,  defeito: 1 },
         ]);
 
@@ -168,7 +168,7 @@
                 turma: '3A Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
-                retiradaConfirmadaPor: 'João Almeida (Coordenação)',
+                retiradaConfirmadaPor: 'Coordenação',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-01', aluno: 'Lucas Silva' },
@@ -194,7 +194,7 @@
                 turma: '3B Info',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
-                retiradaConfirmadaPor: 'João Almeida (Coordenação)',
+                retiradaConfirmadaPor: 'Coordenação',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-09', aluno: 'Pedro Henrique' },
@@ -273,7 +273,7 @@
                 turma: '1B Admin',
                 situacao: 'confirmada',
                 retiradaConfirmada: true,
-                retiradaConfirmadaPor: 'João Almeida (Coordenação)',
+                retiradaConfirmadaPor: 'Coordenação',
                 alunosRegistrados: true,
                 alunosNotebooks: [
                     { etiqueta: 'NT-13', aluno: 'Bruno Henrique' },
@@ -455,44 +455,106 @@
             },
         ];
 
-        save(KEYS.RESERVATIONS, [...existingRes, ...mockReservations]);
-
-        save(KEYS.BLOCKS, [
-            {
-                id: 'mock-blk-1',
-                data: dSeg,
-                inicio: '10:35',
-                fim: '12:15',
-                motivo: 'Manutenção preventiva de rede e cabeamento',
-                criadoPor: 'João Almeida (Coordenação)',
-                criadoEm: new Date().toISOString()
-            },
-            {
-                id: 'mock-blk-2',
-                data: dQua,
-                inicio: '11:25',
-                fim: '12:15',
-                motivo: 'Higienização e conferência técnica dos notebooks',
-                criadoPor: 'João Almeida (Coordenação)',
-                criadoEm: new Date().toISOString()
-            },
-            {
-                id: 'mock-blk-3',
-                data: dSex,
-                inicio: '13:00',
-                fim: '14:40',
-                motivo: 'Conselho de Classe Bimestral e Planejamento',
-                criadoPor: 'Dra. Sandra Lima (Coordenação)',
-                criadoEm: new Date().toISOString()
+        const nextWeekday = (fromDate, count = 1) => {
+            const cursor = new Date(fromDate + 'T12:00:00');
+            let weekdays = 0;
+            while (weekdays < count) {
+                cursor.setDate(cursor.getDate() + 1);
+                if (cursor.getDay() !== 0 && cursor.getDay() !== 6) weekdays++;
             }
-        ]);
+            return dateKey(cursor);
+        };
+        const nowDate = today();
+        const nowTime = getCurrentTime();
+        const todayIsWeekday = [1, 2, 3, 4, 5].includes(new Date(nowDate + 'T12:00:00').getDay());
+        let liveSlotIndex = todayIsWeekday ? TIME_SLOTS.findIndex(slot => slot.end > nowTime) : -1;
+        const liveDate = liveSlotIndex >= 0 ? nowDate : nextWeekday(nowDate);
+        if (liveSlotIndex < 0) liveSlotIndex = 0;
+        const liveSlot = TIME_SLOTS[liveSlotIndex];
+        const recordsDate = nextWeekday(liveDate);
+        const fridayFor = fromDate => {
+            const cursor = new Date(fromDate + 'T12:00:00');
+            while (cursor.getDay() !== 5) cursor.setDate(cursor.getDate() + 1);
+            return dateKey(cursor);
+        };
+        const fridayDate = fridayFor(recordsDate);
+        const demoFirstNames = ['Lucas', 'Beatriz', 'Carlos', 'Mariana', 'Gabriel', 'Júlia', 'Rafael', 'Fernanda', 'Pedro', 'Camila'];
+        const demoLastNames = ['Silva', 'Santos', 'Oliveira', 'Costa', 'Souza'];
+        const demoStudentNames = demoFirstNames.flatMap(first => demoLastNames.map(last => `${first} ${last}`));
+        const studentAssignments = (count, firstTag) => Array.from({ length: count }, (_, index) => ({
+            etiqueta: `NT-${String(firstTag + index).padStart(2, '0')}`,
+            aluno: demoStudentNames[firstTag - 1 + index],
+        }));
+
+        const featuredReservations = mockReservations.filter(r => ['mock-res-1', 'mock-res-6', 'mock-res-7'].includes(r.id));
+        const registeredClass = featuredReservations.find(r => r.id === 'mock-res-1');
+        Object.assign(registeredClass, {
+            data: recordsDate, inicio: '09:30', fim: '10:20', notebooks: 10,
+            sala: 'Aquário', turma: '3A Info', retiradaConfirmada: true,
+            retiradaConfirmadaPor: 'Coordenação',
+            alunosRegistrados: true,
+            alunosNotebooks: studentAssignments(10, 1),
+        });
+        const otherRegisteredClass = featuredReservations.find(r => r.id === 'mock-res-7');
+        Object.assign(otherRegisteredClass, {
+            data: recordsDate, inicio: '10:35', fim: '11:25', notebooks: 15,
+            sala: 'Sala de Leitura', turma: '1B Admin',
+            retiradaConfirmadaPor: 'Coordenação', alunosRegistrados: true,
+            alunosNotebooks: studentAssignments(15, 11),
+        });
+        const classToRegister = featuredReservations.find(r => r.id === 'mock-res-6');
+        Object.assign(classToRegister, {
+            data: liveDate, inicio: liveSlot.start, fim: liveSlot.end, notebooks: 10,
+            sala: 'Sala de Vídeo', turma: '2B Info', retiradaConfirmada: false,
+            alunosRegistrados: false, alunosNotebooks: [],
+        });
+
+        const fridayReservations = [
+            {
+                id: 'mock-res-fri-1', professorId: 'u1', professorNome: 'Prof. Marcelo',
+                data: fridayDate, inicio: '13:00', fim: '13:50', sala: 'Aquário', marca: 'Dell',
+                notebooks: 10, turma: '2C Info', situacao: 'confirmada', retiradaConfirmada: true,
+                retiradaConfirmadaPor: 'Coordenação', alunosRegistrados: true,
+                alunosNotebooks: studentAssignments(10, 26),
+            },
+            {
+                id: 'mock-res-fri-2', professorId: 'u4', professorNome: 'Profª. Ana Souza',
+                data: fridayDate, inicio: '14:40', fim: '15:30', sala: 'Sala de Leitura', marca: 'Acer',
+                notebooks: 15, turma: '1C Log', situacao: 'confirmada', retiradaConfirmada: true,
+                retiradaConfirmadaPor: 'Coordenação', alunosRegistrados: true,
+                alunosNotebooks: studentAssignments(15, 36),
+            },
+        ];
+
+        save(KEYS.RESERVATIONS, [...existingRes, ...featuredReservations, ...fridayReservations]);
+        save(KEYS.BLOCKS, []);
+        if (window.ERS_DEMO) {
+            localStorage.setItem('alceu_demo:ers_defects', JSON.stringify([
+                {
+                    id: 'mock-defect-1', reservaId: 'mock-res-1', professorId: 'u1', professorNome: 'Prof. Marcelo',
+                    etiqueta: 'NT-01', descricao: 'A bateria descarrega rapidamente durante a aula.', aluno: 'Lucas Silva',
+                    criadoEm: new Date(`${recordsDate}T09:45:00-03:00`).toISOString(), lidoEm: null,
+                    data: recordsDate, inicio: '09:30', fim: '10:20', turma: '3A Info', marca: 'Dell', sala: 'Aquário',
+                },
+                {
+                    id: 'mock-defect-2', reservaId: 'mock-res-fri-2', professorId: 'u4', professorNome: 'Profª. Ana Souza',
+                    etiqueta: 'NT-36', descricao: 'A tecla Enter falha durante a digitação.', aluno: demoStudentNames[35],
+                    criadoEm: new Date(`${fridayDate}T15:00:00-03:00`).toISOString(), lidoEm: null,
+                    data: fridayDate, inicio: '14:40', fim: '15:30', turma: '1C Log', marca: 'Acer', sala: 'Sala de Leitura',
+                },
+            ]));
+        }
 
         save(KEYS.SEEDED, true);
         save(SEED_VERSION_KEY, true);
+        if (window.ERS_DEMO) {
+            const session = load(KEYS.SESSION);
+            if (session?.role === 'coordenacao') save(KEYS.SESSION, { ...session, nome: 'Coordenação', avatarLetter: 'C' });
+        }
     }
 
     async function resetDemoData() {
-        for (const key of [KEYS.SEEDED, 'ers_seeded_v4', 'ers_seeded_v5', 'ers_seeded_v6', KEYS.NOTEBOOKS, KEYS.RESERVATIONS, KEYS.BLOCKS, KEYS.ROOMS, KEYS.USERS]) {
+        for (const key of [KEYS.SEEDED, 'ers_seeded_v4', 'ers_seeded_v5', 'ers_seeded_v6', 'ers_seeded_v7', 'ers_seeded_v8', KEYS.NOTEBOOKS, KEYS.RESERVATIONS, KEYS.BLOCKS, KEYS.ROOMS, KEYS.USERS]) {
             localStorage.removeItem(window.ERS_DEMO ? 'alceu_demo:' + key : key);
         }
         await seed(true);
@@ -530,8 +592,8 @@
         if (!user && cleanPassword === '123456') {
             const demoMap = {
                 'professor@demo.com':   { id: 'u1', role: 'professor',   nome: 'Prof. Marcelo',    avatarLetter: 'M' },
-                'proatec@demo.com':     { id: 'u2', role: 'coordenacao',     nome: 'João Almeida',     avatarLetter: 'J' },
-                'coordenacao@demo.com': { id: 'u3', role: 'coordenacao', nome: 'Dra. Sandra Lima',  avatarLetter: 'S' },
+                'proatec@demo.com':     { id: 'u2', role: 'coordenacao', nome: 'Coordenação', avatarLetter: 'C' },
+                'coordenacao@demo.com': { id: 'u3', role: 'coordenacao', nome: 'Coordenação', avatarLetter: 'C' },
             };
             if (demoMap[cleanEmail]) {
                 user = { ...demoMap[cleanEmail], email: cleanEmail, password: '123456', passwordHash: h };
