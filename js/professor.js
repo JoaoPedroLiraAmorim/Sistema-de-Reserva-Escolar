@@ -363,7 +363,7 @@ function addStudentRow(num, etiqueta = '', aluno = '') {
         <td>
             <label>
                 <span class="student-field-label">Nº da Etiqueta</span>
-                <input type="text" class="form-control input-etiqueta" placeholder="01" value="${ERS.escapeHtml(etiqueta)}">
+                <input type="text" class="form-control input-etiqueta" placeholder="Ex: 01" value="${ERS.escapeHtml(etiqueta)}">
             </label>
         </td>
         <td>

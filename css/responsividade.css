@@ -24,6 +24,7 @@
 
 .teacher-day-controls { display: none; }
 .teacher-main-content .active-res-chip.hidden { display: none !important; }
+#active-chip.chip-ready .chip-icon { display: none !important; }
 
 .calendar-events-container { height: auto !important; gap: 5px !important; }
 .calendar-events-container > .calendar-event-card {
@@ -843,7 +844,7 @@ label,
   }
 
   .student-row td:nth-child(3) {
-    grid-column: 1 / -1;
+    grid-column: 1;
     grid-row: 2;
   }
 
@@ -1385,6 +1386,7 @@ label,
     position: relative;
     display: block !important;
     padding: 0;
+    min-height: 44px;
   }
 
   #active-chip.chip-ready .chip-icon, #active-chip.chip-ready .chip-dot { display: none; }
@@ -1397,7 +1399,7 @@ label,
   }
   #active-chip.chip-ready .btn-chip-action {
     width: 100%;
-    min-height: 68px;
+    min-height: 44px;
     justify-content: center;
     border-radius: inherit;
   }

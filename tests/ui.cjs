@@ -171,7 +171,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    await page.keyboard.press('Escape');await page.evaluate(()=>openRegisterStudentsModal('active'));
    const reg=page.locator('#register-students-modal');await reg.waitFor({state:'visible'});
    assert.equal(await reg.locator('input').first().getAttribute('id'),'reg-class','turma é o primeiro campo');
-   assert.equal(await reg.locator('.input-etiqueta').first().getAttribute('placeholder'),'01');
+   assert.equal(await reg.locator('.input-etiqueta').first().getAttribute('placeholder'),'Ex: 01');
    assert.equal(await reg.locator('.input-aluno').first().getAttribute('placeholder'),'Nome do aluno');
    assert.equal(await reg.locator('.row-index').first().isVisible(),width>768,'índice aparece apenas no desktop');
    if(width<=768)for(const sel of ['.modal-body','.student-registration-table-wrapper'])assert.equal(await reg.locator(sel).evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);
