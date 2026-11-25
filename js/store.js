@@ -962,7 +962,7 @@
         return { ok: true, reservation: r };
     }
 
-    function saveStudentAssignments(id, assignments) {
+    function saveStudentAssignments(id, assignments, turma) {
         const list = getReservations();
         const r = list.find(r => r.id === id);
         if (!r) return { ok: false, message: 'Reserva não encontrada.' };
@@ -970,6 +970,12 @@
             return { ok: false, message: 'Esta reserva está indisponível por bloqueio da coordenação.' };
         }
 
+        if (turma !== undefined) {
+            if (typeof turma !== 'string' || !turma.trim() || turma.trim().length > 100) {
+                return { ok: false, message: 'Informe uma turma de até 100 caracteres.' };
+            }
+            r.turma = turma.trim();
+        }
         r.alunosNotebooks = Array.isArray(assignments) ? assignments : [];
         r.alunosRegistrados = r.alunosNotebooks.length > 0;
         r.registradoEm = new Date().toISOString();

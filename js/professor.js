@@ -325,6 +325,7 @@ function openRegisterStudentsModal(resId) {
 
     currentRegResId = resId;
     document.getElementById('register-students-modal').dataset.reservaId = resId;
+    document.getElementById('reg-class').value = r.turma || '';
 
     document.getElementById('reg-summary-date').textContent = bookingDate.format(new Date(r.data + 'T12:00:00Z'));
     document.getElementById('reg-summary-time').textContent = `${r.inicio} – ${r.fim}`;
@@ -362,13 +363,13 @@ function addStudentRow(num, etiqueta = '', aluno = '') {
         <td>
             <label>
                 <span class="student-field-label">Nº da Etiqueta</span>
-                <input type="text" class="form-control input-etiqueta" placeholder="Ex: NT-0${rowNum}" value="${ERS.escapeHtml(etiqueta)}">
+                <input type="text" class="form-control input-etiqueta" placeholder="01" value="${ERS.escapeHtml(etiqueta)}">
             </label>
         </td>
         <td>
             <label>
                 <span class="student-field-label">Nome do Aluno</span>
-                <input type="text" class="form-control input-aluno" placeholder="Nome completo do aluno" value="${ERS.escapeHtml(aluno)}">
+                <input type="text" class="form-control input-aluno" placeholder="Nome do aluno" value="${ERS.escapeHtml(aluno)}">
             </label>
         </td>
         <td style="text-align: center;">
@@ -453,7 +454,13 @@ async function handleSaveStudentRegistration(e) {
         return;
     }
 
-    const result = await ERS.saveStudentAssignments(currentRegResId, assignments);
+    const turma = document.getElementById('reg-class').value.trim();
+    if (!turma) {
+        errEl.textContent = 'Informe a turma da aula.';
+        errEl.style.display = 'block';
+        return;
+    }
+    const result = await ERS.saveStudentAssignments(currentRegResId, assignments, turma);
     if (result.ok) {
         closeModal('register-students-modal');
         ERS.showToast(`Uso de ${assignments.length} notebooks registrado com sucesso!`, 'success');

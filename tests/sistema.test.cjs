@@ -220,6 +220,13 @@ test('retirada exige coordenação e alunos ficam privados entre professores', a
     assert.equal((await f.action('p2', 'saveStudentAssignments', 'active', assignments)).status, 404);
     assert.equal((await f.action('p1', 'saveStudentAssignments', 'active', [...assignments, ...assignments])).status, 400);
     assert.equal((await f.action('p1', 'saveStudentAssignments', 'active', assignments)).status, 200);
+    assert.equal((await f.action('p1', 'saveStudentAssignments', 'active', assignments, '   ')).status, 400);
+    assert.equal((await f.action('p1', 'saveStudentAssignments', 'active', assignments, 'A'.repeat(101))).status, 400);
+    assert.equal((await f.action('p2', 'saveStudentAssignments', 'active', assignments, 'Outra turma')).status, 404);
+    assert.equal((await f.action('p1', 'saveStudentAssignments', 'active', assignments, ' 3º A ')).status, 200);
+    assert.equal((await f.state('c1')).reservations[0].turma, '3º A');
+    assert.equal((await f.action('p1', 'saveStudentAssignments', 'active', assignments)).status, 200);
+    assert.equal((await f.state('c1')).reservations[0].turma, '3º A', 'cliente anterior preserva turma');
     assert.deepEqual((await f.state('p1')).reservations[0].alunosNotebooks, assignments);
     assert.deepEqual((await f.state('c1')).reservations[0].alunosNotebooks, assignments);
     assert.equal(JSON.stringify(await f.state('p2')).includes('Aluno de teste'), false);

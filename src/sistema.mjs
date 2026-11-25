@@ -79,7 +79,7 @@ export async function estado(db, conta) {
 
 export async function alterar(db, conta, acao, args) {
     if (['reportNotebookDefect', 'markDefectRead'].includes(acao)) return alterarDefeito(db, conta, acao, args);
-    const [first, second] = args;
+    const [first, second, third] = args;
     if (acao === 'createReservation') {
         const b = first || {};
         const dados = await dadosReserva(db, b);
@@ -139,10 +139,12 @@ export async function alterar(db, conta, acao, args) {
             exigir(Array.isArray(second) && second.length > 0 && second.length <= r.notebooks, 'Confira a quantidade de alunos e notebooks da reserva.');
             const alunos = second.map(a => ({ etiqueta: texto(a?.etiqueta, 100), aluno: texto(a?.aluno, 200) }));
             exigir(alunos.every(a => a.etiqueta && a.aluno) && new Set(alunos.map(a => a.etiqueta.toLowerCase())).size === alunos.length, 'Informe alunos e etiquetas únicas.');
-            const result = await db.prepare(`UPDATE reservas SET alunos = ? WHERE id = ? AND situacao = 'confirmada'
+            const turma = third === undefined ? r.turma : texto(third);
+            exigir(third === undefined || turma, 'Informe uma turma de até 100 caracteres.');
+            const result = await db.prepare(`UPDATE reservas SET alunos = ?, turma = ? WHERE id = ? AND situacao = 'confirmada'
                 AND retirada_em IS NOT NULL AND NOT EXISTS (
                 SELECT 1 FROM bloqueios b WHERE ${sobreposicaoBloqueio('b', 'reservas')})`)
-                .bind(JSON.stringify(alunos), r.id).run();
+                .bind(JSON.stringify(alunos), turma, r.id).run();
             exigir(result.meta.changes, 'Reserva cancelada ou bloqueada. Atualize a agenda.', 409);
         }
         return { ok: true };

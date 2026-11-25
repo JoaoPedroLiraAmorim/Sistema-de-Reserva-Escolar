@@ -834,22 +834,23 @@ label,
   }
 
   .student-row .row-index {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: center;
-    justify-self: start;
+    display: none;
   }
 
-  .student-row .row-index::before { content: 'Notebook '; }
+  .student-row td:nth-child(2) {
+    grid-column: 1;
+    grid-row: 1;
+  }
 
-  .student-row td:nth-child(2),
   .student-row td:nth-child(3) {
     grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .student-row td:last-child {
     grid-column: 2;
     grid-row: 1;
+    align-self: end;
   }
 
   .student-field-label {
