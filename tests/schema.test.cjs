@@ -46,3 +46,30 @@ test('limpeza bloqueia convites e desafios nao vazios', t => {
  assert.throws(()=>apply(db), /legado_precisa_de_revisao/);
  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM desafios').get().n, 1);
 });
+
+test('nome obrigatorio preserva contas, sessoes e referencias', t => {
+ const db = fixture(t);
+ apply(db);
+ db.exec("INSERT INTO contas (id,email,papel,identidade_externa,nome) VALUES ('p','p@teste.local','professor','firebase:teste:p','Pessoa Teste'); INSERT INTO sessoes VALUES ('hash','p',123);");
+ const migrate = () => {
+  db.exec('BEGIN');
+  try { db.exec(readFileSync(join(dir, '0010_nome_obrigatorio.sql'), 'utf8')); db.exec('COMMIT'); }
+  catch (e) { db.exec('ROLLBACK'); throw e; }
+ };
+ migrate();
+ assert.equal(db.prepare('PRAGMA table_info(contas)').all().find(c=>c.name==='nome').notnull, 1);
+ assert.equal(db.prepare("SELECT nome FROM contas WHERE id='p'").get().nome, 'Pessoa Teste');
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM sessoes').get().n, 1);
+ assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(), []);
+ for (const nome of [null, '', '   ']) assert.throws(()=>db.prepare("UPDATE contas SET nome=? WHERE id='p'").run(nome), /NOME_OBRIGATORIO|NOT NULL/);
+ assert.throws(()=>db.exec("INSERT INTO contas (id,email,papel,identidade_externa) VALUES ('q','q@teste.local','professor','firebase:teste:q')"), /NOME_OBRIGATORIO/);
+});
+test('migracao do nome aborta sem alterar contas sem nome', t => {
+ const db = fixture(t); apply(db);
+ db.exec("INSERT INTO contas (id,email,papel,identidade_externa) VALUES ('p','p@teste.local','professor','firebase:teste:p')");
+ db.exec('BEGIN');
+ assert.throws(()=>db.exec(readFileSync(join(dir, '0010_nome_obrigatorio.sql'),'utf8')), /NOT NULL/);
+ db.exec('ROLLBACK');
+ assert.equal(db.prepare("SELECT nome FROM contas WHERE id='p'").get().nome, null);
+ assert.equal(db.prepare('PRAGMA table_info(contas)').all().some(c=>c.name==='nome_obrigatorio'), false);
+});

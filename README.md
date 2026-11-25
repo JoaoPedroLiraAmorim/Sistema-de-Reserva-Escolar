@@ -1,115 +1,106 @@
-# Alceu Reservas — Sistema de Reserva Escolar
+# Alceu Reservas
 
-Sistema de reservas de salas e notebooks, com uma interface para Professor e Coordenação.
+Sistema web para organizar reservas escolares de salas e notebooks. Professores consultam a agenda e planejam aulas; a Coordenação acompanha reservas, administra recursos e bloqueios e confirma a retirada dos equipamentos.
 
-## Site publicado
+**[Acessar o sistema](https://app.reservas-alceu.workers.dev)** · Para conhecer sem uma conta, use **Professor demo** ou **Coordenação demo** na tela inicial. Os dados de demonstração são fictícios e ficam isolados da API e do banco de produção.
 
-https://app.reservas-alceu.workers.dev
+![Captura da agenda do professor](imagens/agenda-real.png)
 
-O Firebase Authentication autentica contas Google e e-mail/senha. O Worker Cloudflare serve a interface e a API; o banco D1 edulab-dev guarda as contas, sessões, salas, estoque, reservas, bloqueios, retiradas e vínculos de alunos. O nome do banco é legado; a publicação usa sua instância remota.
+*Captura real de uma versão anterior da agenda do professor, mantida entre os arquivos do projeto. A interface publicada evoluiu desde essa captura; consulte a demonstração para ver as telas atuais.*
 
-Após entrar, professores abrem pages/professor.html e a Coordenação abre pages/proatec.html. A antiga pages/conta.html redireciona para a interface principal.
+## O que dá para fazer
 
-Os botões **Professor demo** e **Coordenação demo** permitem experimentar a mesma interface com dados fictícios. Não exigem senha e não gravam no banco real. A sessão demo fica nesta aba; os exemplos ficam no navegador com o prefixo alceu_demo:. Use Sair para retornar ao login normal. Os perfis demo não concedem acesso às APIs autenticadas.
+- **Planejar aulas:** consultar a agenda semanal, escolher data e horário e reservar uma sala, notebooks ou ambos.
+- **Acompanhar reservas:** ver as próximas aulas e cancelar uma reserva própria quando permitido.
+- **Gerir os recursos:** a Coordenação cadastra salas e equipamentos, acompanha a agenda e cria ou remove bloqueios.
+- **Organizar a retirada:** a Coordenação confirma a retirada de notebooks no horário reservado; depois, o professor pode registrar os alunos que utilizarão os equipamentos.
+- **Comunicar problemas:** durante uma aula com notebooks, o professor pode relatar um defeito pela etiqueta do equipamento. A Coordenação consulta e acompanha os relatos.
+- **Acessar com segurança:** entrar com Google ou e-mail e senha confirmados; a API verifica as permissões de cada perfil.
 
-## Dados e permissões
+## Perfis do sistema
 
-- A sessão usa cookie HttpOnly e dura oito horas. O perfil é conferido pelo servidor em cada operação.
-- Novas contas entram como Professor. O cadastro pede nome, e-mail e senha, envia a verificação e retorna ao login. Confirmar o e-mail é necessário para entrar com senha. O nome usado na sessão vem da identidade Firebase verificada.
-- Professores reservam recursos para si e cancelam suas reservas. A Coordenação pode reservar para professores ativos, cancelar reservas e gerenciar salas, estoque e bloqueios.
-- Apenas a Coordenação confirma retiradas, durante o horário da reserva. O registro de alunos exige a retirada confirmada, fica limitado à quantidade de notebooks e é visível somente ao professor responsável e à Coordenação.
-- Salas, marcas e quantidades devem ser cadastradas pela Coordenação. A integração não importa os exemplos antigos do navegador nem cria estoque fictício.
-- Os dados do sistema ficam no SQL. O navegador guarda apenas preferências como menu e e-mail lembrado. A interface mantém um cache em memória e consulta atualizações a cada 15 segundos.
-- Horários e validações do servidor usam America/Sao_Paulo. Conflitos de sala, bloqueios e estoque são verificados na gravação, inclusive em pedidos concorrentes.
-- A criação é permitida até 15 minutos após o início, inclusive, enquanto a aula não terminou. A edição de reserva própria exige ausência de retirada e respeita até 10 minutos após os inícios original, atual e de destino. Vale o primeiro prazo a vencer; alterar o horário não renova a tolerância. Alterações ficam registradas no banco.
-- Bloqueios aceitam intervalo inclusivo de datas e todos os horários. O motivo é opcional. Reservas afetadas continuam no histórico, sinalizadas como bloqueadas, sem cancelamento automático.
-- Durante sua aula com notebooks, o professor pode usar **Reportar defeito**, ao lado de **Nova reserva** na tela inicial, informar a etiqueta e a descrição; o vínculo usa automaticamente a reserva própria com notebooks em andamento de início mais recente, inclusive antes da confirmação da retirada. O relato guarda autor, horário do servidor e contexto da aula, é privado entre professores e fica visível à Coordenação em **Relatórios → Defeitos reportados**. O contador indica relatos não lidos; **Marcar como lido** baixa o contador e preserva o relato.
-- Os registros de aluno mostram um alerta quando a etiqueta possui relato na mesma reserva, independentemente de o aluno ter sido vinculado antes ou depois. O relato não atribui responsabilidade ao aluno nem muda automaticamente as quantidades do estoque; a Coordenação confirma os ajustes no controle de equipamentos existente.
-- Espaço Maker foi retirado dos catálogos e da demonstração. A migração 0008 desativa eventual cadastro antigo, impede recadastro/reativação e preserva reservas históricas vinculadas.
-- A migração 0004 preserva as reservas existentes em reservas_salas. As novas gravações usam reservas. A migração 0009 remove reservas_salas somente se todos os seus registros estiverem representados em reservas com os mesmos dados básicos; também exige convites e desafios vazios. Se houver divergências, a migração falha para permitir revisão e cópia de segurança, sem apagar os registros.
-- O histórico permanece no banco. A agenda e os relatórios de reservas consultam o dia atual e datas futuras; uma consulta histórica completa de reservas ainda não está disponível na interface. A subaba de defeitos mantém também os relatos de aulas passadas.
+| Professor | Coordenação |
+| --- | --- |
+| Consulta a agenda e cria reservas para si. | Consulta e administra reservas e recursos. |
+| Acompanha e cancela suas próprias reservas. | Gerencia salas, equipamentos e bloqueios. |
+| Registra alunos após a confirmação de retirada. | Confirma retiradas durante o horário da reserva. |
+| Reporta defeitos de notebooks durante a aula. | Consulta relatos de defeitos e marca a leitura. |
 
-## E-mails e confirmação de conta
+## Tecnologias e arquitetura
 
-O SDK e o idioma padrão das notificações Firebase usam pt-BR. O nome visual do projeto é Alceu Reservas; o ID continua projetotcc-3ds.
+- **Interface:** HTML, CSS e JavaScript.
+- **Servidor:** Cloudflare Workers, com API de sessão e operações do sistema.
+- **Dados:** Cloudflare D1 (SQL); as migrações ficam em `migrations/`.
+- **Autenticação:** Firebase Authentication para login Google, e-mail e senha e verificação de e-mail.
+- **Testes automatizados:** Node.js, SQLite em memória e Playwright para cobertura de regras, API e interface.
 
-A página pages/verificar-email.html tem a identidade visual do sistema e trata confirmação de e-mail, recuperação de endereço e redefinição de senha. Usa a configuração confiável da API, verifica os códigos no Firebase e exige uma ação explícita para confirmar. O código de uso único sai do endereço assim que a página carrega.
+O Worker serve os arquivos estáticos e a API. As permissões são verificadas no servidor. O navegador mantém um cache temporário em memória e consulta atualizações periodicamente; dados de contas, reservas, equipamentos, salas, bloqueios e relatos são armazenados no banco.
 
-O arquivo emails/verificar-email.html contém o modelo HTML com botão “Verificar meu e-mail”, usando o marcador %LINK%. Ele não é publicado como um arquivo do site nem é enviado pelo fluxo atual.
+## Executar localmente
 
-Em 18/11/2026, a API Firebase recusou alterações do corpo, assunto, remetente e callbackUri com EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED, mesmo na conta administradora. Portanto, o envio padrão mantém o template e a página de destino do Firebase. Para ativar o modelo completo e o destino https://app.reservas-alceu.workers.dev/pages/verificar-email.html, é necessário liberar a configuração com o suporte Firebase ou integrar um serviço próprio de envio. Não há credenciais SMTP no repositório.
+**Pré-requisitos:** Node.js 24 e npm.
 
-## Desenvolvimento local
-
-Use Node.js 24 e as dependências do package-lock.json:
-
-~~~powershell
+```powershell
 npm install
 npm run db:migrate:local
 npm run dev
-~~~
+```
 
-Abra http://127.0.0.1:8787. O banco local é independente do publicado. O seed opcional de salas é somente para desenvolvimento.
+Abra <http://127.0.0.1:8787>. O banco local é separado do ambiente publicado. Para autenticar no endereço local, crie `.dev.vars` com `FIREBASE_PROJECT_ID` e `FIREBASE_WEB_API_KEY` e autorize o host local no Firebase Authentication. Não versione `.dev.vars`.
 
-Para entrar de verdade no endereço local, configure FIREBASE_PROJECT_ID e FIREBASE_WEB_API_KEY em .dev.vars e autorize o host local no Firebase Authentication. Nunca versione esse arquivo. A publicação já usa o projeto projetotcc-3ds.
+A Coordenação precisa ser promovida explicitamente por um administrador no D1, usando o UID Firebase verificado da conta:
 
-A migração não cria uma conta de Coordenação. Um administrador deve promover a identidade correta no D1 Console, pelo identificador Firebase verificado:
-
-~~~sql
+```sql
 UPDATE contas SET papel = 'coordenacao'
 WHERE identidade_externa = 'firebase:projetotcc-3ds:UID_DA_PESSOA';
-~~~
+```
 
-## Arquitetura
+Opcionalmente, carregue salas fictícias apenas no banco local:
 
-| Arquivo/pasta | Responsabilidade |
+```powershell
+npm run db:seed:local
+```
+
+## Comandos úteis
+
+| Comando | Finalidade |
 | --- | --- |
-| index.html, pages/, css/, js/ | Interface compartilhada |
-| js/real-mode.js, js/real-store.js | Inicialização da sessão, cache em memória e gravações pela API |
-| js/store.js | Utilitários e cálculos da interface e dados locais exclusivos da demonstração |
-| firebase/client.mjs | Login e verificação de e-mail pelo Firebase |
-| src/contas.mjs | Validação de identidade Firebase e sessões |
-| src/sistema.mjs | Dados compartilhados, permissões e operações de recursos/reservas |
-| migrations/ | Evoluções do SQL, sem aplicação automática no build |
-| scripts/build.mjs | Geração de public/; não editar arquivos gerados |
+| `npm run dev` | Inicia o Worker local na porta 8787. |
+| `npm run build` | Gera os arquivos estáticos e o pacote Firebase em `public/`. |
+| `npm run db:migrate:local` | Aplica migrações ao banco local. |
+| `npm run test` | Executa testes de regras, autenticação, API e esquema. |
+| `npm run test:ui` | Executa os testes automatizados da interface. |
+| `npm run check:worker` | Prepara o Worker e verifica o pacote com `wrangler deploy --dry-run`. |
+| `npm run test:http` | Verifica o servidor local com `npm run dev` em execução. |
 
-A API de sessão está em /api/conta/sessao. /api/agenda/estado retorna os dados permitidos à conta e /api/agenda/acao recebe as operações explícitas da interface. /api/health confirma a resposta do Worker; /api/salas permite consultar o catálogo de salas.
+## Estrutura do projeto
 
-## Verificações
+```text
+index.html, pages/       telas de acesso, professor e coordenação
+css/                     estilos e responsividade
+js/                      agenda, reservas, recursos e integração da interface
+firebase/client.mjs      autenticação Firebase
+src/                     Worker, API, sessões e regras do sistema
+migrations/              migrações do banco D1
+seeds/                   dados de exemplo para desenvolvimento local
+tests/                   testes automatizados
+scripts/build.mjs        geração dos arquivos em public/
+```
 
-~~~powershell
-npm test
-npm run test:ui
-npm run check:worker
-~~~
+## Regras importantes
 
-Os testes de interface usam o código real do Worker e SQLite em memória, com o login Firebase substituído por identidades fictícias de teste. Cobrem cadastro/login na interface principal, oito viewports, telas da Coordenação, persistência, retiradas, relatos de defeito, contador/leitura, alertas por etiqueta, privacidade dos alunos e logout. Os testes de regras cobrem os instantes exatos das tolerâncias, concorrência e estoque. Nenhum dado de teste é enviado à publicação.
-
-As migrações 0005–0008 precisam ser aplicadas junto com a versão que usa as novas regras, os nomes e os relatos. Elas não são aplicadas automaticamente pelo build. A preparação dessas alterações não publica o Worker nem altera o banco remoto.
-
-Com npm run dev aberto:
-
-~~~powershell
-npm run test:http
-~~~
+- Novas contas recebem o perfil Professor. A confirmação do e-mail é obrigatória para entrar com e-mail e senha.
+- Conflitos de sala, estoque e bloqueios são validados pelo servidor no momento da gravação, inclusive em operações concorrentes.
+- O horário e as validações usam o fuso `America/Sao_Paulo`.
+- A Coordenação confirma retiradas durante o horário reservado. O registro de alunos depende dessa confirmação e fica visível ao professor responsável e à Coordenação.
+- Reservas afetadas por bloqueios permanecem no histórico e são identificadas como bloqueadas.
+- Relatos de defeito não alteram estoque automaticamente e não atribuem responsabilidade ao aluno.
+- A demonstração usa dados fictícios isolados. Ela não autentica nem concede acesso às APIs de produção.
 
 ## Publicação
 
-O build gera os assets e o pacote Firebase. Para atualizar o Worker existente, preserve as variáveis configuradas no painel:
+O build gera os arquivos em `public/`. A publicação existente usa Cloudflare Workers e D1. Antes de publicar, revise as migrações e confira as configurações do ambiente. As migrações não são executadas automaticamente pelo build. Nenhum deploy é iniciado pelos comandos de desenvolvimento acima.
 
-~~~powershell
-npx wrangler d1 migrations apply edulab-dev --remote
-npx wrangler deploy --keep-vars
-~~~
+## Licença
 
-Aplique somente migrações revisadas e confira a conta, o Worker app e o ID do banco em wrangler.jsonc antes de publicar. Nenhuma migração é executada automaticamente pelo build.
-
-O domínio .web.app requer publicação no Firebase Hosting. Firebase Authentication, usado aqui, é independente da hospedagem; migrar o host exige adaptar a ligação com a API e os cookies da sessão.
-
-## Estrutura atual do banco
-
-Após a migração 0009, as oito tabelas da aplicação são: contas, sessoes, salas, equipamentos, reservas, bloqueios, reservas_alteracoes e defeitos_reportados. Tabelas internas do SQLite e de controle de migrações não entram nessa contagem.
-
-Retiradas e vínculos de alunos ficam em reservas. O histórico de edições usa reservas_alteracoes; relatos e confirmações de leitura usam defeitos_reportados. Convites e desafios pertenciam ao fluxo antigo, substituído pelo Firebase Authentication.
-
-Antes de aplicar 0009 em um banco existente, faça uma cópia de segurança. Caso a proteção legado_precisa_de_revisao impeça a limpeza, revise e preserve os dados antigos antes de continuar; não remova essa proteção para forçar a execução. As migrações locais não atualizam o banco publicado.
+Consulte [LICENSE](LICENSE).

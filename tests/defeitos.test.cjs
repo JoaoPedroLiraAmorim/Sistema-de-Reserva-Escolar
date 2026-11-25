@@ -88,7 +88,7 @@ test('remoção da sala impede recadastro e preserva reserva histórica', t => {
     const sql = new DatabaseSync(':memory:'); t.after(() => sql.close());
     const directory = join(__dirname, '../migrations');
     for (const file of readdirSync(directory).filter(f => f.endsWith('.sql') && !f.startsWith('0008')).sort()) sql.exec(readFileSync(join(directory, file), 'utf8'));
-    sql.exec("INSERT INTO contas (id,email,papel,identidade_externa) VALUES ('p','p@escola.test','professor','firebase:test:p'); INSERT INTO salas VALUES ('maker','Espaço Maker',1); INSERT INTO reservas (id,conta_id,sala_id,data,inicio,fim) VALUES ('history','p','maker','2026-11-18','07:00','07:50');");
+    sql.exec("INSERT INTO contas (id,email,papel,identidade_externa,nome) VALUES ('p','p@escola.test','professor','firebase:test:p','Professor Teste'); INSERT INTO salas VALUES ('maker','Espaço Maker',1); INSERT INTO reservas (id,conta_id,sala_id,data,inicio,fim) VALUES ('history','p','maker','2026-11-18','07:00','07:50');");
     sql.exec(readFileSync(join(directory, '0008_retirar_espaco_maker.sql'), 'utf8'));
     assert.equal(sql.prepare("SELECT ativa FROM salas WHERE id='maker'").get().ativa, 0);
     assert.equal(sql.prepare("SELECT sala_id FROM reservas WHERE id='history'").get().sala_id, 'maker');

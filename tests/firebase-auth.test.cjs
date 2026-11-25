@@ -141,13 +141,11 @@ test('D1 só cria professores com identidade verificada e mantém o papel em nov
     await call('/api/conta/sair', config, {}, { cookie: outraSessao });
     assert.equal(await sessao(outraSessao), null);
 
-    sql.prepare(`INSERT INTO contas (id, email, papel, identidade_externa)
-        VALUES ('legada', 'legada@exemplo.com', 'professor', ?)`).run(`firebase:${projectId}:legada`);
-    const legado = { uid: 'legada', email: 'legada@exemplo.com' };
-    const semNome = await entrar(legado);
-    assert.equal((await sessao(semNome.headers.get('Set-Cookie').split(';')[0])).nome, 'legada');
-    const comNome = await entrar({ ...legado, name: 'Lúcia Braga' });
-    const contaLegada = await sessao(comNome.headers.get('Set-Cookie').split(';')[0]);
-    assert.equal(contaLegada.id, 'legada');
-    assert.equal(contaLegada.nome, 'Lúcia Braga');
+    const semNome = await entrar({ uid: 'sem-nome', email: 'sem-nome@exemplo.com' });
+    assert.equal(semNome.status, 400, 'novo cadastro sem nome nao cria conta');
+    assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM contas WHERE email='sem-nome@exemplo.com'").get().n, 0);
+    const semNomeNoToken = await entrar({ uid: 'nova-google', email: googleClaims.email, provider: 'google.com' });
+    assert.equal(semNomeNoToken.status, 200, 'conta existente preserva o nome mesmo sem nome no token');
+    assert.equal(sql.prepare('SELECT nome FROM contas WHERE email = ?').get(googleClaims.email).nome, 'Maria Silva');
+
 });

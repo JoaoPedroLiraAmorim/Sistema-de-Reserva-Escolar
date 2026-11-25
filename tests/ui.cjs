@@ -15,7 +15,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
  for(const f of fs.readdirSync(path.join(root,'migrations')).filter(f=>f.endsWith('.sql')).sort()) sql.exec(fs.readFileSync(path.join(root,'migrations',f),'utf8'));
  const DB = {prepare(query) { const s=sql.prepare(query); const bind = params => ({bind:(...p)=>bind(p),first:async()=>s.get(...params)??null,all:async()=>({results:s.all(...params)}),run:async()=>({meta:s.run(...params)})});return bind([]);},async batch(items) {sql.exec('BEGIN');try{const result=[];for(const item of items)result.push(await item.all());sql.exec('COMMIT');return result;}catch(e){sql.exec('ROLLBACK');throw e;}}};
  const tokens = {};
- for(const [id,papel,nome] of [['p1','professor','Lúcia Braga'],['p2','professor',null],['c1','coordenacao',null]]) {
+ for(const [id,papel,nome] of [['p1','professor','Lúcia Braga'],['p2','professor','Professor Dois'],['c1','coordenacao','Coordenação']]) {
   sql.prepare('INSERT INTO contas (id,email,papel,identidade_externa,nome) VALUES (?,?,?,?,?)').run(id,id+'@exemplo.com',papel,'firebase:test:'+id,nome);
   tokens[id]=randomBytes(32).toString('base64url');
   sql.prepare('INSERT INTO sessoes VALUES (?,?,?)').run(createHash('sha256').update(tokens[id]).digest('base64url'),id,Math.floor(Date.now()/1000)+3600);
@@ -114,7 +114,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.equal(writes.includes('/api/conta/entrar'),false);
   await page.evaluate(()=>{window.__emailVerificado=true;});
   await page.getByLabel('Senha',{exact:true}).fill('senha-de-teste');await page.getByRole('button',{name:'Entrar',exact:true}).click();
-  await page.waitForURL('**/pages/professor.html');await page.locator('.teacher-day-controls').waitFor({state:'visible'});
+  await page.waitForURL('**/pages/professor.html');await page.locator('.week-selector').waitFor({state:'visible'});
   await page.getByText('Olá, Lúcia Braga',{exact:true}).waitFor({state:'attached'});
   assert.equal(await page.locator('#calendarTable').isVisible(),true);
   assert.equal(await page.evaluate(()=>localStorage.getItem('ers_session')),null,'não cria sessão local');
@@ -129,18 +129,26 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    assert.ok(Math.abs(newButton.y-reportButton.y)<=1 && newButton.x+newButton.width<=reportButton.x,'ações lado a lado em '+width);
    if(width<=768) assert.ok(newButton.height<=44.5,'ações compactas no celular');
    if(width>=1920) assert.equal(await page.locator('.teacher-main-content').evaluate(el=>Math.abs(el.getBoundingClientRect().width-el.parentElement.clientWidth)<=1),true,'professor ocupa a largura disponível no desktop');
-   const daily=width<=1100;
+   const phone=width<=768||width===844;
+   const daily=width<=1100&&!phone;
    assert.equal(await page.locator('#calendarHead th[data-date]:visible').count(),daily?1:5);
    assert.equal(await page.locator('#calendarHead th[data-date]').count(),5,'semana letiva tem cinco dias');
-   if(width<=768||width===844) {
-    assert.equal(await page.locator('#teacher-week-days').isVisible(),false,'celular usa apenas as setas para escolher o dia');
-    const day=await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date');
-    await page.locator('#v2-next-day').click();
-    assert.notEqual(await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date'),day);
-    await page.locator('#v2-prev-day').click();
-    assert.equal(await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date'),day);
+   if(phone) {
+    assert.equal(await page.locator('.teacher-day-controls').isVisible(),false,'celular usa navegação semanal');
+    assert.equal(await page.locator('.v2-tool-group').isVisible(),false,'controles iguais aos da coordenação');
+    assert.equal(await page.locator('#btnOpenBlock').count(),0,'professor sem criar bloqueio');
+    const day=await page.locator('#calendarHead th[data-date]').first().getAttribute('data-date');
+    await page.locator('#btnNextWeek').click();
+    const next=await page.locator('#calendarHead th[data-date]').first().getAttribute('data-date');
+    assert.equal((new Date(next)-new Date(day))/86400000,7,'seta avança uma semana');
+    await page.locator('#btnPrevWeek').click();
+    assert.equal(await page.locator('#calendarHead th[data-date]').first().getAttribute('data-date'),day);
+    const scroll=page.locator('.calendar-scroll-area');
+    assert.equal(await scroll.evaluate(el=>el.scrollWidth>el.clientWidth),true,'grade permite rolagem horizontal');
+    await scroll.evaluate(el=>{el.scrollLeft=el.scrollWidth;});
+    assert.ok(await scroll.evaluate(el=>el.scrollLeft)>0,'rolagem alcança o fim da semana');
+    await scroll.evaluate(el=>{el.scrollLeft=0;});
    }
-   if(width<=768||width===844){assert.equal(await page.locator('.calendar-scroll-area').evaluate(el=>el.scrollWidth<=el.clientWidth+1),true);assert.ok(await page.locator('#calendarBody td[data-date]:visible').first().evaluate(el=>el.getBoundingClientRect().height)>=112);}
    await page.locator('#btnOpenNewReservation').click();
    if(width<=768||height<=560) {
     const modalBox=await page.locator('#new-reservation-modal .modal').boundingBox();
@@ -166,7 +174,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
    footer=await reg.locator('.modal-footer').boundingBox();assert.ok(footer.y>=0&&footer.y+footer.height<=height+2);
    await page.keyboard.press('Escape');
   }
-  await page.setViewportSize({width:390,height:844});await visit('pages/professor.html');
+  await page.setViewportSize({width:820,height:1180});await visit('pages/professor.html');
   const friday=await page.locator('#calendarHead th[data-date]').last().getAttribute('data-date');
   await page.evaluate(date=>{const button=document.querySelector(`#teacher-week-days button[data-date="${date}"]`);button.click();},friday);
   await page.locator('#v2-next-day').click();
@@ -174,6 +182,7 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.equal((new Date(monday+'T12:00:00Z')-new Date(friday+'T12:00:00Z'))/86400000,3,'sexta avança direto para segunda');
   await page.locator('#v2-prev-day').click();
   assert.equal(await page.locator('#calendarHead th[data-date]:visible').getAttribute('data-date'),friday,'segunda volta direto para sexta');
+  await page.setViewportSize({width:390,height:844});
   const date=await page.evaluate(()=>ERS.dateKey(ERS.getMonday(ERS.dayOffset(14))));
   await page.locator('#btnOpenNewReservation').click();await page.locator('#res-date').fill(date);
   await page.locator('#res-start').selectOption('07:00');await page.locator('#res-end').selectOption('07:50');
@@ -184,6 +193,16 @@ const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Prog
   assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM reservas WHERE data=?').get(date).n,1);
   await page.reload();await page.waitForFunction(()=>!document.documentElement.classList.contains('app-loading'));
   await page.locator('#mobileMyResBtn').click();assert.equal(await page.locator('.my-res-item').count(),2,'reservas persistem após recarregar');
+  await page.evaluate(id=>openReservationDetail(id),sql.prepare('SELECT id FROM reservas WHERE data=?').get(date).id);
+  const cancel=page.locator('#btn-cancel-res');
+  await cancel.hover();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('btn-cancel-res')).backgroundColor==='rgb(150, 41, 41)');
+  assert.equal(await cancel.evaluate(el=>getComputedStyle(el).borderTopColor),'rgb(150, 41, 41)','cancelar mantém a borda vermelha no hover');
+  await cancel.click();
+  await page.locator('#sys-confirm-btn-ok').hover();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('sys-confirm-btn-ok')).backgroundColor==='rgb(150, 41, 41)');
+  await page.locator('#sys-confirm-btn-cancel').click();
+  await page.keyboard.press('Escape');
   await page.locator('#mobileAgendaBtn').click();await screenshot('professor-real-celular');
   await login('c1');
   for(const [width,height] of [[320,740],[820,1180],[1366,768],[1920,1080],[2560,1440]]) {

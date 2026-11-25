@@ -1321,7 +1321,7 @@ label,
 .teacher-slot-book:hover { background: #e1ebff; }
 
 @media (max-width: 768px), (max-width: 900px) and (max-height: 560px) and (orientation: landscape) {
-  .teacher-page .v2-segment { display: none; }
+  .teacher-page .v2-tool-group { display: none; }
 
   .v2-teacher-day #v2-selected-day {
     font-size: clamp(16px, 4.5vw, 19px);

@@ -25,7 +25,7 @@ function fixture(t, { beforeRun } = {}) {
     } };
     const cookies = {};
     for (const [id, papel] of [['p1', 'professor'], ['p2', 'professor'], ['c1', 'coordenacao']]) {
-        sql.prepare('INSERT INTO contas (id, email, papel, identidade_externa) VALUES (?, ?, ?, ?)').run(id, id + '@exemplo.com', papel, 'firebase:test:' + id);
+        sql.prepare('INSERT INTO contas (id, email, papel, identidade_externa, nome) VALUES (?, ?, ?, ?, ?)').run(id, id + '@exemplo.com', papel, 'firebase:test:' + id, id);
         const token = randomBytes(32).toString('base64url'); cookies[id] = '__Host-alceu_sessao=' + token;
         sql.prepare('INSERT INTO sessoes VALUES (?, ?, ?)').run(createHash('sha256').update(token).digest('base64url'), id, Math.floor(Date.now() / 1000) + 3600);
     }

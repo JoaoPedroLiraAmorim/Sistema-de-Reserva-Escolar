@@ -149,7 +149,7 @@
     let agendaMode = agendaBreakpoint.matches ? 'day' : 'grid';
     let agendaModeChosen = false;
     let selectedAgendaDay;
-    const isTeacherDay = () => teacherAgenda && (phoneAgenda.matches || agendaMode === 'day');
+    const isTeacherDay = () => teacherAgenda && !phoneAgenda.matches && agendaMode === 'day';
     const getAgendaDays = () => [...document.querySelectorAll('#calendarHead th[data-date]')].map(el => el.dataset.date);
     const fullDate = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
     const agendaColumnDate = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });

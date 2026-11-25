@@ -99,10 +99,17 @@ async function identidadeFirebase(config, idToken) {
 }
 
 async function vincularConta(db, identidade) {
+    const existente = await db.prepare('SELECT nome FROM contas WHERE identidade_externa = ?')
+        .bind(identidade.id).first();
+    if (!existente && await db.prepare('SELECT id FROM contas WHERE email = ?').bind(identidade.email).first()) {
+        throw new HttpError(409, 'Este e-mail já está vinculado a outra conta. Procure a coordenação.');
+    }
+    const nome = identidade.nome || existente?.nome;
+    if (!nome) throw new HttpError(400, 'Informe seu nome no cadastro antes de entrar.');
 
     await db.prepare(`INSERT INTO contas (id, email, papel, identidade_externa, nome)
         VALUES (?, ?, 'professor', ?, ?) ON CONFLICT DO NOTHING`)
-        .bind(crypto.randomUUID(), identidade.email, identidade.id, identidade.nome).run();
+        .bind(crypto.randomUUID(), identidade.email, identidade.id, nome).run();
     const conta = await db.prepare('SELECT id, email, ativa, nome FROM contas WHERE identidade_externa = ?')
         .bind(identidade.id).first();
     if (!conta) throw new HttpError(409, 'Este e-mail já está vinculado a outra conta. Procure a coordenação.');
